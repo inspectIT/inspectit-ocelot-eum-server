@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.BeaconTagSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.EumTagsSettings;
 
 import java.util.Arrays;
 

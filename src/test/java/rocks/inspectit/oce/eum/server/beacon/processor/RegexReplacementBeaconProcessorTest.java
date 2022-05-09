@@ -4,10 +4,10 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
-import rocks.inspectit.oce.eum.server.configuration.model.BeaconTagSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.BeaconTagSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.oce.eum.server.configuration.model.EumTagsSettings;
-import rocks.inspectit.oce.eum.server.configuration.model.PatternAndReplacement;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.EumTagsSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.PatternAndReplacement;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;

@@ -1,8 +1,8 @@
-package rocks.inspectit.oce.eum.server.configuration.model;
+package rocks.inspectit.oce.eum.server.configuration.model.exporters.beacon;
 
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
-import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState;
 
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Min;

@@ -1,11 +1,10 @@
-package rocks.inspectit.oce.eum.server.configuration.model;
+package rocks.inspectit.oce.eum.server.configuration.model.selfmonitoring;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Singular;
 import org.springframework.validation.annotation.Validated;
-import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.selfmonitoring.SelfMonitoringSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -16,9 +15,13 @@ import java.util.Map;
  * Self-monitoring settings.
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Validated
-public class EumSelfMonitoringSettings extends SelfMonitoringSettings {
+public class EumSelfMonitoringSettings{
+
+    /**
+     * If self-monitoring is enabled.
+     */
+    private boolean enabled;
 
     /**
      * Definition of the self-monitoring metrics.

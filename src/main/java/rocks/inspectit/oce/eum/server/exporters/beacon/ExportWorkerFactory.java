@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
-import rocks.inspectit.oce.eum.server.configuration.model.BeaconHttpExporterSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.beacon.BeaconHttpExporterSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.metrics.SelfMonitoringMetricManager;
 
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 @ConditionalOnProperty({"inspectit-eum-server.exporters.beacons.http.enabled"})
-@ConditionalOnExpression("NOT new String('${inspectit-eum-server.exporters.beacons.http.enabled}').toUpperCase().equals(T(rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState).DISABLED.toString())")
+@ConditionalOnExpression("NOT new String('${inspectit-eum-server.exporters.beacons.http.enabled}').toUpperCase().equals(T(rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState).DISABLED.toString())")
 public class ExportWorkerFactory {
 
     /**

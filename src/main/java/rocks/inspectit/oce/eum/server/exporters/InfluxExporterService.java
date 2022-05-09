@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.metrics.InfluxExporterSettings;
 import rocks.inspectit.oce.eum.server.metrics.percentiles.TimeWindowViewManager;
-import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
-import rocks.inspectit.ocelot.config.model.exporters.metrics.InfluxExporterSettings;
 import rocks.inspectit.opencensus.influx.InfluxExporter;
 
 import javax.annotation.PostConstruct;

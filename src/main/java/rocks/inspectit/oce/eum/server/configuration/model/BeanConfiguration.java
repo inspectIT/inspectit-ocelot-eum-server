@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.eum.server.configuration;
+package rocks.inspectit.oce.eum.server.configuration.model;
 
 import io.opencensus.stats.Stats;
 import io.opencensus.stats.StatsRecorder;
@@ -6,7 +6,7 @@ import io.opencensus.stats.ViewManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
-import rocks.inspectit.ocelot.config.conversion.InspectitConfigConversionService;
+import rocks.inspectit.oce.eum.server.configuration.conversion.InspectitConfigConversionService;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.eum.server.configuration.model;
+package rocks.inspectit.oce.eum.server.configuration.model.tags;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

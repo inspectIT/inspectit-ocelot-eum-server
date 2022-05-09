@@ -12,11 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
 import rocks.inspectit.oce.eum.server.events.RegisteredTagsEvent;
 import rocks.inspectit.oce.eum.server.metrics.percentiles.TimeWindowViewManager;
 import rocks.inspectit.oce.eum.server.utils.TagUtils;
-import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import java.time.Duration;
 import java.util.*;

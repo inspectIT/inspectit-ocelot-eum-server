@@ -1,8 +1,10 @@
-package rocks.inspectit.oce.eum.server.configuration.model;
+package rocks.inspectit.oce.eum.server.configuration.model.exporters;
 
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
-import rocks.inspectit.ocelot.config.model.exporters.metrics.MetricsExportersSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.beacon.BeaconExporterSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.metrics.MetricsExportersSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.EumTraceExportersSettings;
 
 import javax.validation.Valid;
 
@@ -23,7 +25,7 @@ public class EumExportersSettings {
      */
     @Valid
     private MetricsExportersSettings metrics;
-    
+
     /**
      * Exporter settings for trace exporters.
      */

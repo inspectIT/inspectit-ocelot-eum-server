@@ -1,11 +1,12 @@
-package rocks.inspectit.oce.eum.server.configuration.model;
+package rocks.inspectit.oce.eum.server.configuration.model.tags;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.providers.TagsProvidersSettings;
 import rocks.inspectit.oce.eum.server.utils.IPUtils;
-import rocks.inspectit.ocelot.config.model.tags.TagsSettings;
 
+import javax.validation.Valid;
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Pattern;
@@ -15,9 +16,19 @@ import java.util.*;
  * Holds an additional map of tags, which will be resolved based on the EUM beacon.
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class EumTagsSettings extends TagsSettings {
+public class EumTagsSettings {
+
+    /**
+     * Settings for available tags providers.
+     */
+    @Valid
+    private TagsProvidersSettings providers;
+
+    /**
+     * Map of arbitrary user defined tags.
+     */
+    private Map<String, String> extra = new HashMap<>();
 
     private static final String IP_PATTERN = "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])($|(\\/[1-9]$|\\/[1-2][0-9]$|\\/3[0-2]$))";
 

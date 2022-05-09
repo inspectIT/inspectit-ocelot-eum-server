@@ -17,9 +17,9 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
 import rocks.inspectit.oce.eum.server.metrics.MeasuresAndViewsManager;
-import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;

@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
-import rocks.inspectit.oce.eum.server.configuration.model.BeaconTagSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.BeaconTagSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.oce.eum.server.configuration.model.PatternAndReplacement;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.PatternAndReplacement;
 
 import java.util.*;
 import java.util.function.Function;

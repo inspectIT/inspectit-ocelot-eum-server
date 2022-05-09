@@ -1,10 +1,8 @@
-package rocks.inspectit.oce.eum.server.configuration.model;
+package rocks.inspectit.oce.eum.server.configuration.model.metric.definition;
 
 import lombok.*;
 import rocks.inspectit.oce.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
-import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;

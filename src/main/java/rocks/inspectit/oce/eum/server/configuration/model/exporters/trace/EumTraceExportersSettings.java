@@ -1,14 +1,17 @@
-package rocks.inspectit.oce.eum.server.configuration.model;
+package rocks.inspectit.oce.eum.server.configuration.model.exporters.trace;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.validation.annotation.Validated;
-import rocks.inspectit.ocelot.config.model.exporters.trace.TraceExportersSettings;
+
+import javax.validation.Valid;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Validated
-public class EumTraceExportersSettings extends TraceExportersSettings {
+public class EumTraceExportersSettings {
+
+    @Valid
+    private JaegerExporterSettings jaeger;
 
     /**
      * Specifies whether client IP addresses which are added to spans should be masked.

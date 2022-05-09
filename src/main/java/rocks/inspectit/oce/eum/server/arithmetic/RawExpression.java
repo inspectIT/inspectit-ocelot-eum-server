@@ -3,7 +3,6 @@ package rocks.inspectit.oce.eum.server.arithmetic;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
-import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
 
 import java.util.ArrayList;
 import java.util.Collections;

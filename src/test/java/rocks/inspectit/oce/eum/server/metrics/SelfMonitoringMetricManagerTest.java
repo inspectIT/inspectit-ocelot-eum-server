@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.eum.server.metrics;
 
 import io.opencensus.stats.*;
-import io.opencensus.tags.TagKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,11 +10,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.oce.eum.server.configuration.model.EumSelfMonitoringSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.selfmonitoring.EumSelfMonitoringSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.oce.eum.server.configuration.model.EumTagsSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -63,7 +61,7 @@ public class SelfMonitoringMetricManagerTest {
 
             MetricDefinitionSettings dummyMetricDefinition = MetricDefinitionSettings.builder()
                     .description("Dummy description")
-                    .type(rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings.MeasureType.DOUBLE)
+                    .type(MetricDefinitionSettings.MeasureType.DOUBLE)
                     .unit("number")
                     .enabled(true)
                     .views(views)

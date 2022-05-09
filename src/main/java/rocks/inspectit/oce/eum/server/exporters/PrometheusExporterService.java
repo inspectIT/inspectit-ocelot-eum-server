@@ -9,7 +9,6 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

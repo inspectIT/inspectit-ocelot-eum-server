@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.stats.ViewManager;
 import io.opencensus.tags.Tags;
-import org.apache.commons.math3.ml.neuralnet.MapUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,11 +13,12 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.beacon.recorder.BeaconRecorder;
-import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
-import rocks.inspectit.oce.eum.server.configuration.model.BeaconTagSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.BeaconMetricDefinitionSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.BeaconTagSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.events.RegisteredTagsEvent;
-import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import java.util.*;
 
@@ -103,7 +103,7 @@ public class BeaconMetricManagerTest {
             BeaconMetricDefinitionSettings dummyMetricDefinition = BeaconMetricDefinitionSettings.beaconMetricBuilder()
                     .valueExpression("{dummy_beacon_field}")
                     .description("Dummy description")
-                    .type(rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings.MeasureType.DOUBLE)
+                    .type(MetricDefinitionSettings.MeasureType.DOUBLE)
                     .unit("ms")
                     .enabled(true)
                     .views(views)

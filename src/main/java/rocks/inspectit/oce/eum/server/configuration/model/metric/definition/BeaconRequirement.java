@@ -1,10 +1,11 @@
-package rocks.inspectit.oce.eum.server.configuration.model;
+package rocks.inspectit.oce.eum.server.configuration.model.metric.definition;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.beacon.InitiatorType;
 
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;

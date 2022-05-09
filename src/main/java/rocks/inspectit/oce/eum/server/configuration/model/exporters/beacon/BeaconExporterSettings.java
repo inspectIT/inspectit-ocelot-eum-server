@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.eum.server.configuration.model;
+package rocks.inspectit.oce.eum.server.configuration.model.exporters.beacon;
 
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;

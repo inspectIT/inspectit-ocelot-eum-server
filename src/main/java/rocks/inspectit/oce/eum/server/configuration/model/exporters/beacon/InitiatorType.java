@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.eum.server.configuration.model;
+package rocks.inspectit.oce.eum.server.configuration.model.exporters.beacon;
 
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 

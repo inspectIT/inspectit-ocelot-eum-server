@@ -10,9 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
-import rocks.inspectit.oce.eum.server.configuration.model.BeaconHttpExporterSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.beacon.BeaconHttpExporterSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 
 import java.time.Duration;
 import java.util.concurrent.BlockingQueue;
