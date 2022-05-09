@@ -4,7 +4,7 @@ import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.beacon.BeaconExporterSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.metrics.MetricsExportersSettings;
-import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.EumTraceExportersSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.TraceExportersSettings;
 
 import javax.validation.Valid;
 
@@ -13,7 +13,7 @@ import javax.validation.Valid;
  */
 @Data
 @Validated
-public class EumExportersSettings {
+public class ExportersSettings {
 
     /**
      * Exporter settings for beacon exporters.
@@ -30,5 +30,5 @@ public class EumExportersSettings {
      * Exporter settings for trace exporters.
      */
     @Valid
-    private EumTraceExportersSettings tracing;
+    private TraceExportersSettings tracing;
 }

@@ -12,8 +12,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.oce.eum.server.configuration.model.exporters.EumExportersSettings;
-import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.EumTraceExportersSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExportersSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.TraceExportersSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.JaegerExporterSettings;
 
 import javax.annotation.PostConstruct;
@@ -29,8 +29,8 @@ public class TraceExportersConfiguration {
     @PostConstruct
     public void logWrongJaegerConfig() {
         Optional.ofNullable(configuration.getExporters())
-                .map(EumExportersSettings::getTracing)
-                .map(EumTraceExportersSettings::getJaeger)
+                .map(ExportersSettings::getTracing)
+                .map(TraceExportersSettings::getJaeger)
                 .filter((jaeger) -> !jaeger.getEnabled().isDisabled())
                 .ifPresent(settings -> {
                     if (StringUtils.hasText(settings.getUrl()) && !StringUtils.hasText(settings.getGrpc())) {

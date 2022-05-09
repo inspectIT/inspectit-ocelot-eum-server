@@ -2,20 +2,16 @@ package rocks.inspectit.oce.eum.server.metrics;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import org.assertj.core.groups.Tuple;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.util.CollectionUtils;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.events.RegisteredTagsEvent;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.*;
 
 import java.util.*;

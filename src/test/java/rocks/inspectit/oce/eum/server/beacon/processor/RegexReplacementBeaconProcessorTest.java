@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.tags.BeaconTagSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.oce.eum.server.configuration.model.tags.EumTagsSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.TagsSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.tags.PatternAndReplacement;
 
 import java.util.Arrays;
@@ -32,7 +32,7 @@ public class RegexReplacementBeaconProcessorTest {
             regexSettings.put("third", third);
 
             EumServerConfiguration conf = new EumServerConfiguration();
-            conf.setTags(new EumTagsSettings());
+            conf.setTags(new TagsSettings());
             conf.getTags().setBeacon(regexSettings);
 
             assertThatThrownBy(() -> new RegexReplacementBeaconProcessor(conf)).hasMessageStartingWith("Cyclic");
@@ -60,7 +60,7 @@ public class RegexReplacementBeaconProcessorTest {
             invalidOrder.put("first", first);
 
             EumServerConfiguration conf = new EumServerConfiguration();
-            conf.setTags(new EumTagsSettings());
+            conf.setTags(new TagsSettings());
             conf.getTags().setBeacon(invalidOrder);
 
             RegexReplacementBeaconProcessor proc = new RegexReplacementBeaconProcessor(conf);
@@ -80,7 +80,7 @@ public class RegexReplacementBeaconProcessorTest {
             beaconTags.put("first", first);
 
             EumServerConfiguration conf = new EumServerConfiguration();
-            conf.setTags(new EumTagsSettings());
+            conf.setTags(new TagsSettings());
             conf.getTags().setBeacon(beaconTags);
 
             RegexReplacementBeaconProcessor proc = new RegexReplacementBeaconProcessor(conf);
@@ -104,7 +104,7 @@ public class RegexReplacementBeaconProcessorTest {
             beaconTags.put("value", first);
 
             EumServerConfiguration conf = new EumServerConfiguration();
-            conf.setTags(new EumTagsSettings());
+            conf.setTags(new TagsSettings());
             conf.getTags().setBeacon(beaconTags);
 
             RegexReplacementBeaconProcessor proc = new RegexReplacementBeaconProcessor(conf);
@@ -145,7 +145,7 @@ public class RegexReplacementBeaconProcessorTest {
             beaconTags.put("third", third);
 
             EumServerConfiguration conf = new EumServerConfiguration();
-            conf.setTags(new EumTagsSettings());
+            conf.setTags(new TagsSettings());
             conf.getTags().setBeacon(beaconTags);
 
             RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);
@@ -173,7 +173,7 @@ public class RegexReplacementBeaconProcessorTest {
             beaconTags.put("first", first);
 
             EumServerConfiguration conf = new EumServerConfiguration();
-            conf.setTags(new EumTagsSettings());
+            conf.setTags(new TagsSettings());
             conf.getTags().setBeacon(beaconTags);
 
             RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);
@@ -200,7 +200,7 @@ public class RegexReplacementBeaconProcessorTest {
             beaconTags.put("first", first);
 
             EumServerConfiguration conf = new EumServerConfiguration();
-            conf.setTags(new EumTagsSettings());
+            conf.setTags(new TagsSettings());
             conf.getTags().setBeacon(beaconTags);
 
             RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);
@@ -228,7 +228,7 @@ public class RegexReplacementBeaconProcessorTest {
             beaconTags.put("first", first);
 
             EumServerConfiguration conf = new EumServerConfiguration();
-            conf.setTags(new EumTagsSettings());
+            conf.setTags(new TagsSettings());
             conf.getTags().setBeacon(beaconTags);
 
             RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);
@@ -257,7 +257,7 @@ public class RegexReplacementBeaconProcessorTest {
             beaconTags.put("first", first);
 
             EumServerConfiguration conf = new EumServerConfiguration();
-            conf.setTags(new EumTagsSettings());
+            conf.setTags(new TagsSettings());
             conf.getTags().setBeacon(beaconTags);
 
             RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);
@@ -288,7 +288,7 @@ public class RegexReplacementBeaconProcessorTest {
             beaconTags.put("output", first);
 
             EumServerConfiguration conf = new EumServerConfiguration();
-            conf.setTags(new EumTagsSettings());
+            conf.setTags(new TagsSettings());
             conf.getTags().setBeacon(beaconTags);
 
             RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);
@@ -320,7 +320,7 @@ public class RegexReplacementBeaconProcessorTest {
             beaconTags.put("output", first);
 
             EumServerConfiguration conf = new EumServerConfiguration();
-            conf.setTags(new EumTagsSettings());
+            conf.setTags(new TagsSettings());
             conf.getTags().setBeacon(beaconTags);
 
             RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);

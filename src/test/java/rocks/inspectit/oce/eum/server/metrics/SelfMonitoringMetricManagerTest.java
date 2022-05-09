@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
-import rocks.inspectit.oce.eum.server.configuration.model.selfmonitoring.EumSelfMonitoringSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public class SelfMonitoringMetricManagerTest {
     @Nested
     class record {
 
-        private EumSelfMonitoringSettings eumSelfMonitoringSettings = new EumSelfMonitoringSettings();
+        private SelfMonitoringSettings selfMonitoringSettings = new SelfMonitoringSettings();
 
         @BeforeEach
         void setupConfiguration() {
@@ -69,15 +69,15 @@ public class SelfMonitoringMetricManagerTest {
 
             Map<String, MetricDefinitionSettings> definitionMap = new HashMap<>();
             definitionMap.put("beacons_received", dummyMetricDefinition);
-            eumSelfMonitoringSettings.setEnabled(true);
-            eumSelfMonitoringSettings.setMetrics(definitionMap);
-            eumSelfMonitoringSettings.setMetricPrefix("inspectit-eum/self/");
+            selfMonitoringSettings.setEnabled(true);
+            selfMonitoringSettings.setMetrics(definitionMap);
+            selfMonitoringSettings.setMetricPrefix("inspectit-eum/self/");
         }
 
         @Test
         void verifyNoViewIsGeneratedWithDisabledSelfMonitoring() {
-            eumSelfMonitoringSettings.setEnabled(false);
-            when(configuration.getSelfMonitoring()).thenReturn(eumSelfMonitoringSettings);
+            selfMonitoringSettings.setEnabled(false);
+            when(configuration.getSelfMonitoring()).thenReturn(selfMonitoringSettings);
 
             selfMonitoringMetricManager.record("beacons_received", 1);
 
@@ -86,7 +86,7 @@ public class SelfMonitoringMetricManagerTest {
 
         @Test
         void verifyNoViewIsGeneratedWithNonExistentMetric() {
-            when(configuration.getSelfMonitoring()).thenReturn(eumSelfMonitoringSettings);
+            when(configuration.getSelfMonitoring()).thenReturn(selfMonitoringSettings);
 
             selfMonitoringMetricManager.record("apples_received", 1);
 
@@ -95,7 +95,7 @@ public class SelfMonitoringMetricManagerTest {
 
         @Test
         void verifySelfMonitoringMetricManagerIsCalled() {
-            when(configuration.getSelfMonitoring()).thenReturn(eumSelfMonitoringSettings);
+            when(configuration.getSelfMonitoring()).thenReturn(selfMonitoringSettings);
 
             selfMonitoringMetricManager.initMetrics();
 

@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
-import rocks.inspectit.oce.eum.server.configuration.model.selfmonitoring.EumSelfMonitoringSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 
 import javax.annotation.PostConstruct;
@@ -29,7 +29,7 @@ public class SelfMonitoringMetricManager {
     @PostConstruct
     @VisibleForTesting
     void initMetrics() {
-        EumSelfMonitoringSettings selfMonitoringSettings = configuration.getSelfMonitoring();
+        SelfMonitoringSettings selfMonitoringSettings = configuration.getSelfMonitoring();
         for (Map.Entry<String, MetricDefinitionSettings> metricEntry : selfMonitoringSettings.getMetrics().entrySet()) {
             String measureName = metricEntry.getKey();
             MetricDefinitionSettings metricDefinitionSettings = metricEntry.getValue();
@@ -50,7 +50,7 @@ public class SelfMonitoringMetricManager {
      * @param customTags  custom tags
      */
     public void record(String measureName, Number value, Map<String, String> customTags) {
-        EumSelfMonitoringSettings selfMonitoringSettings = configuration.getSelfMonitoring();
+        SelfMonitoringSettings selfMonitoringSettings = configuration.getSelfMonitoring();
         if (selfMonitoringSettings.isEnabled() && selfMonitoringSettings.getMetrics().containsKey(measureName)) {
             MetricDefinitionSettings metricDefinitionSettings = selfMonitoringSettings.getMetrics().get(measureName);
 

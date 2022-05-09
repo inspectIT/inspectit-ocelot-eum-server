@@ -5,8 +5,6 @@ import io.opencensus.stats.*;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.Tags;
-import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;

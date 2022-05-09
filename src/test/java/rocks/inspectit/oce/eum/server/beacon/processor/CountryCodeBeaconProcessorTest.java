@@ -14,7 +14,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.oce.eum.server.configuration.model.tags.EumTagsSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.TagsSettings;
 import rocks.inspectit.oce.eum.server.utils.GeolocationResolver;
 import rocks.inspectit.oce.eum.server.utils.IPUtils;
 
@@ -43,7 +43,7 @@ class CountryCodeBeaconProcessorTest {
 
     public static final String DEFAULT_IP_ADDRESS = "10.10.10.10";
 
-    private EumTagsSettings tagsSettings = new EumTagsSettings();
+    private TagsSettings tagsSettings = new TagsSettings();
 
     private Beacon beacon;
 

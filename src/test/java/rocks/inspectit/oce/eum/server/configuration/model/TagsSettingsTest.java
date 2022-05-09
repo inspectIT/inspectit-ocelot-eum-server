@@ -5,21 +5,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.eum.server.configuration.model.tags.BeaconTagSettings;
-import rocks.inspectit.oce.eum.server.configuration.model.tags.EumTagsSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.TagsSettings;
 
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-class EumTagsSettingsTest {
+class TagsSettingsTest {
 
     @Nested
     public class IsGlobalTagMissing {
 
         @Test
         public void emptySettings() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
 
             boolean result = settings.isGlobalTagMissing();
 
@@ -28,7 +28,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void tagMissing() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getDefineAsGlobal().add("missing-tag");
 
             boolean result = settings.isGlobalTagMissing();
@@ -38,7 +38,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void hasBeaconTag() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getDefineAsGlobal().add("beacon-tag");
             settings.getBeacon().put("beacon-tag", BeaconTagSettings.builder().input("beacon-field").build());
 
@@ -49,7 +49,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void hasExtraTag() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getDefineAsGlobal().add("extra-tag");
             settings.getExtra().put("extra-tag", "constant-value");
 
@@ -64,7 +64,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void emptySettings() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
 
             boolean result = settings.isCheckUniquenessOfTags();
 
@@ -73,7 +73,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void noDuplicateTags() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getExtra().put("tag_a", "");
             settings.getBeacon().put("tag_b", BeaconTagSettings.builder().build());
 
@@ -84,7 +84,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void hasDuplicateTags() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getExtra().put("tag_a", "");
             settings.getBeacon().put("tag_a", BeaconTagSettings.builder().build());
 
@@ -99,7 +99,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void emptyCustomMapping() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
 
             boolean result = settings.isCheckIpRangesDoNotOverlap();
 
@@ -108,7 +108,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void ipsAreEqual() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"127.127.127.127"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"127.127.127.127"}));
 
@@ -119,7 +119,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void ipsAreNotEqual() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"127.127.127.127"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"127.127.127.128"}));
 
@@ -130,7 +130,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void cidrsAreEqual() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"10.0.0.0/16"}));
 
@@ -141,7 +141,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void cidrsOverlap() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"10.0.0.0/17"}));
 
@@ -152,7 +152,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void cidrsDoNotOverlap() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"10.1.0.0/16"}));
 
@@ -163,7 +163,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void cidrContainsIp() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"10.0.0.1"}));
 
@@ -174,7 +174,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void cidrDoesNotContainIp() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"11.0.0.1"}));
 
@@ -185,7 +185,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void cidrsOfSameLabelAreOverlapping() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16", "10.0.0.0/17"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"11.0.0.1"}));
 
@@ -196,7 +196,7 @@ class EumTagsSettingsTest {
 
         @Test
         public void cidrAndIpOfSameLabelAreOverlapping() {
-            EumTagsSettings settings = new EumTagsSettings();
+            TagsSettings settings = new TagsSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16", "10.0.0.1"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"11.0.0.1"}));
 

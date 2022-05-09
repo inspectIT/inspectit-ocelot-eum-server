@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.eum.server.configuration.model.selfmonitoring;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Singular;
 import org.springframework.validation.annotation.Validated;
 import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
@@ -16,7 +15,7 @@ import java.util.Map;
  */
 @Data
 @Validated
-public class EumSelfMonitoringSettings{
+public class SelfMonitoringSettings {
 
     /**
      * If self-monitoring is enabled.

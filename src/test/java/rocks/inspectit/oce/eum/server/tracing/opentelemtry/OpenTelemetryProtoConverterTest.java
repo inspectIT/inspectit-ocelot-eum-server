@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.eum.server.tracing.opentelemtry;
 
 import com.google.protobuf.util.JsonFormat;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.common.v1.InstrumentationLibrary;

@@ -4,10 +4,10 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
-import rocks.inspectit.oce.eum.server.configuration.model.exporters.EumExportersSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExportersSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.BeaconMetricDefinitionSettings;
-import rocks.inspectit.oce.eum.server.configuration.model.selfmonitoring.EumSelfMonitoringSettings;
-import rocks.inspectit.oce.eum.server.configuration.model.tags.EumTagsSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.selfmonitoring.SelfMonitoringSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.tags.TagsSettings;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -35,19 +35,19 @@ public class EumServerConfiguration {
      * Map of tags
      */
     @Valid
-    private EumTagsSettings tags;
+    private TagsSettings tags;
 
     /**
      * Self Monitoring
      */
     @Valid
-    private EumSelfMonitoringSettings selfMonitoring;
+    private SelfMonitoringSettings selfMonitoring;
 
     /**
      * The exporters settings
      */
     @Valid
-    private EumExportersSettings exporters;
+    private ExportersSettings exporters;
 
     /**
      * The resource timing settings.

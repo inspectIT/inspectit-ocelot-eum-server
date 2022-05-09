@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.eum.server.configuration.model.tags;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.oce.eum.server.configuration.model.tags.providers.TagsProvidersSettings;
 import rocks.inspectit.oce.eum.server.utils.IPUtils;
@@ -17,7 +16,7 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class EumTagsSettings {
+public class TagsSettings {
 
     /**
      * Settings for available tags providers.

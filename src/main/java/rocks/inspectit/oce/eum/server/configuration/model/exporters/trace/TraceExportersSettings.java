@@ -1,14 +1,13 @@
 package rocks.inspectit.oce.eum.server.configuration.model.exporters.trace;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 
 @Data
 @Validated
-public class EumTraceExportersSettings {
+public class TraceExportersSettings {
 
     @Valid
     private JaegerExporterSettings jaeger;
