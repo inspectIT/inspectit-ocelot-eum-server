@@ -20,9 +20,16 @@ public class InfluxExporterSettings {
     private ExporterEnabledState enabled;
 
     /**
-     * The HTTP URL of influx (e.g. http://localhost:8086)
+     * This property is deprecated since v2.0. Please use {@link #endpoint} instead.
+     * The HTTP URL of influx (e.g. http://localhost:8086).
      */
+    @Deprecated
     private String url;
+
+    /**
+     * The HTTP URL endpoint of Influx (e.g., http://localhost:8086)
+     */
+    private String endpoint;
 
     /**
      * The database to which the values are pushed.

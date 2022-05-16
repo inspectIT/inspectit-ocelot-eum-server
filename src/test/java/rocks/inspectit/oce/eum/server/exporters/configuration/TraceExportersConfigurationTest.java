@@ -16,9 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class TraceExportersConfigurationTest {
 
-    @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaeger.grpc=", "inspectit-eum-server.exporters.tracing.jaeger.enabled=ENABLED"})
+    @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaeger.endpoint=", "inspectit-eum-server.exporters.tracing.jaeger.enabled=ENABLED"})
     @Nested
-    public class MissingGrpcTest {
+    public class MissingEndpointTest {
 
         @Autowired(required = false)
         JaegerGrpcSpanExporter exporter;
@@ -29,7 +29,7 @@ class TraceExportersConfigurationTest {
         }
     }
 
-    @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaeger.grpc=localhost:1234", "inspectit-eum-server.exporters.tracing.jaeger.enabled=DISABLED"})
+    @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaeger.endpoint=localhost:1234", "inspectit-eum-server.exporters.tracing.jaeger.enabled=DISABLED", "inspectit-eum-server.exporters.tracing.jaeger.protocol=grpc"})
     @Nested
     public class DisabledTest {
 
@@ -42,7 +42,7 @@ class TraceExportersConfigurationTest {
         }
     }
 
-    @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaeger.grpc=localhost:1234", "inspectit-eum-server.exporters.tracing.jaeger.enabled=ENABLED"})
+    @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaeger.endpoint=localhost:1234", "inspectit-eum-server.exporters.tracing.jaeger.enabled=ENABLED", "inspectit-eum-server.exporters.tracing.jaeger.protocol=grpc"})
     @Nested
     public class BothAvailableTest {
 
