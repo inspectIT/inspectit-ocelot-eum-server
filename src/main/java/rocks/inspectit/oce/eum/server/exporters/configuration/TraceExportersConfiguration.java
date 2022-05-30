@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExportersSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.TraceExportersSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.JaegerExporterSettings;
@@ -35,6 +36,19 @@ public class TraceExportersConfiguration {
                 .ifPresent(settings -> {
                     if (StringUtils.hasText(settings.getUrl()) && !StringUtils.hasText(settings.getEndpoint())) {
                         log.warn("In order to use Jaeger span exporter, please specify the grpc API 'endpoint' property instead of the 'url'.");
+                    }
+                });
+    }
+
+    @PostConstruct
+    public void logEnabledButNoEndpoint() {
+        Optional.ofNullable(configuration.getExporters())
+                .map(ExportersSettings::getTracing)
+                .map(TraceExportersSettings::getJaeger)
+                .filter((jaeger) -> jaeger.getEnabled().equals(ExporterEnabledState.ENABLED))
+                .ifPresent(settings -> {
+                    if (!StringUtils.hasText(settings.getEndpoint())) {
+                        log.warn("Jaeger Exporter is enabled but 'endpoint' is not set.");
                     }
                 });
     }
