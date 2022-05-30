@@ -1,0 +1,22 @@
+name: EUM Server Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    container: openjdk:8-jdk
+    steps:
+      - uses: actions/checkout@v2
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: test
+        run: ./gradlew test
