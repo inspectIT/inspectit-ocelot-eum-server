@@ -40,11 +40,17 @@ public class TraceController {
     @CrossOrigin
     @PostMapping("spans")
     public ResponseEntity<Void> spans(@RequestBody @NotBlank String data) {
+
         boolean isError = false;
         Stopwatch stopwatch = Stopwatch.createStarted();
         int spanSize = -1;
 
         try {
+            if(spanExporters == null){
+                log.warn("A span was sent to the EUM-server for processing but no span exporter is registered/enabled in 'inspectit-eum-server.exporters.tracing'. To fix this, update the configuration at 'inspectit-eum-server.exporters.tracing' accordingly, e.g., by adding a configuration for Jaeger.");
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "No SpanExporter to process the request exists in the EUM server. To fix this, update the EUM server's configuration at 'exporters.tracing' to add a span exporter, e.g. for Jaeger.");
+            }
+
             // use protobuf to convert request string to the open-telemetry proto impl
             ExportTraceServiceRequest.Builder requestBuilder = ExportTraceServiceRequest.newBuilder();
             JsonFormat.parser().merge(data, requestBuilder);
@@ -61,6 +67,10 @@ public class TraceController {
             return ResponseEntity.accepted().build();
 
             // in case of exception send proper response back
+        } catch (ResponseStatusException e) {
+            isError = true;
+            // simply rethrow since it already is a fitting ResponseStatusException
+            throw e;
         } catch (InvalidProtocolBufferException e) {
             isError = true;
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OpenTelemetry data corrupted.", e);
