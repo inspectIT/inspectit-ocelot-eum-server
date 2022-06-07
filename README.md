@@ -1,4 +1,7 @@
 # inspectit-ocelot-eum-server
+
+[![EUM Server Tests](https://github.com/inspectIT/inspectit-ocelot-eum-server/actions/workflows/eumserver_test.yml/badge.svg?branch=main)](https://github.com/inspectIT/inspectit-ocelot-eum-server/actions/workflows/eumserver_test.yml)
+
 This server provides Enduser Monitoring data by using the [OpenCensus](https://github.com/census-instrumentation/opencensus-java) toolkit.
 
 ## Metrics
