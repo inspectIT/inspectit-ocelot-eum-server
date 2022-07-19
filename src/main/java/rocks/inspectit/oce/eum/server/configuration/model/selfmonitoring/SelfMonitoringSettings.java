@@ -8,6 +8,7 @@ import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.Metr
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -26,7 +27,7 @@ public class SelfMonitoringSettings {
      * Definition of the self-monitoring metrics.
      */
     @Singular
-    private Map<@NotBlank String, @Valid @NotNull MetricDefinitionSettings> metrics;
+    private Map<@NotBlank String, @Valid @NotNull MetricDefinitionSettings> metrics = Collections.emptyMap();
 
     /**
      * The prefix used for the self-monitoring metrics.
