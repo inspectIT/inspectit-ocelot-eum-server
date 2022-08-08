@@ -6,10 +6,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven {
-        name 'Nexus@NT'
-        url "https://repository.novatec-gmbh.de/content/repositories/3rd_party_libs/"
-    }
 }
 
 apply plugin: 'java'
