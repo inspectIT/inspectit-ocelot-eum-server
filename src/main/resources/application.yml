@@ -302,6 +302,16 @@ inspectit-eum-server:
   resource-timing:
     enabled: true
 
+# SERVER properties
+# Avoid exposing internals to outside via error page
+server:
+  error:
+    include-stacktrace: never
+    include-binding-errors: never
+    include-message: never
+    whitelabel:
+      enabled: false
+
 # ACTUATOR PROPERTIES
 management:
   # Whether to enable or disable all endpoints by default.
