@@ -100,6 +100,21 @@ inspectit-eum-server:
         enabled: true
         host: localhost
         port: 8888
+
+  security:
+    enabled: false
+    authorization-header: Authorization
+    permitted-urls:
+      - "/actuator/health"
+      - "/boomerang/**"
+    auth-provider:
+      simple:
+        enabled: false
+        watch: true
+        frequency: 60s
+        config-directory: "" # Empty by default to force users to provide one
+        default-file-name: "default-token-file.yaml"
+        create-default-file-if-not-exists: true
 ```
 ##### Metrics Definition
 A metric is defined through the following attributes:
@@ -125,4 +140,53 @@ By using the tag `COUNTRY_CODE`, the geolocation of the requester is resolved by
 By now, the prometheus exporter is available. If `ènabled` is set to true, the exporter is exposes the metrics under 
 ```bash
 http://[host]:[port]/metrics
+```
+
+##### Security
+Currently the EUM Server only supports a simple API token security concept. In future, additional authentication providers
+will be supported
+Security can be enabled by changing spring application yaml, using system properties or environment variables.
+
+```bash
+inspectit-eum-server:
+  ....
+  security:
+    enabled: true
+    authorization-header: Authorization
+    permitted-urls:
+      - "/actuator/health"
+      - "/boomerang/**"
+    auth-provider:
+      # List of providers
+      ....
+```
+
+##### Simple Token Provider
+The simple token provider can enabled from config file...
+
+```bash
+inspectit-eum-server:
+  ...
+  security:
+    ....
+    auth-provider:
+      simple:
+        # Enable/Disable Provider
+        enabled: true
+        # Flag indicates if the directory should be watched for changes and tokens reloaded
+        watch: true
+        # How often directory should be watched for changes
+        frequency: 60s
+        # The directory where token files are stored
+        config-directory: "" # Empty by default to force users to provide one
+        # Flag indicates if a default token file should be created with an initial token
+        create-default-file-if-not-exists: true
+        # The name of the initial token file
+        default-file-name: "default-token-file.yaml"
+```
+or via environment variables:
+```bash
+INSPECTIT_EUM_SERVER_SECURITY_AUTH_PROVIDER_SIMPLE_CONFIG_DIRECTORY=<my-directory>
+INSPECTIT_EUM_SERVER_SECURITY_AUTH_PROVIDER_SIMPLE_ENABLED=TRUE;
+INSPECTIT_EUM_SERVER_SECURITY_ENABLED=TRUE
 ```
