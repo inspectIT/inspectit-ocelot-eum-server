@@ -8,6 +8,9 @@ import io.opentelemetry.proto.common.v1.InstrumentationLibrary;
 import io.opentelemetry.proto.trace.v1.InstrumentationLibrarySpans;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfoBuilder;
+import io.opentelemetry.sdk.internal.InstrumentationScopeUtil;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.OcelotSpanUtils;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -63,11 +66,11 @@ public class OpenTelemetryProtoConverter {
      */
     private Stream<SpanData> toSpanData(InstrumentationLibrarySpans librarySpans, Resource resource, Map<String, String> customSpanAttributes) {
         InstrumentationLibrary library = librarySpans.getInstrumentationLibrary();
-        InstrumentationLibraryInfo libraryInfo = InstrumentationLibraryInfo.create(library.getName(), library.getVersion());
+        InstrumentationScopeInfo instrumentationScopeInfo = InstrumentationScopeInfo.builder(library.getName()).setVersion(library.getVersion()).build();
 
         return librarySpans.getSpansList()
                 .stream()
-                .map(protoSpan -> OcelotSpanUtils.createSpanData(protoSpan, resource, libraryInfo, customSpanAttributes))
+                .map(protoSpan -> OcelotSpanUtils.createSpanData(protoSpan, resource, instrumentationScopeInfo, customSpanAttributes))
                 .filter(Objects::nonNull);
     }
 

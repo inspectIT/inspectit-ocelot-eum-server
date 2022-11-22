@@ -164,6 +164,24 @@ inspectit-eum-server:
         # E.g. if the exportInterval is 15s and the buffer-size is 4, the export will keep up to one minute of data in memory.
         buffer-size: 40
 
+      # settings for the OtlpGrpcMetricExporter used in OtlpGrpcMetricExporterService
+      otlp:
+        enabled: IF_CONFIGURED
+        # the export interval of the metrics
+        export-interval: ${inspectit.metrics.frequency}
+        # the URL endpoint, e.g., http://127.0.0.1:4317
+        endpoint: null
+        # the transport protocol, e.g., 'grpc' or 'http/protobuf'
+        protocol:
+        # headers
+        headers: { }
+        # the aggregation temporality, e.g., CUMULATIVE or DELTA
+        preferredTemporality: CUMULATIVE
+        # compression method
+        compression: NONE
+        # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
+        timeout: 10s
+
     tracing:
       # Specifies whether client IP addresses which are added to spans should be masked.
       mask-span-ip-addresses: true
@@ -178,11 +196,24 @@ inspectit-eum-server:
         # Location of the jaeger gRPC API.
         # Either a valid NameResolver-compliant URI, or an authority string.
         # If this property is not set, the jaeger-exporter will not be started.
-        # endpoint: localhost:14250
+        # endpoint: http://localhost:14250
 
 
-        # service name for all exported spans.
-        service-name: browser-js
+      otlp:
+        # If OTLP exporter for the OT received spans is enabled.
+        enabled: IF_CONFIGURED
+        # the transport protocol, e.g., 'http/thrift' or 'grpc'
+        protocol: grpc
+        # headers
+        headers:
+          "Connection": "close"
+        # compression method
+        compression: NONE
+        # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
+        timeout: 10s
+
+      # service name for all exported spans.
+      service-name: browser-js
 
     beacons:
       http:
