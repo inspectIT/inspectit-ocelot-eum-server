@@ -55,4 +55,12 @@ class TraceExportersConfigurationTest {
         }
     }
 
+    @Nested
+    class OtlpTraceExporterConfigTest{
+
+        // TODO: add tests for {@link TraceExportersConfiguration#otlpSpanExporter()}
+        void otlpTraceExporterConfig(){
+            assertThat(false).isTrue();
+        }
+    }
 }

@@ -37,7 +37,9 @@ public class JaegerExporterSettings {
      */
     private TransportProtocol protocol;
 
+    @Deprecated
     /**
+     * This property is deprecated in favor of {@link TraceExportersSettings#serviceName}.
      * The service name. Used in {@link rocks.inspectit.oce.eum.server.exporters.configuration.TraceExportersConfiguration}
      */
     private String serviceName;

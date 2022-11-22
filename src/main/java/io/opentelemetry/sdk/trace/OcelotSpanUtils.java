@@ -13,8 +13,9 @@ import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.trace.v1.Span;
 import io.opentelemetry.proto.trace.v1.Status;
-import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
-import io.opentelemetry.sdk.internal.SystemClock;
+import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.internal.AttributesMap;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 
 /**
  * Utility class for creating {@link SpanData} instances from {@link Span} ones. This class is in the OpenTelemetry package
- * because it requires access to package-local classes, e.g. {@link RecordEventsReadableSpan}.
+ * because it requires access to package-local classes, e.g. {@link SdkSpan}.
  */
 @Slf4j
 public class OcelotSpanUtils {
@@ -78,14 +79,14 @@ public class OcelotSpanUtils {
     /**
      * Creates a {@link SpanData} instance based on the given arguments.
      *
-     * @param protoSpan                  the protobuf representation of the span
-     * @param resource                   the span's resources
-     * @param instrumentationLibraryInfo the information of the tracing library
-     * @param customSpanAttributes       additional attributes which should be added to each span
+     * @param protoSpan                the protobuf representation of the span
+     * @param resource                 the span's resources
+     * @param instrumentationScopeInfo the information of the tracing library
+     * @param customSpanAttributes     additional attributes which should be added to each span
      *
      * @return the created {@link SpanData} instance
      */
-    public static SpanData createSpanData(Span protoSpan, Resource resource, InstrumentationLibraryInfo instrumentationLibraryInfo, Map<String, String> customSpanAttributes) {
+    public static SpanData createSpanData(Span protoSpan, Resource resource, InstrumentationScopeInfo instrumentationScopeInfo, Map<String, String> customSpanAttributes) {
         try {
             String traceId = toIdString(protoSpan.getTraceId());
             String spanId = toIdString(protoSpan.getSpanId());
@@ -93,6 +94,7 @@ public class OcelotSpanUtils {
 
             SpanContext spanContext = createSpanContext(traceId, spanId);
             SpanContext parentSpanContext = createSpanContext(traceId, parentSpanId);
+            io.opentelemetry.api.trace.Span parentSpan = io.opentelemetry.api.trace.Span.wrap(parentSpanContext);
 
             // only create spans with valid context
             if (!spanContext.isValid()) {
@@ -110,12 +112,11 @@ public class OcelotSpanUtils {
             // convert attributes map to AttributesMap
             Attributes spanAttributes = toAttributes(protoSpan.getAttributesList(), customSpanAttributes);
             Map<AttributeKey<?>, Object> attributesMap = spanAttributes.asMap();
-            AttributesMap spanAttributesMap = new AttributesMap(attributesMap.size());
+            AttributesMap spanAttributesMap = AttributesMap.create(attributesMap.size(), spanLimits.getMaxAttributeValueLength());
             spanAttributesMap.putAll(attributesMap);
 
             // creating the actual span
-            RecordEventsReadableSpan span = RecordEventsReadableSpan.startSpan(spanContext, name, instrumentationLibraryInfo, spanKind, parentSpanContext, NOOP_CONTEXT, spanLimits, NOOP_SPAN_PROCESSOR, SystemClock
-                    .getInstance(), resource, spanAttributesMap, links, totalRecordedLinks, startTime);
+            SdkSpan span = SdkSpan.startSpan(spanContext, name, instrumentationScopeInfo, spanKind, parentSpan, NOOP_CONTEXT, spanLimits, NOOP_SPAN_PROCESSOR, Clock.getDefault(), resource, spanAttributesMap, links, totalRecordedLinks, startTime);
 
             // add events to the span - and filter events which occurred before the actual span
             protoSpan.getEventsList()
@@ -152,7 +153,7 @@ public class OcelotSpanUtils {
     @VisibleForTesting
     static SpanContext createSpanContext(String traceId, String spanId) {
         //TODO - TraceState and TraceFlags are currently not supported by this class!
-        if (StringUtils.isEmpty(spanId)) {
+        if (!StringUtils.hasText(spanId)) {
             return SpanContext.getInvalid();
         }
         return SpanContext.create(traceId, spanId, TraceFlags.getDefault(), TraceState.getDefault());
