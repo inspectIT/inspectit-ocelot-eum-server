@@ -41,19 +41,19 @@ import java.util.stream.Stream;
  *  security:
  *    ....
  *    auth-provider:
- *    simple:
- *    # Enable/Disable Provider
- *    enabled: true
- *    # Flag indicates if the directory should be watched for changes and tokens reloaded
- *    watch: true
- *    # How often directory should be watched for changes
- *    frequency: 60s
- *    # The directory where token files are stored
- *    config-directory: "" # Empty by default to force users to provide one
- *    # Flag indicates if a default token file should be created with an initial token
- *    create-default-file-if-not-exists: true
- *    # The name of the initial token file
- *    default-file-name: "default-token-file.yaml"
+ *      simple:
+ *        # Enable/Disable Provider
+ *        enabled: true
+ *        # Flag indicates if the directory should be watched for changes and tokens reloaded
+ *        watch: true
+ *        # How often directory should be watched for changes
+ *        frequency: 60s
+ *        # The directory where token files are stored
+ *        config-directory: "" # Empty by default to force users to provide one
+ *        # Flag indicates if a default token file should be created with an initial token
+ *        create-default-file-if-not-exists: true
+ *        # The name of the initial token file
+ *        default-file-name: "default-token-file.yaml"
  *    </pre>
  */
 @Slf4j

@@ -35,7 +35,7 @@ public class SimpleApiTokenAuthenticationProviderSettings {
     private boolean watch;
 
     /**
-     * Name of the default token provider file if non exists and a {@link #createDefaultFileIfNotExists} is true.
+     * Name of the default token provider file if it does not exist and {@link #createDefaultFileIfNotExists} is true.
      */
     @NotEmpty
     private String defaultFileName;
@@ -43,7 +43,7 @@ public class SimpleApiTokenAuthenticationProviderSettings {
     private boolean createDefaultFileIfNotExists = true;
 
     @AssertTrue(message = "configDirectory can not be null or empty if SimpleApiTokenAuthentication is enabled")
-    public boolean isConfigDirectoryNotNullifEnabled() {
+    public boolean isConfigDirectoryNotNullIfEnabled() {
         return !isEnabled() || (isEnabled() && StringUtils.hasText(configDirectory));
     }
 }

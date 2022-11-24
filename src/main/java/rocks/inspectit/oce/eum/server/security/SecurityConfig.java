@@ -26,7 +26,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private List<AuthenticationProvider> apiTokenAuthProviders = Collections.emptyList();
 
     /**
-     * Adds all {@link AuthenticationProvider }s to the {@link AuthenticationManagerBuilder}.
+     * Adds all {@link AuthenticationProvider}s to the {@link AuthenticationManagerBuilder}.
      *
      * @param auth the {@link AuthenticationManagerBuilder} to use
      */

@@ -9,7 +9,6 @@ import javax.validation.Valid;
 @Validated
 public class AuthenticationProviderSettings {
 
-
     @Valid
     private SimpleApiTokenAuthenticationProviderSettings simple;
 }

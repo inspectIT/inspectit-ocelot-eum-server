@@ -143,11 +143,11 @@ http://[host]:[port]/metrics
 ```
 
 ##### Security
-Currently the EUM Server only supports a simple API token security concept. In future, additional authentication providers
-will be supported
-Security can be enabled by changing spring application yaml, using system properties or environment variables.
+Currently, the EUM Server only supports a simple API token security concept. In future, additional authentication providers
+will be supported.
+Security can be enabled by changing spring `application.yml`, using system properties or environment variables.
 
-```bash
+```yaml
 inspectit-eum-server:
   ....
   security:
@@ -162,9 +162,9 @@ inspectit-eum-server:
 ```
 
 ##### Simple Token Provider
-The simple token provider can enabled from config file...
+The simple token provider can be enabled from config file...
 
-```bash
+```yaml
 inspectit-eum-server:
   ...
   security:

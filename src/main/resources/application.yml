@@ -308,7 +308,7 @@ inspectit-eum-server:
     enabled: false
     # Change name of authentication header if required
     authorization-header: Authorization
-    # White list certain urls which must no be secured
+    # White list certain urls which must not be secured
     permitted-urls:
       - "/actuator/health"
       - "/boomerang/**"
