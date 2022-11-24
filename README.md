@@ -114,7 +114,6 @@ inspectit-eum-server:
         frequency: 60s
         token-directory: "" # Empty by default to force users to provide one
         default-file-name: "default-token-file.yaml"
-        create-default-file-if-not-exists: true
 ```
 ##### Metrics Definition
 A metric is defined through the following attributes:
@@ -177,14 +176,14 @@ inspectit-eum-server:
         watch: true
         # How often directory should be watched for changes
         frequency: 60s
-        # The directory where token files are stored
-        token-directory: "" # Empty by default to force users to provide one
+        # The directory where token files are stored. Empty by default to force users to provide one
+        token-directory: ""
         # The name of the initial token file
         default-file-name: "default-token-file.yaml"
 ```
 or via environment variables:
 ```bash
-INSPECTIT_EUM_SERVER_SECURITY_AUTH_PROVIDER_SIMPLE_CONFIG_DIRECTORY=<my-directory>
+INSPECTIT_EUM_SERVER_SECURITY_AUTH_PROVIDER_SIMPLE_TOKEN_DIRECTORY=<my-directory>
 INSPECTIT_EUM_SERVER_SECURITY_AUTH_PROVIDER_SIMPLE_ENABLED=TRUE;
 INSPECTIT_EUM_SERVER_SECURITY_ENABLED=TRUE
 ```

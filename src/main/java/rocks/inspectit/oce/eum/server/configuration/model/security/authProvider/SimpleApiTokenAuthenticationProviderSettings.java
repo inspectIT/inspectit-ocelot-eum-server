@@ -38,9 +38,8 @@ public class SimpleApiTokenAuthenticationProviderSettings {
      */
     private String defaultFileName;
 
-
-    @AssertTrue(message = "configDirectory can not be null or empty if SimpleApiTokenAuthentication is enabled")
-    public boolean isConfigDirectoryNotNullIfEnabled() {
+    @AssertTrue(message = "tokenDirectory can not be null or empty if SimpleApiTokenAuthentication is enabled")
+    public boolean isTokenDirectoryNotNullIfEnabled() {
         return !isEnabled() || (isEnabled() && StringUtils.hasText(tokenDirectory));
     }
 }

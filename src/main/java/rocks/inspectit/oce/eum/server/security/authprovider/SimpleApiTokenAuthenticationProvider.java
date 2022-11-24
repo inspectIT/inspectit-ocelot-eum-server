@@ -49,11 +49,9 @@ import java.util.stream.Stream;
  *        watch: true
  *        # How often directory should be watched for changes
  *        frequency: 60s
- *        # The directory where token files are stored
- *        token-directory: "" # Empty by default to force users to provide one
+ *        # The directory where token files are stored. Empty by default to force users to provide one
+ *        token-directory: ""
  *        # Flag indicates if a default token file should be created with an initial token
- *        create-default-file-if-not-exists: true
- *        # The name of the initial token file
  *        default-file-name: "default-token-file.yaml"
  *    </pre>
  */
@@ -133,11 +131,9 @@ public class SimpleApiTokenAuthenticationProvider implements AuthenticationProvi
     }
 
     private void createDefaultTokenProviderFile() {
-        if (StringUtils.hasText(configuration.getSecurity().getAuthProvider().getSimple().getDefaultFileName())) {
-            File file = new File(tokenDirectory.getAbsolutePath() + File.separator + configuration.getSecurity()
-                    .getAuthProvider()
-                    .getSimple()
-                    .getDefaultFileName());
+        String defaultFileName = configuration.getSecurity().getAuthProvider().getSimple().getDefaultFileName();
+        if (StringUtils.hasText(defaultFileName)) {
+            File file = new File(tokenDirectory.getAbsolutePath() + File.separator + defaultFileName);
             if (!file.exists()) {
                 log.debug("Create initial token file: {}", file.getAbsolutePath());
                 try {

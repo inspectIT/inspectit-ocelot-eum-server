@@ -320,9 +320,9 @@ inspectit-eum-server:
         watch: true
         # How often directory should be watched for changes
         frequency: 60s
-        # The directory where token files are stored
-        token-directory: "" # Empty by default to force users to provide one
-        # The name of the initial token file
+        # The directory where token files are stored. Empty by default to force users to provide one
+        token-directory: ""
+        # The name of the initial token file. If a name is provided file will be created with an initial token
         default-file-name: "default-token-file.yaml"
 
 

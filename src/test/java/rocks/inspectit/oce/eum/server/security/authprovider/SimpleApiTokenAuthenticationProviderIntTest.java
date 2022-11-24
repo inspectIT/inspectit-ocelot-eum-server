@@ -30,7 +30,7 @@ public class SimpleApiTokenAuthenticationProviderIntTest {
         @Override
         public void initialize(ConfigurableApplicationContext applicationContext) {
             String tokenDir = getClass().getClassLoader().getResource("security/simple-auth-provider").getFile();
-            TestPropertyValues.of("inspectit-eum-server.security.enabled=true", "inspectit-eum-server.security.auth-provider.simple.enabled=true", "inspectit-eum-server.security.auth-provider.simple.token-directory=" + tokenDir, "inspectit-eum-server.security.auth-provider.simple.default-file-name=\"\"")
+            TestPropertyValues.of("inspectit-eum-server.security.enabled=true", "inspectit-eum-server.security.auth-provider.simple.enabled=true", "inspectit-eum-server.security.auth-provider.simple.token-directory=" + tokenDir, "inspectit-eum-server.security.auth-provider.simple.default-file-name=")
                     .applyTo(applicationContext);
         }
     }

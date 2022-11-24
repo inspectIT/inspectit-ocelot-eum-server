@@ -63,7 +63,8 @@ public class DirectoryPoller {
     private ScheduledFuture<?> pollingTask;
 
     /**
-     * Flag to indicate that we need to shutdown the used executor on destroy.
+     * Flag to indicate that the {@link #defaultExecutor()} is used, which is initialized by {@link  DirectoryPoller} itself
+     * and needs to be shutdown on destroy.
      */
     private boolean isDefaultExecutor = false;
 
