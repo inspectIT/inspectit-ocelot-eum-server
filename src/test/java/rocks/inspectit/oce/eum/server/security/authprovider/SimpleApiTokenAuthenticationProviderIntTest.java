@@ -12,12 +12,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = SimpleApiTokenAuthenticationProviderIntTest.Initializer.class)
+@DirtiesContext
 public class SimpleApiTokenAuthenticationProviderIntTest {
 
     @Autowired
@@ -28,7 +30,7 @@ public class SimpleApiTokenAuthenticationProviderIntTest {
         @Override
         public void initialize(ConfigurableApplicationContext applicationContext) {
             String tokenDir = getClass().getClassLoader().getResource("security/simple-auth-provider").getFile();
-            TestPropertyValues.of("inspectit-eum-server.security.enabled=true", "inspectit-eum-server.security.auth-provider.simple.enabled=true", "inspectit-eum-server.security.auth-provider.simple.config-directory=" + tokenDir, "inspectit-eum-server.security.auth-provider.simple.create-default-file-if-not-exists=false")
+            TestPropertyValues.of("inspectit-eum-server.security.enabled=true", "inspectit-eum-server.security.auth-provider.simple.enabled=true", "inspectit-eum-server.security.auth-provider.simple.token-directory=" + tokenDir, "inspectit-eum-server.security.auth-provider.simple.default-file-name=\"\"")
                     .applyTo(applicationContext);
         }
     }

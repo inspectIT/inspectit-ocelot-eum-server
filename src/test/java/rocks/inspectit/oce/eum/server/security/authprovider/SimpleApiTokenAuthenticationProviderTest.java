@@ -41,7 +41,10 @@ class SimpleApiTokenAuthenticationProviderTest {
     private void configurationReturnsDefaultTokensDirectory() {
         File file = new File(getClass().getClassLoader().getResource("security/simple-auth-provider").getFile());
 
-        when(configuration.getSecurity().getAuthProvider().getSimple().getConfigDirectory()).thenReturn(file.getAbsolutePath());
+        when(configuration.getSecurity()
+                .getAuthProvider()
+                .getSimple()
+                .getTokenDirectory()).thenReturn(file.getAbsolutePath());
     }
 
     @Nested
@@ -78,8 +81,9 @@ class SimpleApiTokenAuthenticationProviderTest {
     class LoadTokens {
 
         @Test
-        public void loadExistingTokens() throws Exception {
+        public void loadExistingTokens() {
             configurationReturnsDefaultTokensDirectory();
+
             authenticationProvider.init();
             Object o = ReflectionTestUtils.getField(authenticationProvider, "knownTokens");
             assertThat(o).isEqualTo(defaultTokens());
@@ -89,11 +93,12 @@ class SimpleApiTokenAuthenticationProviderTest {
         @Test
         public void createTokenDirectoryAndCreateInitialToken(@TempDir File tempTokenDir) {
             String tokenDir = tempTokenDir.getAbsolutePath() + File.separator + "tokens";
-            when(configuration.getSecurity().getAuthProvider().getSimple().getConfigDirectory()).thenReturn(tokenDir);
+            when(configuration.getSecurity().getAuthProvider().getSimple().getTokenDirectory()).thenReturn(tokenDir);
 
-            when(configuration.getSecurity().getAuthProvider().getSimple().isCreateDefaultFileIfNotExists()).thenReturn(true);
-
-            when(configuration.getSecurity().getAuthProvider().getSimple().getDefaultFileName()).thenReturn("test-tokens.yaml");
+            when(configuration.getSecurity()
+                    .getAuthProvider()
+                    .getSimple()
+                    .getDefaultFileName()).thenReturn("test-tokens.yaml");
 
             authenticationProvider.init();
 

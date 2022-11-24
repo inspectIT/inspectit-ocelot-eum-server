@@ -112,7 +112,7 @@ inspectit-eum-server:
         enabled: false
         watch: true
         frequency: 60s
-        config-directory: "" # Empty by default to force users to provide one
+        token-directory: "" # Empty by default to force users to provide one
         default-file-name: "default-token-file.yaml"
         create-default-file-if-not-exists: true
 ```
@@ -178,9 +178,7 @@ inspectit-eum-server:
         # How often directory should be watched for changes
         frequency: 60s
         # The directory where token files are stored
-        config-directory: "" # Empty by default to force users to provide one
-        # Flag indicates if a default token file should be created with an initial token
-        create-default-file-if-not-exists: true
+        token-directory: "" # Empty by default to force users to provide one
         # The name of the initial token file
         default-file-name: "default-token-file.yaml"
 ```
