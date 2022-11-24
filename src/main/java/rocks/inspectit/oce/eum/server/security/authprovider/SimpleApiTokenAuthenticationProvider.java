@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.security.ApiTokenAuthentication;
 import rocks.inspectit.oce.eum.server.utils.DirectoryPoller;
@@ -49,7 +50,7 @@ import java.util.stream.Stream;
  *        # How often directory should be watched for changes
  *        frequency: 60s
  *        # The directory where token files are stored
- *        config-directory: "" # Empty by default to force users to provide one
+ *        token-directory: "" # Empty by default to force users to provide one
  *        # Flag indicates if a default token file should be created with an initial token
  *        create-default-file-if-not-exists: true
  *        # The name of the initial token file
@@ -93,7 +94,7 @@ public class SimpleApiTokenAuthenticationProvider implements AuthenticationProvi
     @VisibleForTesting
     @PostConstruct
     void init() {
-        tokenDirectory = new File(configuration.getSecurity().getAuthProvider().getSimple().getConfigDirectory());
+        tokenDirectory = new File(configuration.getSecurity().getAuthProvider().getSimple().getTokenDirectory());
 
         if (tokenDirectory.exists() && !tokenDirectory.isDirectory()) {
             throw new IllegalStateException("Not a directory <" + tokenDirectory.getAbsolutePath() + ">");
@@ -132,7 +133,7 @@ public class SimpleApiTokenAuthenticationProvider implements AuthenticationProvi
     }
 
     private void createDefaultTokenProviderFile() {
-        if (configuration.getSecurity().getAuthProvider().getSimple().isCreateDefaultFileIfNotExists()) {
+        if (StringUtils.hasText(configuration.getSecurity().getAuthProvider().getSimple().getDefaultFileName())) {
             File file = new File(tokenDirectory.getAbsolutePath() + File.separator + configuration.getSecurity()
                     .getAuthProvider()
                     .getSimple()
