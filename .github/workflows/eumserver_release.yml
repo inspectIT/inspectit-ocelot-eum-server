@@ -1,0 +1,15 @@
+name: Release Eum Server
+
+on: [push]
+
+jobs:
+    build_and_test_eum_server:
+        runs-on: ubuntu-latest
+        container: openjdk:8-jdk
+        
+        steps:
+            - uses: actions/checkout@v3 
+            - name: Grant execute permission for gradlew
+            - run: chmod +x gradlew
+            - run: ./gradlew test
+    
