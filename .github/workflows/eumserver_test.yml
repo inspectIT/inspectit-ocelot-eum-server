@@ -14,9 +14,7 @@ on:
         config-path:
             required: true
             type: string
-        secrets:
-            envPat:
-                required: true
+
 jobs:
   test:
     name: Run Tests
