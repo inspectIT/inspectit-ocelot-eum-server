@@ -10,7 +10,7 @@ jobs:
         name: "Publish docker image"
         runs-on: ubuntu-latest
         environment: release
-        needs: [eumserver_test]
+        needs: [test_eum_server]
         
         steps:
             - uses: actions/checkout@v3
