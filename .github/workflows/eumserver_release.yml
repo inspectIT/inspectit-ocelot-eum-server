@@ -3,7 +3,8 @@ name: Release Eum Server
 on: [push]
 
 jobs:
-    
+    test_eum_server:
+        uses: ./.github/workflows/eumserver_test.yml
             
     publish_docker_images:
         name: "Publish docker image"
