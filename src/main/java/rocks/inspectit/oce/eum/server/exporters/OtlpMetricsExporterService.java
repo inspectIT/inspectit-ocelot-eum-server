@@ -1,0 +1,205 @@
+package rocks.inspectit.oce.eum.server.exporters;
+
+import io.opencensus.metrics.Metrics;
+import io.opencensus.metrics.export.Metric;
+import io.opencensus.metrics.export.MetricProducer;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
+import io.opentelemetry.opencensusshim.internal.metrics.MetricAdapter;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.metrics.InstrumentType;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
+import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import rocks.inspectit.oce.eum.server.AppStartupRunner;
+import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.TransportProtocol;
+import rocks.inspectit.oce.eum.server.configuration.model.exporters.metrics.OtlpMetricsExporterSettings;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.validation.Valid;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+@Component
+@Slf4j
+public class OtlpMetricsExporterService {
+
+    private final List<TransportProtocol> SUPPORTED_PROTOCOLS = Arrays.asList(TransportProtocol.GRPC, TransportProtocol.HTTP_PROTOBUF);
+
+    @Autowired
+    private EumServerConfiguration configuration;
+
+    @Autowired
+    private ScheduledExecutorService executor;
+
+    @Autowired
+    private AppStartupRunner appStartupRunner;
+
+    private Supplier<Set<MetricProducer>> metricProducerSupplier;
+
+    MetricExporter metricExporter;
+
+    PeriodicMetricReaderBuilder metricReaderBuilder;
+
+    OpenTelemetrySdk openTelemetry;
+
+    SdkMeterProvider meterProvider;
+
+    private ScheduledFuture<?> exporterTask;
+
+    private Resource otelResource;
+
+    OtlpMetricsExporterSettings otlpMetricsExporterSettings;
+
+    private boolean shouldEnable() {
+        @Valid OtlpMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlp();
+        if (!otlp.getEnabled().isDisabled()) {
+            if (SUPPORTED_PROTOCOLS.contains(otlp.getProtocol())) {
+                if (StringUtils.hasText(otlp.getEndpoint())) {
+                    return true;
+                } else if (StringUtils.hasText(otlp.getEndpoint())) {
+                    log.warn("OTLP Metric Exporter is enabled but 'endpoint' is not set.");
+                    return true;
+                }
+            }
+            if (otlp.getEnabled().equals(ExporterEnabledState.ENABLED)) {
+                if (!SUPPORTED_PROTOCOLS.contains(otlp.getProtocol())) {
+                    log.warn("OTLP Metric Exporter is enabled, but wrong 'protocol' is specified. Supported values are ", Arrays.toString(SUPPORTED_PROTOCOLS.stream()
+                            .map(transportProtocol -> transportProtocol.getConfigRepresentation())
+                            .toArray()));
+                }
+                if (!StringUtils.hasText(otlp.getEndpoint())) {
+                    log.warn("OTLP Metric Exporter is enabled but 'endpoint' is not set.");
+                }
+            }
+        }
+
+        return false;
+    }
+
+    @PostConstruct
+    void doEnable() {
+
+        if (shouldEnable()) {
+            otlpMetricsExporterSettings = configuration.getExporters().getMetrics().getOtlp();
+            AggregationTemporality preferredTemporality = otlpMetricsExporterSettings.getPreferredTemporality();
+            AggregationTemporalitySelector aggregationTemporalitySelector = instrumentType -> preferredTemporality;
+            otelResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters()
+                    .getMetrics()
+                    .getServiceName(), AttributeKey.stringKey("inspectit.eum-server.version"), appStartupRunner.getServerVersion(), ResourceAttributes.TELEMETRY_SDK_VERSION, appStartupRunner.getOpenTelemetryVersion(), ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java", ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"));
+
+            try {
+                metricProducerSupplier = () -> Metrics.getExportComponent()
+                        .getMetricProducerManager()
+                        .getAllMetricProducer();
+
+                switch (otlpMetricsExporterSettings.getProtocol()) {
+                    case GRPC: {
+                        OtlpGrpcMetricExporterBuilder metricExporterBuilder = OtlpGrpcMetricExporter.builder()
+                                .setAggregationTemporalitySelector(aggregationTemporalitySelector)
+                                .setEndpoint(otlpMetricsExporterSettings.getEndpoint())
+                                .setCompression(otlpMetricsExporterSettings.getCompression().toString())
+                                .setTimeout(otlpMetricsExporterSettings.getTimeout());
+                        if (otlpMetricsExporterSettings.getHeaders() != null) {
+                            for (Map.Entry<String, String> headerEntry : otlpMetricsExporterSettings.getHeaders()
+                                    .entrySet()) {
+                                metricExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
+                            }
+                        }
+                        metricExporter = metricExporterBuilder.build();
+                        break;
+                    }
+                    case HTTP_PROTOBUF: {
+                        OtlpHttpMetricExporterBuilder metricExporterBuilder = OtlpHttpMetricExporter.builder()
+                                .setAggregationTemporalitySelector(aggregationTemporalitySelector)
+                                .setEndpoint(otlpMetricsExporterSettings.getEndpoint())
+                                .setCompression(otlpMetricsExporterSettings.getCompression().toString())
+                                .setTimeout(otlpMetricsExporterSettings.getTimeout());
+                        if (otlpMetricsExporterSettings.getHeaders() != null) {
+                            for (Map.Entry<String, String> headerEntry : otlpMetricsExporterSettings.getHeaders()
+                                    .entrySet()) {
+                                metricExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
+                            }
+                        }
+                        metricExporter = metricExporterBuilder.build();
+                        break;
+                    }
+                }
+                //                metricReaderBuilder = PeriodicMetricReader.builder(metricExporter)
+                //                        .setInterval(otlp.getExportInterval())
+                //                        .setExecutor(executor);
+
+                exporterTask = executor.scheduleAtFixedRate(this::export, otlpMetricsExporterSettings.getExportInterval()
+                        .toMillis(), otlpMetricsExporterSettings.getExportInterval().toMillis(), TimeUnit.MILLISECONDS);
+                //                meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReaderBuilder.build()).build();
+                //                openTelemetry = OpenTelemetrySdk.builder().setMeterProvider(meterProvider).buildAndRegisterGlobal();
+
+                log.info("Starting OTLP metric exporter with {} on '{}'", otlpMetricsExporterSettings.getProtocol(), otlpMetricsExporterSettings.getEndpoint());
+            } catch (Exception e) {
+                log.error("Error starting OTLP metric exporter", e);
+                throw e;
+            }
+
+        }
+    }
+
+    @PreDestroy
+    private void doDisable() {
+        if (exporterTask != null) {
+            log.info("Stopping OTLP metric exporter");
+            exporterTask.cancel(false);
+        }
+        if (metricExporter != null) {
+            metricExporter.flush();
+            metricExporter.close();
+//            meterProvider.forceFlush();
+//            meterProvider.close();
+        }
+    }
+
+    private void export() {
+        List<Metric> metrics = metricProducerSupplier.get()
+                .stream()
+                .flatMap(metricProducer -> metricProducer.getMetrics().stream())
+                .collect(Collectors.toList());
+
+        List<MetricData> convertedMetrics = metrics.stream()
+                .map(metric -> MetricAdapter.convert(otelResource, metric))
+                .collect(Collectors.toList());
+
+        CompletableResultCode code = metricExporter.export(convertedMetrics);
+        CountDownLatch latch = new CountDownLatch(1);
+        code.whenComplete(() -> latch.countDown());
+        try {
+            latch.await(otlpMetricsExporterSettings.getExportInterval().toMillis(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}

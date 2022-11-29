@@ -15,11 +15,7 @@ import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.*;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -45,36 +41,32 @@ import static org.testcontainers.Testcontainers.exposeHostPorts;
  * This class is based on the {@link io.opentelemetry.integrationtest.OtlpExporterIntegrationTest}
  */
 @Testcontainers(disabledWithoutDocker = true)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ExporterIntTestBase {
+@SpringBootTest
+public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTestBase {
 
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    TestRestTemplate restTemplate;
-
-    public static final String SERVICE_NAME = "E2E-test";
+    protected static final String OTLP_HTTP_METRICS_PATH = "/v1/metrics";
 
     static final String COLLECTOR_TAG = "0.58.0";
 
     static final String COLLECTOR_IMAGE = "otel/opentelemetry-collector-contrib:" + COLLECTOR_TAG;
 
-    static final Integer COLLECTOR_OTLP_GRPC_PORT = 4317;
+    protected static final Integer COLLECTOR_OTLP_GRPC_PORT = 4317;
 
-    static final Integer COLLECTOR_OTLP_HTTP_PORT = 4318;
+    protected static final Integer COLLECTOR_OTLP_HTTP_PORT = 4318;
 
     static final Integer COLLECTOR_HEALTH_CHECK_PORT = 13133;
 
-    static final Integer COLLECTOR_JAEGER_GRPC_PORT = 14250;
+    protected static final Integer COLLECTOR_JAEGER_GRPC_PORT = 14250;
 
-    static final Integer COLLECTOR_JAEGER_THRIFT_HTTP_PORT = 14268;
+    protected static final Integer COLLECTOR_JAEGER_THRIFT_HTTP_PORT = 14268;
 
     static final Integer COLLECTOR_JAEGER_THRIFT_BINARY_PORT = 6832;
 
     static final Integer COLLECTOR_JAEGER_THRIFT_COMPACT_PORT = 6831;
 
     static final Integer COLLECTOR_PROMETHEUS_PORT = 8888;
+
+    static final Integer COLLECTOR_PROMETHEUS_RECEIVER_PORT = 8889;
 
     static final Integer COLLECTOR_INFLUX_DB1_PORT = 8086;
 
@@ -86,7 +78,7 @@ public class ExporterIntTestBase {
 
     static final String JAEGER_GRPC_PATH = "/v1/traces";
 
-    private static final Logger LOGGER = Logger.getLogger(ExporterIntTestBase.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ExporterIntTestBaseWithOtelCollector.class.getName());
 
     /**
      * The {@link OtlpGrpcServer} used as an exporter endpoint for the OpenTelemetry Collector
@@ -98,11 +90,13 @@ public class ExporterIntTestBase {
      */
     static GenericContainer<?> collector;
 
-    final static String DEFAULT_TRACE_ID = "497d4e959f574a77d0d3abf05523ec5c";
+    // TODO: try to re-use the collector container across test classes to speed up tests
+    static{
+
+    }
 
     @BeforeAll
     static void startCollector() {
-
         // start the gRPC server
         grpcServer = new OtlpGrpcServer();
         grpcServer.start();
@@ -113,31 +107,20 @@ public class ExporterIntTestBase {
 
         collector = new GenericContainer<>(DockerImageName.parse(COLLECTOR_IMAGE)).withEnv("LOGGING_EXPORTER_LOG_LEVEL", "INFO")
                 .withEnv("OTLP_EXPORTER_ENDPOINT", "host.testcontainers.internal:" + grpcServer.httpPort())
-                .withEnv("PROMETHEUS_SCRAPE_TARGET", String.format("host.testcontainers.internal:%s", COLLECTOR_PROMETHEUS_PORT))
+                .withEnv("PROMETHEUS_SCRAPE_TARGET", String.format("host.testcontainers.internlal:%s", COLLECTOR_PROMETHEUS_PORT))
+                .withEnv("PROMETHEUS_INTEGRATION_TEST_SCRAPE_TARGET", String.format("host.testcontainers.internal:%s", COLLECTOR_PROMETHEUS_RECEIVER_PORT))
                 .withClasspathResourceMapping("otel-config.yaml", "/otel-config.yaml", BindMode.READ_ONLY)
                 .withCommand("--config", "/otel-config.yaml")
                 .withLogConsumer(outputFrame -> LOGGER.log(Level.INFO, outputFrame.getUtf8String().replace("\n", "")))
                 // expose all relevant ports
-                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_JAEGER_THRIFT_HTTP_PORT, COLLECTOR_JAEGER_THRIFT_BINARY_PORT, COLLECTOR_JAEGER_THRIFT_COMPACT_PORT, COLLECTOR_JAEGER_GRPC_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_INFLUX_DB1_PORT, COLLECTOR_ZIPKIN_PORT)
+                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_JAEGER_THRIFT_HTTP_PORT, COLLECTOR_JAEGER_THRIFT_BINARY_PORT, COLLECTOR_JAEGER_THRIFT_COMPACT_PORT, COLLECTOR_JAEGER_GRPC_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_INFLUX_DB1_PORT, COLLECTOR_ZIPKIN_PORT, COLLECTOR_PROMETHEUS_RECEIVER_PORT)
+                .withReuse(true)
                 .waitingFor(Wait.forHttp("/").forPort(COLLECTOR_HEALTH_CHECK_PORT));
 
-        // collector.withStartupTimeout(Duration.of(1, ChronoUnit.MINUTES));
+        //collector.withStartupTimeout(Duration.of(1, ChronoUnit.MINUTES));
         // note: in case you receive the 'Caused by: org.testcontainers.containers.ContainerLaunchException: Timed out waiting for container port to open' exception,
         // uncomment the above line. The exception is probably caused by Docker Desktop hiccups and should only appear locally.
         collector.start();
-
-        // build and register OpenTelemetrySdk
-        //        SpanProcessor spanProcessor = BatchSpanProcessor.builder(SpanExporter.composite(OtlpGrpcSpanExporter.builder()
-        //                        .setEndpoint(getEndpoint(COLLECTOR_OTLP_GRPC_PORT))
-        //                        .build(), JaegerGrpcSpanExporter.builder()
-        //                        .setEndpoint(getEndpoint(COLLECTOR_JAEGER_GRPC_PORT, JAEGER_GRPC_PATH))
-        //                        .build(), OtlpHttpSpanExporter.builder().setEndpoint(getEndpoint(COLLECTOR_OTLP_HTTP_PORT)).build()))
-        //                .build();
-        //        openTelemetrySdk = OpenTelemetrySdk.builder()
-        //                .setTracerProvider(SdkTracerProvider.builder().addSpanProcessor(spanProcessor).build())
-        //                .setMeterProvider(SdkMeterProvider.builder().build())
-        //                .buildAndRegisterGlobal();
-
     }
 
     @AfterAll
@@ -159,7 +142,7 @@ public class ExporterIntTestBase {
      *
      * @return the constructed endpoint for the {@link #collector}
      */
-    static String getEndpoint(Integer originalPort, String path) {
+    protected static String getEndpoint(Integer originalPort, String path) {
         return String.format("http://%s:%d/%s", collector.getHost(), collector.getMappedPort(originalPort), path.startsWith("/") ? path.substring(1) : path);
     }
 
@@ -170,7 +153,7 @@ public class ExporterIntTestBase {
      *
      * @return the constructed endpoint for the {@link #collector}
      */
-    static String getEndpoint(Integer originalPort) {
+    protected static String getEndpoint(Integer originalPort) {
         return String.format("http://%s:%d", collector.getHost(), collector.getMappedPort(originalPort));
     }
 
@@ -179,7 +162,7 @@ public class ExporterIntTestBase {
      *
      * @param expectedTraceId the expected trace id
      */
-    void awaitSpansExported(String expectedTraceId) {
+    protected void awaitSpansExported(String expectedTraceId) {
 
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
 
@@ -200,38 +183,48 @@ public class ExporterIntTestBase {
 
     }
 
+
     /**
-     * Posts a {@code Span} to {@link rocks.inspectit.oce.eum.server.rest.TraceController#spans(String)} using {@link #postSpan(String)} using the {@link #DEFAULT_TRACE_ID}
+     * Verifies that the metric has been exported to and received by the {@link #grpcServer}
+     *
+     * @param metricName
+     * @param value
      */
-    void postSpan() {
-        postSpan(DEFAULT_TRACE_ID);
+    protected void awaitMetricsExported(String metricName, double value) {
+        await().atMost(30, TimeUnit.SECONDS)
+                .pollInterval(500, TimeUnit.MILLISECONDS)
+                .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream()).anyMatch(mReq -> mReq.getResourceMetricsList()
+                        .stream()
+                        .anyMatch(rm ->
+                                // check for the given metrics
+                                rm.getInstrumentationLibraryMetrics(0)
+                                        .getMetricsList()
+                                        .stream()
+                                        .filter(metric -> metric.getName().equalsIgnoreCase(metricName))
+                                        .anyMatch(metric -> metric.getDoubleSum()
+                                                .getDataPointsList()
+                                                .stream()
+                                                .anyMatch(d -> d.getValue() == value)))));
     }
 
     /**
-     * Posts a {@code Span} to {@link rocks.inspectit.oce.eum.server.rest.TraceController#spans(String)}
+     * Checks if a metric with the given value has been recorded or not
      *
-     * @param traceId the trace id to be used
+     * @param value    the value
+     * @param expected whether the value is expected or not
      */
-    void postSpan(String traceId) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> request = new HttpEntity<>(getSpanString(traceId), headers);
-
-        ResponseEntity<String> entity = restTemplate.postForEntity(String.format("http://localhost:%d/spans", port), request, String.class);
-
-        assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
-    }
-
-    /**
-     * Returns a request string for a {@code Span}
-     *
-     * @param traceId the trace id
-     *
-     * @return
-     */
-    private String getSpanString(String traceId) {
-        String now = System.currentTimeMillis() + "000001";
-        return "{\"resourceSpans\":[{\"resource\":{\"attributes\":[{\"key\":\"service.name\",\"value\":{\"stringValue\":\"" + SERVICE_NAME + "\"}},{\"key\":\"telemetry.sdk.language\",\"value\":{\"stringValue\":\"webjs\"}},{\"key\":\"telemetry.sdk.name\",\"value\":{\"stringValue\":\"opentelemetry\"}},{\"key\":\"telemetry.sdk.version\",\"value\":{\"stringValue\":\"0.18.2\"}}],\"droppedAttributesCount\":0},\"instrumentationLibrarySpans\":[{\"spans\":[{\"traceId\":\"" + traceId + "\",\"spanId\":\"fc3d735ad8dd7399\",\"name\":\"HTTP GET\",\"kind\":3,\"startTimeUnixNano\":" + now + ",\"endTimeUnixNano\":" + now + ",\"attributes\":[{\"key\":\"http.method\",\"value\":{\"stringValue\":\"GET\"}},{\"key\":\"http.url\",\"value\":{\"stringValue\":\"http://localhost:1337?command=undefined\"}},{\"key\":\"http.response_content_length\",\"value\":{\"intValue\":665}},{\"key\":\"http.status_code\",\"value\":{\"intValue\":200}},{\"key\":\"http.status_text\",\"value\":{\"stringValue\":\"OK\"}},{\"key\":\"http.host\",\"value\":{\"stringValue\":\"localhost:1337\"}},{\"key\":\"http.scheme\",\"value\":{\"stringValue\":\"http\"}},{\"key\":\"http.user_agent\",\"value\":{\"stringValue\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36\"}}],\"droppedAttributesCount\":0,\"events\":[{\"timeUnixNano\":1619187815416888600,\"name\":\"open\",\"attributes\":[],\"droppedAttributesCount\":0},{\"timeUnixNano\":1619187815417378600,\"name\":\"send\",\"attributes\":[],\"droppedAttributesCount\":0},{\"timeUnixNano\":1619187815418218800,\"name\":\"fetchStart\",\"attributes\":[],\"droppedAttributesCount\":0},{\"timeUnixNano\":1619187815420648700,\"name\":\"domainLookupStart\",\"attributes\":[],\"droppedAttributesCount\":0},{\"timeUnixNano\":1619187815420648700,\"name\":\"domainLookupEnd\",\"attributes\":[],\"droppedAttributesCount\":0},{\"timeUnixNano\":1619187815420648700,\"name\":\"connectStart\",\"attributes\":[],\"droppedAttributesCount\":0},{\"timeUnixNano\":1619170468572063700,\"name\":\"secureConnectionStart\",\"attributes\":[],\"droppedAttributesCount\":0},{\"timeUnixNano\":1619187815723468800,\"name\":\"connectEnd\",\"attributes\":[],\"droppedAttributesCount\":0},{\"timeUnixNano\":1619187815723523600,\"name\":\"requestStart\",\"attributes\":[],\"droppedAttributesCount\":0},{\"timeUnixNano\":1619187815732868600,\"name\":\"responseStart\",\"attributes\":[],\"droppedAttributesCount\":0},{\"timeUnixNano\":1619187815734768600,\"name\":\"responseEnd\",\"attributes\":[],\"droppedAttributesCount\":0},{\"timeUnixNano\":1619187815735928600,\"name\":\"loaded\",\"attributes\":[],\"droppedAttributesCount\":0}],\"droppedEventsCount\":0,\"status\":{\"code\":0},\"links\":[],\"droppedLinksCount\":0}],\"instrumentationLibrary\":{\"name\":\"@opentelemetry/instrumentation-xml-http-request\",\"version\":\"0.18.2\"}}]}]}";
+    protected void assertMetric(double value, boolean expected) {
+        assertThat(grpcServer.metricRequests.stream()
+                .anyMatch(mReq -> mReq.getResourceMetricsList()
+                        .stream()
+                        .anyMatch(rm -> rm.getInstrumentationLibraryMetricsList()
+                                .stream()
+                                .anyMatch(iml -> iml.getMetricsList()
+                                        .stream()
+                                        .anyMatch(metric -> metric.getDoubleSum()
+                                                .getDataPointsList()
+                                                .stream()
+                                                .anyMatch(d -> expected ? d.getValue() == value : d.getValue() != value))))));
     }
 
     /**

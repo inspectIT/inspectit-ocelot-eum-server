@@ -17,4 +17,12 @@ public class MetricsExportersSettings {
 
     @Valid
     private InfluxExporterSettings influx;
+
+    @Valid
+    private OtlpMetricsExporterSettings otlp;
+
+    /**
+     * The service name.
+     */
+    private String serviceName;
 }

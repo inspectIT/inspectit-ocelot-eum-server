@@ -47,8 +47,8 @@ public class PrometheusExporterService {
 
     @PreDestroy
     protected boolean doDisable() {
-        log.info("Stopping Prometheus Exporter");
         if (prometheusClient != null) {
+            log.info("Stopping Prometheus Exporter");
             prometheusClient.stop();
             CollectorRegistry.defaultRegistry.clear();
         }
