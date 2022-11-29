@@ -12,8 +12,6 @@ import rocks.inspectit.oce.eum.server.exporters.ExporterIntTestBaseWithOtelColle
 
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @DirtiesContext
 @ContextConfiguration(initializers = OtlpHttpMetricExporterServiceIntTest.EnvInitializer.class)
 public class OtlpHttpMetricExporterServiceIntTest extends ExporterIntTestBaseWithOtelCollector {

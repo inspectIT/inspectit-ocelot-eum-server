@@ -114,7 +114,6 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                 .withLogConsumer(outputFrame -> LOGGER.log(Level.INFO, outputFrame.getUtf8String().replace("\n", "")))
                 // expose all relevant ports
                 .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_JAEGER_THRIFT_HTTP_PORT, COLLECTOR_JAEGER_THRIFT_BINARY_PORT, COLLECTOR_JAEGER_THRIFT_COMPACT_PORT, COLLECTOR_JAEGER_GRPC_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_INFLUX_DB1_PORT, COLLECTOR_ZIPKIN_PORT, COLLECTOR_PROMETHEUS_RECEIVER_PORT)
-                .withReuse(true)
                 .waitingFor(Wait.forHttp("/").forPort(COLLECTOR_HEALTH_CHECK_PORT));
 
         //collector.withStartupTimeout(Duration.of(1, ChronoUnit.MINUTES));
