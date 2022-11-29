@@ -12,13 +12,11 @@ import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.opencensusshim.internal.metrics.MetricAdapter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
@@ -108,8 +106,7 @@ public class OtlpMetricsExporterService {
 
         if (shouldEnable()) {
             otlpMetricsExporterSettings = configuration.getExporters().getMetrics().getOtlp();
-            AggregationTemporality preferredTemporality = otlpMetricsExporterSettings.getPreferredTemporality();
-            AggregationTemporalitySelector aggregationTemporalitySelector = instrumentType -> preferredTemporality;
+            AggregationTemporalitySelector aggregationTemporalitySelector = otlpMetricsExporterSettings.getPreferredTemporality() == AggregationTemporality.DELTA ? AggregationTemporalitySelector.deltaPreferred() : AggregationTemporalitySelector.alwaysCumulative();
             otelResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters()
                     .getMetrics()
                     .getServiceName(), AttributeKey.stringKey("inspectit.eum-server.version"), appStartupRunner.getServerVersion(), ResourceAttributes.TELEMETRY_SDK_VERSION, appStartupRunner.getOpenTelemetryVersion(), ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java", ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"));
@@ -151,14 +148,8 @@ public class OtlpMetricsExporterService {
                         break;
                     }
                 }
-                //                metricReaderBuilder = PeriodicMetricReader.builder(metricExporter)
-                //                        .setInterval(otlp.getExportInterval())
-                //                        .setExecutor(executor);
-
                 exporterTask = executor.scheduleAtFixedRate(this::export, otlpMetricsExporterSettings.getExportInterval()
                         .toMillis(), otlpMetricsExporterSettings.getExportInterval().toMillis(), TimeUnit.MILLISECONDS);
-                //                meterProvider = SdkMeterProvider.builder().registerMetricReader(metricReaderBuilder.build()).build();
-                //                openTelemetry = OpenTelemetrySdk.builder().setMeterProvider(meterProvider).buildAndRegisterGlobal();
 
                 log.info("Starting OTLP metric exporter with {} on '{}'", otlpMetricsExporterSettings.getProtocol(), otlpMetricsExporterSettings.getEndpoint());
             } catch (Exception e) {
@@ -178,8 +169,8 @@ public class OtlpMetricsExporterService {
         if (metricExporter != null) {
             metricExporter.flush();
             metricExporter.close();
-//            meterProvider.forceFlush();
-//            meterProvider.close();
+            //            meterProvider.forceFlush();
+            //            meterProvider.close();
         }
     }
 

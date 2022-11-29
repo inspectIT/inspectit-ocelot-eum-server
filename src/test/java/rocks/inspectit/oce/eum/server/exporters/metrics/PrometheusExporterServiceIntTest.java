@@ -46,11 +46,11 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
                     .applyTo(applicationContext);
             TestPropertyValues.of(String.format("inspectit-eum-server.exporters.metrics.prometheus.enabled=ENABLED"))
                     .applyTo(applicationContext);
+            TestPropertyValues.of("inspectit-eum-server.self-monitoring.enabled=" + false).applyTo(applicationContext);
         }
     }
 
     private static CloseableHttpClient httpClient;
-
     @BeforeAll
     public static void beforeClass() {
         CollectorRegistry.defaultRegistry.clear();
@@ -61,7 +61,6 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
         HttpClientBuilder builder = HttpClientBuilder.create();
         httpClient = builder.build();
     }
-
 
     @AfterEach
     public void closeClient() throws Exception {
@@ -104,15 +103,17 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
     @Test
     public void expectOneView() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
-        beacon.put(BEACON_KEY_NAME, "12");
-
+        beacon.put(BEACON_LOAD_TIME_KEY_NAME, "12");
         sendBeacon(beacon);
+
+        // replace '/' with '_' for Prometheus metric name
+        String metricKeyName = METRIC_LOAD_TIME_KEY_NAME.replaceAll("/","_");
 
         await().atMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
             HttpResponse response = httpClient.execute(new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics)"));
             ResponseHandler responseHandler = new BasicResponseHandler();
             assertThat(responseHandler.handleResponse(response)
-                    .toString()).contains("page_ready_time_SUM{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",} 12.0");
+                    .toString()).contains(metricKeyName+"{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",} 12.0");
         });
     }
 }
