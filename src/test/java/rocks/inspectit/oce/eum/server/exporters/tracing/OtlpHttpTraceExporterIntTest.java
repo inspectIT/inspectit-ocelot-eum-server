@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.eum.server.exporters;
+package rocks.inspectit.oce.eum.server.exporters.tracing;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -8,10 +8,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.TransportProtocol;
+import rocks.inspectit.oce.eum.server.exporters.ExporterIntTestBaseWithOtelCollector;
 
 @DirtiesContext
 @ContextConfiguration(initializers = OtlpHttpTraceExporterIntTest.EnvInitializer.class)
-public class OtlpHttpTraceExporterIntTest extends ExporterIntTestBase {
+public class OtlpHttpTraceExporterIntTest extends ExporterIntTestBaseWithOtelCollector {
 
     static class EnvInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -23,7 +24,7 @@ public class OtlpHttpTraceExporterIntTest extends ExporterIntTestBase {
     }
 
     @Test
-    void verifyTraceSentHttp() {
+    void verifyTraceSentHttp() throws Exception {
         String httpTraceId = "497d4e959f574a77d0d3abf05523ec5b";
         postSpan(httpTraceId);
         awaitSpansExported(httpTraceId);

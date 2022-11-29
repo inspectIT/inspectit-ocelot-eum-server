@@ -24,6 +24,10 @@ receivers:
           scrape_interval: 500ms
           static_configs:
             - targets:  [$PROMETHEUS_SCRAPE_TARGET]
+        - job_name: 'integration-tests'
+          scrape_interval: 500ms
+          static_configs:
+            - targets: [$PROMETHEUS_INTEGRATION_TEST_SCRAPE_TARGET]
 
   # accept InfluxDB
   influxdb:
@@ -44,7 +48,7 @@ service:
   extensions: [health_check]
   pipelines:
     metrics:
-      receivers: [otlp, prometheus, influxdb]
+      receivers: [otlp] #, prometheus, influxdb]
       exporters: [logging, otlp]
     traces:
       receivers: [otlp, jaeger, zipkin]

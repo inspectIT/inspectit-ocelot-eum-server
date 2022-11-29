@@ -126,6 +126,9 @@ inspectit-eum-server:
         # The port of the prometheus HTTP endpoint.
         port: 8888
 
+        # service name for all exported metrics.
+        service-name: "browser-js"
+
       influx:
         # Determines whether the influx exporter is enabled.
         enabled: IF_CONFIGURED
@@ -168,11 +171,11 @@ inspectit-eum-server:
       otlp:
         enabled: IF_CONFIGURED
         # the export interval of the metrics
-        export-interval: ${inspectit.metrics.frequency}
+        export-interval: 15s
         # the URL endpoint, e.g., http://127.0.0.1:4317
         endpoint: null
         # the transport protocol, e.g., 'grpc' or 'http/protobuf'
-        protocol:
+        protocol: grpc
         # headers
         headers: { }
         # the aggregation temporality, e.g., CUMULATIVE or DELTA
@@ -181,7 +184,7 @@ inspectit-eum-server:
         compression: NONE
         # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
         timeout: 10s
-
+        # the export interval of the metrics.
     tracing:
       # Specifies whether client IP addresses which are added to spans should be masked.
       mask-span-ip-addresses: true
@@ -205,8 +208,7 @@ inspectit-eum-server:
         # the transport protocol, e.g., 'http/thrift' or 'grpc'
         protocol: grpc
         # headers
-        headers:
-          "Connection": "close"
+        headers: { }
         # compression method
         compression: NONE
         # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
