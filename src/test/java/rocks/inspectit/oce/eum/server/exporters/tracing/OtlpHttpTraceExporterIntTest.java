@@ -10,6 +10,8 @@ import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnab
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.TransportProtocol;
 import rocks.inspectit.oce.eum.server.exporters.ExporterIntTestBaseWithOtelCollector;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @DirtiesContext
 @ContextConfiguration(initializers = OtlpHttpTraceExporterIntTest.EnvInitializer.class)
 public class OtlpHttpTraceExporterIntTest extends ExporterIntTestBaseWithOtelCollector {
@@ -29,5 +31,8 @@ public class OtlpHttpTraceExporterIntTest extends ExporterIntTestBaseWithOtelCol
         postSpan(httpTraceId);
         awaitSpansExported(httpTraceId);
     }
-
+    @Test
+    void testDefaultSettings(){
+        assertThat(true).isEqualTo(false);
+    }
 }

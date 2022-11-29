@@ -1,9 +1,12 @@
 package rocks.inspectit.oce.eum.server.exporters;
 
+import io.prometheus.client.CollectorRegistry;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -20,12 +23,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class ExporterIntMockMvcTestBase {
 
+    @Autowired
+    protected MockMvc mockMvc;
+
     public static final String SERVICE_NAME = "E2E-test";
 
     final static String DEFAULT_TRACE_ID = "497d4e959f574a77d0d3abf05523ec5c";
-
-    @Autowired
-    protected MockMvc mockMvc;
 
     static String URL_KEY = "u";
 
@@ -33,9 +36,14 @@ public class ExporterIntMockMvcTestBase {
 
     protected static String FAKE_BEACON_KEY_NAME = "does_not_exist";
 
-    protected static String BEACON_KEY_NAME = "t_page";
+    protected static String BEACON_PAGE_READY_TIME_KEY_NAME = "t_page";
 
-    protected static String METRIC_KEY_NAME = "page_ready_time/SUM";
+    protected static String BEACON_LOAD_TIME_KEY_NAME = "t_done";
+
+    // Metric key names are in OTEL format (i.e., using '/')
+    protected static String METRIC_PAGE_READY_TIME_KEY_NAME = "page_ready_time/SUM";
+
+    protected static String METRIC_LOAD_TIME_KEY_NAME = "load_time/SUM";
 
     /**
      * Sends a beacon to the mocked endpoint.

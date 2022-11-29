@@ -12,6 +12,8 @@ import rocks.inspectit.oce.eum.server.exporters.ExporterIntTestBaseWithOtelColle
 
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @DirtiesContext
 @ContextConfiguration(initializers = OtlpHttpMetricExporterServiceIntTest.EnvInitializer.class)
 public class OtlpHttpMetricExporterServiceIntTest extends ExporterIntTestBaseWithOtelCollector {
@@ -32,10 +34,10 @@ public class OtlpHttpMetricExporterServiceIntTest extends ExporterIntTestBaseWit
         // fake beacon that we don't expect
         beacon.put(FAKE_BEACON_KEY_NAME, "1339");
         // real beacon that we expect
-        beacon.put(BEACON_KEY_NAME, "1336");
+        beacon.put(BEACON_PAGE_READY_TIME_KEY_NAME, "1336");
         sendBeacon(beacon);
         // wait until metrics have been exported
-        awaitMetricsExported(METRIC_KEY_NAME, 1336);
+        awaitMetricsExported(METRIC_PAGE_READY_TIME_KEY_NAME, 1336);
         assertMetric(1339, false);
     }
 }
