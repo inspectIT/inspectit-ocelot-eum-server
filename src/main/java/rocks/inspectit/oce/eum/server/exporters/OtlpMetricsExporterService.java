@@ -110,7 +110,11 @@ public class OtlpMetricsExporterService {
             otelResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters()
                     .getMetrics()
                     .getServiceName(), AttributeKey.stringKey("inspectit.eum-server.version"), appStartupRunner.getServerVersion(), ResourceAttributes.TELEMETRY_SDK_VERSION, appStartupRunner.getOpenTelemetryVersion(), ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java", ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"));
-
+            String endpoint = configuration.getExporters().getMetrics().getOtlp().getEndpoint();
+            // OTEL expects that the URI starts with 'http://' or 'https://'
+            if (!endpoint.startsWith("http")) {
+                endpoint = String.format("http://%s", endpoint);
+            }
             try {
                 metricProducerSupplier = () -> Metrics.getExportComponent()
                         .getMetricProducerManager()
@@ -120,7 +124,7 @@ public class OtlpMetricsExporterService {
                     case GRPC: {
                         OtlpGrpcMetricExporterBuilder metricExporterBuilder = OtlpGrpcMetricExporter.builder()
                                 .setAggregationTemporalitySelector(aggregationTemporalitySelector)
-                                .setEndpoint(otlpMetricsExporterSettings.getEndpoint())
+                                .setEndpoint(endpoint)
                                 .setCompression(otlpMetricsExporterSettings.getCompression().toString())
                                 .setTimeout(otlpMetricsExporterSettings.getTimeout());
                         if (otlpMetricsExporterSettings.getHeaders() != null) {
@@ -135,7 +139,7 @@ public class OtlpMetricsExporterService {
                     case HTTP_PROTOBUF: {
                         OtlpHttpMetricExporterBuilder metricExporterBuilder = OtlpHttpMetricExporter.builder()
                                 .setAggregationTemporalitySelector(aggregationTemporalitySelector)
-                                .setEndpoint(otlpMetricsExporterSettings.getEndpoint())
+                                .setEndpoint(endpoint)
                                 .setCompression(otlpMetricsExporterSettings.getCompression().toString())
                                 .setTimeout(otlpMetricsExporterSettings.getTimeout());
                         if (otlpMetricsExporterSettings.getHeaders() != null) {
@@ -169,8 +173,6 @@ public class OtlpMetricsExporterService {
         if (metricExporter != null) {
             metricExporter.flush();
             metricExporter.close();
-            //            meterProvider.forceFlush();
-            //            meterProvider.close();
         }
     }
 
@@ -184,13 +186,6 @@ public class OtlpMetricsExporterService {
                 .map(metric -> MetricAdapter.convert(otelResource, metric))
                 .collect(Collectors.toList());
 
-        CompletableResultCode code = metricExporter.export(convertedMetrics);
-        CountDownLatch latch = new CountDownLatch(1);
-        code.whenComplete(() -> latch.countDown());
-        try {
-            latch.await(otlpMetricsExporterSettings.getExportInterval().toMillis(), TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        metricExporter.export(convertedMetrics);
     }
 }

@@ -31,6 +31,7 @@ public class OtlpGrpcMetricExporterServiceIntTest extends ExporterIntTestBaseWit
         // fake beacon that we don't expect
         beacon.put(FAKE_BEACON_KEY_NAME, "1338");
         // real beacon that we expect
+        // use a different metric (t_page) as the different metric exporter test cases overload the metrics
         beacon.put(BEACON_PAGE_READY_TIME_KEY_NAME, "42");
         sendBeacon(beacon);
         // wait until metrics have been exported

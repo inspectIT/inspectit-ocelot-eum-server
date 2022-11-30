@@ -103,6 +103,7 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
     @Test
     public void expectOneView() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
+        // send the beacon. use a different metric (t_load) as the different metric exporter test cases overload the metrics
         beacon.put(BEACON_LOAD_TIME_KEY_NAME, "12");
         sendBeacon(beacon);
 
