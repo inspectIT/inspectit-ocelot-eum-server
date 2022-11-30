@@ -31,8 +31,4 @@ public class OtlpHttpTraceExporterIntTest extends ExporterIntTestBaseWithOtelCol
         postSpan(httpTraceId);
         awaitSpansExported(httpTraceId);
     }
-    @Test
-    void testDefaultSettings(){
-        assertThat(true).isEqualTo(false);
-    }
 }

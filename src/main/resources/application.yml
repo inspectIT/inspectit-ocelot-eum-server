@@ -6,8 +6,8 @@ inspectit-eum-server:
       value-expression: "{t_page}"
       unit: ms
       views:
-        '[page_ready_time/SUM]': {aggregation: SUM}
-        '[page_ready_time/COUNT]': {aggregation: COUNT}
+        '[page_ready_time/SUM]': { aggregation: SUM }
+        '[page_ready_time/COUNT]': { aggregation: COUNT }
 
     load_time:
       measure-type: LONG
@@ -17,8 +17,8 @@ inspectit-eum-server:
           requirement: NOT_EXISTS
       unit: ms
       views:
-        '[load_time/SUM]': {aggregation: SUM}
-        '[load_time/COUNT]': {aggregation: COUNT}
+        '[load_time/SUM]': { aggregation: SUM }
+        '[load_time/COUNT]': { aggregation: COUNT }
 
     calc_load_time:
       measure-type: LONG
@@ -28,8 +28,8 @@ inspectit-eum-server:
           requirement: NOT_EXISTS
       unit: ms
       views:
-        '[calc_load_time/SUM]': {aggregation: SUM}
-        '[calc_load_time/COUNT]': {aggregation: COUNT}
+        '[calc_load_time/SUM]': { aggregation: SUM }
+        '[calc_load_time/COUNT]': { aggregation: COUNT }
 
     start_timestamp:
       measure-type: LONG
@@ -48,7 +48,7 @@ inspectit-eum-server:
       views:
         end_timestamp:
           aggregation: LAST_VALUE
-          tags: {APPLICATION: true}
+          tags: { APPLICATION: true }
 
   tags:
     extra:
@@ -205,6 +205,8 @@ inspectit-eum-server:
       otlp:
         # If OTLP exporter for the OT received spans is enabled.
         enabled: IF_CONFIGURED
+        # the URL endpoint, e.g., http://127.0.0.1:4317
+        endpoint: null
         # the transport protocol, e.g., 'http/thrift' or 'grpc'
         protocol: grpc
         # headers
