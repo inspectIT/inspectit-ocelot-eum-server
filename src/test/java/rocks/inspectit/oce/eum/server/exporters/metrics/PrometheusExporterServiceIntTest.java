@@ -89,9 +89,9 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
 
         await().atMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
             HttpResponse response = httpClient.execute(new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics)"));
-            ResponseHandler responseHandler = new BasicResponseHandler();
+            ResponseHandler<String> responseHandler = new BasicResponseHandler();
             assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
-            assertThat(responseHandler.handleResponse(response).toString()).doesNotContain("Fake Value");
+            assertThat(responseHandler.handleResponse(response)).doesNotContain("Fake Value");
         });
     }
 
@@ -112,9 +112,8 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
 
         await().atMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
             HttpResponse response = httpClient.execute(new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics)"));
-            ResponseHandler responseHandler = new BasicResponseHandler();
-            assertThat(responseHandler.handleResponse(response)
-                    .toString()).contains(metricKeyName+"{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",} 12.0");
+            ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            assertThat(responseHandler.handleResponse(response)).contains(metricKeyName+"{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",} 12.0");
         });
     }
 }

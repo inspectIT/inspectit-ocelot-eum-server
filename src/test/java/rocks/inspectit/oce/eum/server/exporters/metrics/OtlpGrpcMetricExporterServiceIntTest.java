@@ -19,14 +19,14 @@ public class OtlpGrpcMetricExporterServiceIntTest extends ExporterIntTestBaseWit
 
         @Override
         public void initialize(ConfigurableApplicationContext applicationContext) {
-            TestPropertyValues.of("inspectit-eum-server.exporters.metrics.otlp.enabled=" + ExporterEnabledState.ENABLED, "inspectit-eum-server.exporters.metrics.otlp.endpoint=" + getEndpoint(COLLECTOR_OTLP_GRPC_PORT), "inspectit-eum-server.exporters.metrics.otlp.interval=1s", "inspectit-eum-server.exporters.metrics.otlp.protocol=" + TransportProtocol.GRPC.getConfigRepresentation(), "inspectit-eum-server.exporters.metrics.service-name=" + SERVICE_NAME)
+            TestPropertyValues.of("inspectit-eum-server.exporters.metrics.otlp.enabled=" + ExporterEnabledState.ENABLED, "inspectit-eum-server.exporters.metrics.otlp.endpoint=" + getEndpoint(COLLECTOR_OTLP_GRPC_PORT), "inspectit-eum-server.exporters.metrics.otlp.export-interval=1s", "inspectit-eum-server.exporters.metrics.otlp.protocol=" + TransportProtocol.GRPC.getConfigRepresentation(), "inspectit-eum-server.exporters.metrics.service-name=" + SERVICE_NAME)
                     .applyTo(applicationContext);
             TestPropertyValues.of("inspectit-eum-server.self-monitoring.enabled=" + false).applyTo(applicationContext);
         }
     }
 
     @Test
-    void verifyOtlpHttpMetrics() throws Exception {
+    void verifyOtlpGrpcMetrics() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
         // fake beacon that we don't expect
         beacon.put(FAKE_BEACON_KEY_NAME, "1338");
