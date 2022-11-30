@@ -47,7 +47,7 @@ task generateVersionFile {
     doLast {
         def currentDate = new Date().toString()
         ext.versionFile.withWriter('UTF-8') { writer ->
-            writer << "$version\n$currentDate\n$boomerangVersion\n$openTelemetryVersion"
+            writer << "$version\n$currentDate\n$boomerangVersion"
         }
     }
 }
@@ -58,7 +58,7 @@ task downloadOpenTelemetryPlugin() {
     doLast {
         def f = ext.dest
         new URL("https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin/releases/download/$boomerangOpenTelemetryPluginVersion/boomerang-opentelemetry.js")
-                .boomerangOpenTelemetryPluginVersion { i -> f.withOutputStream { it << i } }
+                .withInputStream { i -> f.withOutputStream { it << i } }
     }
 
 }
@@ -124,7 +124,6 @@ dependencies {
             "io.grpc:grpc-netty-shaded:1.36.1",
             "io.grpc:grpc-protobuf:1.36.1",
             "io.grpc:grpc-stub:1.36.1",
-            // TODO: put otel version into variable!
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             "io.opentelemetry:opentelemetry-proto",
             "io.opentelemetry:opentelemetry-semconv",

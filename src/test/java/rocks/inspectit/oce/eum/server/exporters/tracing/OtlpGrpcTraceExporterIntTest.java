@@ -31,8 +31,4 @@ public class OtlpGrpcTraceExporterIntTest extends ExporterIntTestBaseWithOtelCol
         postSpan(grpcTraceId);
         awaitSpansExported(grpcTraceId);
     }
-    @Test
-    void testDefaultSettings(){
-        assertThat(true).isEqualTo(false);
-    }
 }
