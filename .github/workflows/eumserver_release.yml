@@ -27,7 +27,7 @@ jobs:
         name: "Build assets"
         runs-on: ubuntu-latest
         environment: release
-        needs: [build]
+        needs: [test_eum_server]
         
         steps:
             - name: Grant execute permission for gradlew
