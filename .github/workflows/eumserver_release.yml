@@ -20,7 +20,7 @@ jobs:
                 filename: test.zip
             - name: Create Github Release
               uses: actions/create-release@v1
-               env:
+              env:
                 GITHUB_TOKEN: $ {{ GITHUB_TOKEN }}
             - name: Create release
               id: create-release
