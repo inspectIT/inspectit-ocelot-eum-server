@@ -20,6 +20,11 @@ jobs:
           run: chmod +x gradlew
         - name: Build project
           run: ./gradlew build
+        - name: Upload build
+          uses: actions/upload-artifact@v2
+          with:
+            name: eumserver-build
+            path: out/
         
     test_release:
         name: "test release"
@@ -29,7 +34,7 @@ jobs:
             - name: Download site content
               uses: actions/download-artifact@v2
               with:
-                name: test-content
+                name: eumserver-build
             - name: Archive site content
               uses: thedoctor0/zip-release@master
               with: 
@@ -52,20 +57,6 @@ jobs:
                 asset_path: ./test.zip
                 asset_name: test-v.zip
                 asset_content_type: application/zip
-    
-              
-    build_assets:
-        name: "Build assets"
-        runs-on: ubuntu-latest
-        environment: release
-        needs: [test_eum_server, build_project]
-        
-        steps:
-            - uses: actions/checkout@v3
-            - name: Grant execute permission for gradlew
-              run: chmod +x gradlew
-            - name: run bootJar
-              run: ./gradlew assemble build.gradle
             
     publish_docker_images:
         name: "Publish docker image"
@@ -86,6 +77,21 @@ jobs:
                 registry: docker.io
                 username: ${{ secrets.DOCKER_USERNAME }}
                 password: ${{ secrets.DOCKER_PASSWORD }}
+
+    publish_docker_images:
+      name: "Publish docker image"
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+        - name: Publish docker image
+          uses: docker/build-push-action@v1
+          with:
+            username: ${{ secrets.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
+            registry: docker.pkg.github.com
+            repository: ${{ github.repository}}/next
+            tags: latest, ${{ github.ref }}
               
               
               
