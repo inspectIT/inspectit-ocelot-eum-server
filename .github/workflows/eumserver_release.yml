@@ -7,6 +7,7 @@ on:
 
 jobs:
     test_eum_server:
+      - name: Go through tests
         uses: ./.github/workflows/eumserver_test.yml
 
     build_project:
@@ -80,7 +81,7 @@ jobs:
           context: .
           push: true
           tags: danipaniii/test:latest, ${{ github.ref }}
-          file: ./docker/Dockerfile
+          file: ../../docker/Dockerfile
               
               
               
