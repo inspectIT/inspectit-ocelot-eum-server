@@ -80,6 +80,7 @@ jobs:
           context: .
           push: true
           tags: danipaniii/test:latest, ${{ github.ref }}
+          file: ../docker
               
               
               
