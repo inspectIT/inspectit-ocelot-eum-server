@@ -57,26 +57,6 @@ jobs:
                 asset_path: ./test.zip
                 asset_name: test-v.zip
                 asset_content_type: application/zip
-            
-    publish_docker_images:
-        name: "Publish docker image"
-        runs-on: ubuntu-latest
-        environment: release
-        needs: [test_eum_server, build_project]
-        
-        steps:
-            - uses: actions/checkout@v3
-              name: Check out code
-              
-            - uses: mr-smithers-excellent/docker-build-push@v5
-              name: Build & push Docker image
-              with:
-                image: danipaniii/testing
-                dockerfile: ../docker/
-                tags: v1, latest
-                registry: docker.io
-                username: ${{ secrets.DOCKER_USERNAME }}
-                password: ${{ secrets.DOCKER_PASSWORD }}
 
     publish_docker_images:
       name: "Publish docker image"
