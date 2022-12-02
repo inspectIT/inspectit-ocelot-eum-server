@@ -7,7 +7,6 @@ on:
 
 jobs:
     test_eum_server:
-        name: Go through tests
         uses: ./.github/workflows/eumserver_test.yml
 
     build_project:
