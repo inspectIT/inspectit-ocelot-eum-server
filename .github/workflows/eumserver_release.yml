@@ -28,7 +28,7 @@ jobs:
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: Upload asset to github release
-              uses: actions/upload-release-assets@v1
+              uses: actions/upload-release-asset@v1
               env:
                 GITHUB_TOKEN: $ {{ GITHUB_TOKEN }}
               with:
@@ -65,7 +65,7 @@ jobs:
               name: Build & push Docker image
               with:
                 image: danipaniii/testing
-                dockerfile: ../../docker/Dockerfile
+                dockerfile: ../../docker/
                 tags: v1, latest
                 registry: docker.io
                 username: ${{ secrets.DOCKER_USERNAME }}
