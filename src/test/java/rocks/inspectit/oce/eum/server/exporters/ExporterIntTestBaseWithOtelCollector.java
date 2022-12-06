@@ -21,6 +21,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
 
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -91,7 +92,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
     static GenericContainer<?> collector;
 
     // TODO: try to re-use the collector container across test classes to speed up tests
-    static{
+    static {
 
     }
 
@@ -182,7 +183,6 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
     }
 
-
     /**
      * Verifies that the metric has been exported to and received by the {@link #grpcServer}
      *
@@ -190,6 +190,17 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
      * @param value
      */
     protected void awaitMetricsExported(String metricName, double value) {
+        awaitMetricsExported(metricName, value, ViewDefinitionSettings.Aggregation.SUM);
+    }
+
+    /**
+     * Verifies that the metric has been exported to and received by the {@link #grpcServer}
+     *
+     * @param metricName
+     * @param value
+     * @param aggregation
+     */
+    protected void awaitMetricsExported(String metricName, double value, ViewDefinitionSettings.Aggregation aggregation) {
         await().atMost(30, TimeUnit.SECONDS)
                 .pollInterval(500, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream()).anyMatch(mReq -> mReq.getResourceMetricsList()
@@ -200,10 +211,9 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                                         .getMetricsList()
                                         .stream()
                                         .filter(metric -> metric.getName().equalsIgnoreCase(metricName))
-                                        .anyMatch(metric -> metric.getDoubleSum()
-                                                .getDataPointsList()
-                                                .stream()
-                                                .anyMatch(d -> d.getValue() == value)))));
+                                        .anyMatch(metric -> (aggregation == ViewDefinitionSettings.Aggregation.LAST_VALUE ? metric.getDoubleGauge()
+                                                .getDataPointsList() : metric.getDoubleSum()
+                                                .getDataPointsList()).stream().anyMatch(d -> d.getValue() == value)))));
     }
 
     /**
