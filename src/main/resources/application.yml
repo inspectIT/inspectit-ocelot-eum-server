@@ -184,7 +184,6 @@ inspectit-eum-server:
         compression: NONE
         # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
         timeout: 10s
-        # the export interval of the metrics.
     tracing:
       # Specifies whether client IP addresses which are added to spans should be masked.
       mask-span-ip-addresses: true
@@ -200,6 +199,12 @@ inspectit-eum-server:
         # Either a valid NameResolver-compliant URI, or an authority string.
         # If this property is not set, the jaeger-exporter will not be started.
         # endpoint: http://localhost:14250
+
+        # compression method, will only take effect when protocol is set to 'grpc'
+        compression: NONE
+
+        # timeout, i.e., maximum time the Jaeger exporter will wait for each batch export; will only take effect when protocol is set to 'grpc'
+        timeout: 10s
 
 
       otlp:

@@ -8,7 +8,9 @@ import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
+import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -93,7 +95,11 @@ public class TraceExportersConfiguration {
         SpanExporter spanExporter = null;
         switch (jaegerExporterSettings.getProtocol()) {
             case GRPC: {
-                spanExporter = JaegerGrpcSpanExporter.builder().setEndpoint(endpoint).build();
+                spanExporter = JaegerGrpcSpanExporter.builder()
+                        .setEndpoint(endpoint)
+                        .setCompression(jaegerExporterSettings.getCompression().toString())
+                        .setTimeout(jaegerExporterSettings.getTimeout())
+                        .build();
                 break;
 
             }
@@ -121,7 +127,8 @@ public class TraceExportersConfiguration {
             case GRPC: {
                 OtlpGrpcSpanExporterBuilder otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder()
                         .setEndpoint(endpoint)
-                        .setTimeout(otlpTraceExporterSettings.getTimeout());
+                        .setTimeout(otlpTraceExporterSettings.getTimeout())
+                        .setCompression(otlpTraceExporterSettings.getCompression().toString());
                 if (otlpTraceExporterSettings.getHeaders() != null) {
                     for (Map.Entry<String, String> headerEntry : otlpTraceExporterSettings.getHeaders().entrySet()) {
                         otlpGrpcSpanExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
@@ -133,7 +140,8 @@ public class TraceExportersConfiguration {
             case HTTP_PROTOBUF: {
                 OtlpHttpSpanExporterBuilder otlpHttpSpanExporterBuilder = OtlpHttpSpanExporter.builder()
                         .setEndpoint(endpoint)
-                        .setTimeout(otlpTraceExporterSettings.getTimeout());
+                        .setTimeout(otlpTraceExporterSettings.getTimeout())
+                        .setCompression(otlpTraceExporterSettings.getCompression().toString());
                 if (otlpTraceExporterSettings.getHeaders() != null) {
                     for (Map.Entry<String, String> headerEntry : otlpTraceExporterSettings.getHeaders().entrySet()) {
                         otlpHttpSpanExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
@@ -145,7 +153,7 @@ public class TraceExportersConfiguration {
         }
         log.info("Starting OTLP span exporter on {} '{}'", otlpTraceExporterSettings.getProtocol()
                 .getConfigRepresentation(), endpoint);
-        System.setProperty("otel.resource.attributes", "service.name=" + configuration.getExporters()
+        System.setProperty("otel.resource.attributes", ResourceAttributes.SERVICE_NAME.getKey() + "=" + configuration.getExporters()
                 .getTracing()
                 .getServiceName());
 

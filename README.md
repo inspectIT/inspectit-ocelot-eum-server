@@ -161,15 +161,15 @@ To enable the OTLP exporters, it is only required to specify the `url`.
 
 The following properties are nested properties below the `inspectit-eum-server.exporters.metrics.otlp` property:
 
-| Property                | Default         | Description                                                                                                                                                                                                                  |
-|-------------------------|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `.enabled`              | `IF_CONFIGURED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC metrics exporter.                                                                                                                |
-| `.endpoint`             | `null`          | Target to which the exporter is going to send metrics, e.g. `http://localhost:4317`                                                                                                                                          |
-| `.protocol`             | `null`          | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`.                                              |
-| `.preferredTemporality` | `CUMULATIVE`    | The preferred output aggregation temporality, see [OTEL documentation](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md). Supported values are `CUMULATIVE` and `DELTA`.| 
-| `.headers`              | `null`          | Key-value pairs to be used as headers associated with gRPC or HTTP requests, see [OTEL documentation](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md).|
-| `.compression` | `NONE`          | The compression method, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported compression methods are `gzip` and `none`.                                   |
-| `.timeout`     | `10s`           | Maximum time the OTLP exporter will wait for each batch export, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/).                           |
+| Property                 | Default         | Description                                                                                                                                                                                                                  |
+|--------------------------|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.enabled`               | `IF_CONFIGURED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC metrics exporter.                                                                                                                |
+| `.endpoint`              | `null`          | Target to which the exporter is going to send metrics, e.g. `http://localhost:4317`                                                                                                                                          |
+| `.protocol`              | `null`          | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`.                                              |
+| `.preferred-temporality` | `CUMULATIVE`    | The preferred output aggregation temporality, see [OTEL documentation](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md). Supported values are `CUMULATIVE` and `DELTA`.| 
+| `.headers`               | `null`          | Key-value pairs to be used as headers associated with gRPC or HTTP requests, see [OTEL documentation](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md).|
+| `.compression`           | `NONE`          | The compression method, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported compression methods are `gzip` and `none`.                                   |
+| `.timeout`               | `10s`           | Maximum time the OTLP exporter will wait for each batch export, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/).                           |
 
 ##### Trace Exporters
 
@@ -195,11 +195,13 @@ By default, the Jaeger exporters are enabled but the URL/gRPC `endpoint` needed 
 
 The following properties are nested properties below the `inspectit.exporters.tracing.jaeger` property:
 
-|Property | Default         | Description|
-|---|-----------------|---|
-|`.enabled`| `IF_CONFIGURED` |If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Jaeger exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.|
-|`.endpoint`| `null`          |URL endpoint under which the Jaeger server can be accessed (e.g. http://127.0.0.1:14268/api/traces).|
-|`.protocol`| `grpc`          |The transport protocol. Supported protocols are `grpc` and `http/thrift`.|
+|Property | Default         | Description                                                                                                                                                                                                                                          |
+|---|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`.enabled`| `IF_CONFIGURED` | If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Jaeger exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.                                                      |
+|`.endpoint`| `null`          | URL endpoint under which the Jaeger server can be accessed (e.g. http://127.0.0.1:14268/api/traces).                                                                                                                                                 |
+|`.protocol`| `grpc`          | The transport protocol. Supported protocols are `grpc` and `http/thrift`.                                                                                                                                                                            |
+| `.compression` | `NONE`          | The compression method, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported compression methods are `gzip` and `none`. This property only takes effect when the protocol is set to `grpc`. |
+| `.timeout`     | `10s`           | Maximum time the OTLP exporter will wait for each batch export, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). This property only takes effect when the protocol is set to `grpc`.                                                                                 |
 
 ##### OTLP Exporter (Traces)
 
