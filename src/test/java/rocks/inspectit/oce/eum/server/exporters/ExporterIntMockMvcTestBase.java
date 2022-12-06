@@ -47,7 +47,7 @@ public class ExporterIntMockMvcTestBase {
 
     protected static String METRIC_LOAD_TIME_KEY_NAME = "load_time/SUM";
 
-    protected static String METRIC_END_TIMESTAMP_KEY_NAME ="end_timstamp/SUM";
+    protected static String METRIC_END_TIMESTAMP_KEY_NAME ="end_timestamp";
     /**
      * Sends a beacon to the mocked endpoint.
      */
