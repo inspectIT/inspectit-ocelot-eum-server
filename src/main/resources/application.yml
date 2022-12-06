@@ -184,7 +184,6 @@ inspectit-eum-server:
         compression: NONE
         # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
         timeout: 10s
-        # the export interval of the metrics.
     tracing:
       # Specifies whether client IP addresses which are added to spans should be masked.
       mask-span-ip-addresses: true
