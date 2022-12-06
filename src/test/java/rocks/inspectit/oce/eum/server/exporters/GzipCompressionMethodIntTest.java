@@ -1,8 +1,7 @@
-package rocks.inspectit.oce.eum.server.exporters.tracing;
+package rocks.inspectit.oce.eum.server.exporters;
 
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -14,8 +13,6 @@ import rocks.inspectit.oce.eum.server.configuration.model.CompressionMethod;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.TransportProtocol;
-import rocks.inspectit.oce.eum.server.exporters.ExporterIntTestBaseWithOtelCollector;
-import rocks.inspectit.oce.eum.server.exporters.OtlpMetricsExporterService;
 
 import java.util.List;
 import java.util.Map;
@@ -71,7 +68,7 @@ public class GzipCompressionMethodIntTest extends ExporterIntTestBaseWithOtelCol
 
     @Test
     void verifyTraceSentGrpc() throws Exception {
-        String grpcTraceId = "497d4e959f574a77d0d3abf05523ec5a";
+        String grpcTraceId = "497d4e959f574a77d0d3abf05523ec5g";
         postSpan(grpcTraceId);
         awaitSpansExported(grpcTraceId);
     }
@@ -92,11 +89,11 @@ public class GzipCompressionMethodIntTest extends ExporterIntTestBaseWithOtelCol
         // fake beacon that we don't expect
         beacon.put(FAKE_BEACON_KEY_NAME, "1334");
         // real beacon that we expect
-        // use a different metric (t_page) as the different metric exporter test cases overload the metrics
-        beacon.put(BEACON_PAGE_READY_TIME_KEY_NAME, "41");
+        // use a different metric (rt.end) as the different metric exporter test cases overload the metrics
+        beacon.put(BEACON_END_TIMESTAMP_KEY_NAME, "41");
         sendBeacon(beacon);
         // wait until metrics have been exported
-        awaitMetricsExported(METRIC_PAGE_READY_TIME_KEY_NAME, 41);
+        awaitMetricsExported(METRIC_END_TIMESTAMP_KEY_NAME, 41);
         assertMetric(1334, false);
     }
 
