@@ -38,6 +38,8 @@ public class ExporterIntMockMvcTestBase {
 
     protected static String BEACON_PAGE_READY_TIME_KEY_NAME = "t_page";
 
+    protected static String BEACON_END_TIMESTAMP_KEY_NAME = "rt.end";
+
     protected static String BEACON_LOAD_TIME_KEY_NAME = "t_done";
 
     // Metric key names are in OTEL format (i.e., using '/')
@@ -45,6 +47,7 @@ public class ExporterIntMockMvcTestBase {
 
     protected static String METRIC_LOAD_TIME_KEY_NAME = "load_time/SUM";
 
+    protected static String METRIC_END_TIMESTAMP_KEY_NAME ="end_timstamp/SUM";
     /**
      * Sends a beacon to the mocked endpoint.
      */
