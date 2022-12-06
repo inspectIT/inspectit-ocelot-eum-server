@@ -20,6 +20,7 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -75,6 +76,9 @@ public class OtlpMetricsExporterService {
 
     OtlpMetricsExporterSettings otlpMetricsExporterSettings;
 
+    @Getter
+    private boolean enabled;
+
     private boolean shouldEnable() {
         @Valid OtlpMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlp();
         if (!otlp.getEnabled().isDisabled()) {
@@ -105,6 +109,7 @@ public class OtlpMetricsExporterService {
     void doEnable() {
 
         if (shouldEnable()) {
+            enabled = true;
             otlpMetricsExporterSettings = configuration.getExporters().getMetrics().getOtlp();
             AggregationTemporalitySelector aggregationTemporalitySelector = otlpMetricsExporterSettings.getPreferredTemporality() == AggregationTemporality.DELTA ? AggregationTemporalitySelector.deltaPreferred() : AggregationTemporalitySelector.alwaysCumulative();
             otelResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters()
@@ -152,6 +157,7 @@ public class OtlpMetricsExporterService {
                         break;
                     }
                 }
+
                 exporterTask = executor.scheduleAtFixedRate(this::export, otlpMetricsExporterSettings.getExportInterval()
                         .toMillis(), otlpMetricsExporterSettings.getExportInterval().toMillis(), TimeUnit.MILLISECONDS);
 
@@ -166,6 +172,7 @@ public class OtlpMetricsExporterService {
 
     @PreDestroy
     private void doDisable() {
+        enabled = false;
         if (exporterTask != null) {
             log.info("Stopping OTLP metric exporter");
             exporterTask.cancel(false);
