@@ -19,7 +19,7 @@ jobs:
         - name: Grant execute permission for gradlew
           run: chmod +x gradlew
         - name: Build project
-          run: ./gradlew build bootJar -PbuildVersion=${{ github.ref }}
+          run: ./gradlew build bootJar 
         - name: Add artifacts
           run: |
             mkdir artifacts
