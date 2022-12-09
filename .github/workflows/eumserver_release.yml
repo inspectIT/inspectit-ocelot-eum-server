@@ -20,16 +20,16 @@ jobs:
           run: chmod +x gradlew
         - name: Build artifacts
           run: |
-            ./gradlew build bootJar -PbuildVersion=${{ github.ref_name }}
+            ./gradlew build bootJar -PbuildVersion=${{ github.ref }}
             mkdir artifacts
-            cp ./inspectit-ocelot-eum-server/build/libs/inspectit-ocelot-eum-server-${{ $github.ref_name }}.jar ./artifacts
+            cp ./inspectit-ocelot-eum-server/build/libs/inspectit-ocelot-eum-server-${{ $github.ref }}.jar ./artifacts
         - name: Create Release
           uses: softprops/action-gh-release@v0.1.14
           with:
             files: artifacts/*
             generate_release_notes: true
             token: ${{ secrets.RELEASE_USER_TOKEN }}
-            name: Version ${{ github.ref_name }}
+            name: Version ${{ github.ref }}
         
     test_release:
         name: "test release"
@@ -61,7 +61,7 @@ jobs:
               with:
                 upload_url: ${{ steps.create-release.outputs.upload_url }}
                 asset_path: ./test.zip
-                asset_name: test-v.zip
+                assef: test-v.zip
                 asset_content_type: application/zip
 
     publish_docker_images:
