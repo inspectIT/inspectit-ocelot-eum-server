@@ -24,7 +24,7 @@ jobs:
           uses: actions/upload-artifact@v3
           with:
             name: eumserver-jar
-            path: inspectit-ocelot-eum-server/README.md
+            path: build
             if-no-files-found: error
         
     test_release:
