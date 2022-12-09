@@ -20,11 +20,15 @@ jobs:
           run: chmod +x gradlew
         - name: Build project
           run: ./gradlew build
-        - name: Upload build
+        - name: Upload jar
           uses: actions/upload-artifact@v3
           with:
             name: eumserver-jar
             path: build/libs
+            if-no-files-found: error
+        - name: Upload zip
+          uses: actions/upload-artifact@v3
+          with:
             name: eumserver-zip
             path: build/distributions
             if-no-files-found: error
