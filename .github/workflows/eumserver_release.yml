@@ -21,10 +21,11 @@ jobs:
         - name: Build project
           run: ./gradlew build
         - name: Upload build
-          uses: actions/upload-artifact@v2
+          uses: actions/upload-artifact@v2.2.0
           with:
-            name: eumserver-build
+            name: eumserver-jar
             path: out/
+            if-no-files-found: error
         
     test_release:
         name: "test release"
