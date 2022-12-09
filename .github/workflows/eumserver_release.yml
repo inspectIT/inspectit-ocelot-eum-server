@@ -24,6 +24,11 @@ jobs:
           run: |
             mkdir artifacts
             cp build/libs/*.jar ./artifacts
+        - name: Upload eumserver jar
+          uses: actions/upload-artifact@v3
+          with:
+            name: eumserver-jar
+            path: build/libs/*.jar
         - name: Create Release
           uses: softprops/action-gh-release@v0.1.15
           with:
