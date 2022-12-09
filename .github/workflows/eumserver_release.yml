@@ -35,7 +35,7 @@ jobs:
             - name: Download site content
               uses: actions/download-artifact@v2
               with:
-                name: eumserver-build
+                name: eumserver-jar
                 path: out/
             - name: Archive site content
               uses: thedoctor0/zip-release@master
