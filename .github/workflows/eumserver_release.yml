@@ -24,13 +24,13 @@ jobs:
           uses: actions/upload-artifact@v3
           with:
             name: eumserver-jar
-            path: build/libs
+            path: build/libs/*.jar
             if-no-files-found: error
         - name: Upload zip
           uses: actions/upload-artifact@v3
           with:
             name: eumserver-zip
-            path: build/distributions
+            path: build
             if-no-files-found: error
         
     test_release:
