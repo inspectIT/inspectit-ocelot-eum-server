@@ -31,7 +31,7 @@ jobs:
             tag_name: ${{ github.ref }}
             files: artifacts/*
             generate_release_notes: true
-            token: ${{ GITHUB_TOKEN }}
+            token: ${{ github.token }}
             name: Version ${{ github.ref }}
         
     test_release:
