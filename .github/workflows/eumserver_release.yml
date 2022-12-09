@@ -50,10 +50,6 @@ jobs:
           with: 
             name: eumserver-jar
             path: docker
-        - name: extract jar
-          run: |
-            cd docker
-            unzip eumserver-jar-${{ github.ref_name }}.zip
         - name: Grand execute permission for gradlew
           run: chmod +x gradlew
         - name: Build Docker Images
