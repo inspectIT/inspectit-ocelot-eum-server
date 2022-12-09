@@ -58,7 +58,7 @@ jobs:
           run: |
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker push danipaniii/testing:${{ github.ref_name }}
-            docker push danipaniii/testing::latest
+            docker push danipaniii/testing:latest
               
               
               
