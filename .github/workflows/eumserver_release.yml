@@ -24,7 +24,9 @@ jobs:
           uses: actions/upload-artifact@v3
           with:
             name: eumserver-jar
-            path: build
+            path: build/libs
+            name: eumserver-zip
+            path: build/distributions
             if-no-files-found: error
         
     test_release:
