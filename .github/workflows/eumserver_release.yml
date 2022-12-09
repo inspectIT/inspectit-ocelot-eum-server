@@ -52,7 +52,7 @@ jobs:
             path: docker
         - name: extract jar
           run: |
-            apt install unzip
+            sudo apt install unzip
             unzip eumserver-jar.zip
         - name: Grand execute permission for gradlew
           run: chmod +x gradlew
