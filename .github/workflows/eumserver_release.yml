@@ -21,10 +21,10 @@ jobs:
         - name: Build project
           run: ./gradlew build
         - name: Upload build
-          uses: actions/upload-artifact@v2.2.0
+          uses: actions/upload-artifact@v3
           with:
             name: eumserver-jar
-            path: inspectit-ocelot-eum-server/**
+            path: inspectit-ocelot-eum-server/README.md
             if-no-files-found: error
         
     test_release:
