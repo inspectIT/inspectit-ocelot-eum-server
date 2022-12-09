@@ -22,7 +22,7 @@ jobs:
           run: |
             ./gradlew build bootJar -PbuildVersion=${{ github.ref }}
             mkdir artifacts
-            cp ./inspectit-ocelot-eum-server/build/libs/inspectit-ocelot-eum-server-${{ $github.ref }}.jar ./artifacts
+            cp ./inspectit-ocelot-eum-server/build/libs/inspectit-ocelot-eum-server-${{ github.ref }}.jar ./artifacts
         - name: Create Release
           uses: softprops/action-gh-release@v0.1.14
           with:
