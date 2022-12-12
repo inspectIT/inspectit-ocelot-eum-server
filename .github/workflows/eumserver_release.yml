@@ -57,6 +57,7 @@ jobs:
         - name: Login to Docker Hub
           uses: docker/login-action@v2
           with:
+            registry: docker.io
             username: ${{ secrets.DOCKER_USERNAME }}
             password: ${{ secrets.DOCKER_PASSWORD }}
         - name: Set up Docker Buildx
@@ -64,7 +65,7 @@ jobs:
         - name: Build and push
           uses: docker/build-push-action@v3
           with:
-            context: ./docker/Dockerfile
+            context: .
             push: true
             tags: danipaniii/testing:latest, ${{ github.ref_name }}
             file: ./docker/Dockerfile
