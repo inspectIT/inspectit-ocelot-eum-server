@@ -32,14 +32,11 @@ jobs:
         - name: Create Release
           uses: softprops/action-gh-release@v0.1.15
           with:
-            body_path: ${{ github.workspace }}-CHANGELOG.txt
             tag_name: ${{ github.ref_name }}
             files: artifacts/*
             generate_release_notes: true
             token: ${{ github.token }}
             name: Version ${{ github.ref_name }}
-          env:
-            GITHUB_REPOSITORY:  danipaniii/inspectit-ocelot-eum-server 
 
     publish_docker_image:
       name: "Publish docker image"
