@@ -29,10 +29,11 @@ jobs:
           with:
             name: eumserver-jar
             path: build/libs/inspectit-ocelot-eum-server-${{ github.ref_name }}.jar
+        - name: Create package.json for changelog
+          run: echo "{}" > package.json
         - name: "Generate Changelog"
           uses: scottbrenner/generate-changelog-action@master
           id: Changelog
-          run: echo "{}" > package.json
           with:
             package-dir: package.json
         - name: Create Release
