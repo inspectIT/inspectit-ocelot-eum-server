@@ -29,8 +29,6 @@ jobs:
           with:
             name: eumserver-jar
             path: build/libs/inspectit-ocelot-eum-server-${{ github.ref_name }}.jar
-        - name: Generate  Changelog
-          run: echo "# Good things have arrived" > ${{ github.workspace }}-CHANGELOG.txt
         - name: Create Release
           uses: softprops/action-gh-release@v0.1.15
           with:
