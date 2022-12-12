@@ -30,9 +30,8 @@ jobs:
             name: eumserver-jar
             path: build/libs/inspectit-ocelot-eum-server-${{ github.ref_name }}.jar
         - name: "Generate Changelog"
-          uses: heinrichreimer/github-changelog-generator-action@v2.3
-          with:
-            token: ${{ secrets.GITHUB_TOKEN }}
+          uses: scottbrenner/generate-changelog-action@master
+          id: Changelog
         - name: Create Release
           uses: softprops/action-gh-release@v0.1.15
           with:
@@ -41,6 +40,7 @@ jobs:
             generate_release_notes: true
             token: ${{ github.token }}
             name: Version ${{ github.ref_name }}
+            body: ${{ steps.Changelog.outputs.changelog }}
 
     publish_docker_image:
       name: "Publish docker image"
