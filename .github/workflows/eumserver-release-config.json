@@ -1,0 +1,26 @@
+{
+    "categories": [
+        {
+            "title": "Breaking Changes 🛠",
+            "labels": "breaking-change"
+        },
+        {
+            "title": "New Features 🎉",
+            "labels": "enhancement"
+        },
+        {
+            "title": "Bugfixes",
+            "lables": "bug"
+        },
+        {
+            "title": "Other Changes",
+            "labels": "*"
+        }
+    ],
+    "ignore_labels": [
+        "wonfix",
+        "invalid",
+        "duplicate",
+        "question"
+    ]
+}
