@@ -32,6 +32,9 @@ jobs:
         - name: "Generate Changelog"
           uses: scottbrenner/generate-changelog-action@master
           id: Changelog
+          run: echo "{}" > package.json
+          with:
+            package-dir: package.json
         - name: Create Release
           uses: softprops/action-gh-release@v0.1.15
           with:
