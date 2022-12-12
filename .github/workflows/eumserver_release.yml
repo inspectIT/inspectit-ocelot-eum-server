@@ -54,10 +54,11 @@ jobs:
           uses: docker/setup-qemu-action@v2
         - name: Set up Docker Buildx
           uses: docker/setup-buildx-action@v2
+          with:
+            buildkitd-flags: --debug
         - name: Login to Docker Hub
           uses: docker/login-action@v2
           with:
-            registry: docker.io
             username: ${{ secrets.DOCKER_USERNAME }}
             password: ${{ secrets.DOCKER_PASSWORD }}
         - name: Set up Docker Buildx
@@ -65,7 +66,7 @@ jobs:
         - name: Build and push
           uses: docker/build-push-action@v3
           with:
-            context: "{{defaultContext}}:docker"
+            context: .
             push: true
             tags: danipaniii/testing:latest, ${{ github.ref_name }}
             file: ./docker/Dockerfile
