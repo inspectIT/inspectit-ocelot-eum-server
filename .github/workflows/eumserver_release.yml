@@ -67,7 +67,7 @@ jobs:
           uses: docker/build-push-action@v3
           with:
             push: true
-            tags: docker.io/danipaniii/testing:${{ github.ref_name }}
+            tags: danipaniii/testing:${{ github.ref_name }}, danipaniii/testing:latest
             file: ./docker/Dockerfile
         #- name: Build and push with tag current version
          # uses: docker/build-push-action@v3
