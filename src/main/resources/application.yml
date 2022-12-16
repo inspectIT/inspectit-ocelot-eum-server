@@ -302,6 +302,30 @@ inspectit-eum-server:
   resource-timing:
     enabled: true
 
+
+  security:
+    # Enable/Disable Security
+    enabled: false
+    # Change name of authentication header if required
+    authorization-header: Authorization
+    # White list certain urls which must not be secured
+    permitted-urls:
+      - "/actuator/health"
+      - "/boomerang/**"
+    auth-provider:
+      simple:
+        # Enable/Disable Provider
+        enabled: false
+        # Flag indicates if the directory should be watched for changes and tokens reloaded
+        watch: true
+        # How often directory should be watched for changes
+        frequency: 60s
+        # The directory where token files are stored. Empty by default to force users to provide one
+        token-directory: ""
+        # The name of the initial token file. If a name is provided file will be created with an initial token
+        default-file-name: "default-token-file.yaml"
+
+
 # SERVER properties
 # Avoid exposing internals to outside via error page
 server:
@@ -319,3 +343,9 @@ management:
   endpoint:
     # Whether to enable the health endpoint.
     health.enabled: true
+
+spring:
+  autoconfigure:
+    # Disable ErrorMvcAutoConfiguration to avoid nasty exceptions if whitelabel error page is disabled
+    # https://github.com/spring-projects/spring-boot/issues/2001
+    exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
