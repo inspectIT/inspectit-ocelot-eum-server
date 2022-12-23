@@ -1,4 +1,4 @@
 FROM openjdk:11-jre-slim
-COPY inspectit-ocelot-eum-server.jar /
-COPY entrypoint.sh  /
+
+ADD ./docker/ /
 ENTRYPOINT ["sh", "/entrypoint.sh"]
