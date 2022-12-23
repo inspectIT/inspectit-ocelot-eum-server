@@ -109,7 +109,7 @@ dependencies {
             "org.springframework.boot:spring-boot-starter-web",
             'org.springframework.boot:spring-boot-starter-actuator',
             "org.springframework.boot:spring-boot-starter-validation",
-            "org.springframework.security:spring-security-web:5.1.5.RELEASE",
+            "org.springframework.boot:spring-boot-starter-security",
 
             // pin Prometheus client to 0.6.0 to prevent auto prefixing counter metrics with "_total"
             // see: https://github.com/prometheus/client_java/issues/640, https://github.com/prometheus/client_java/pull/653
@@ -127,6 +127,7 @@ dependencies {
             "io.opentelemetry:opentelemetry-proto:1.1.0-alpha",
             "io.opentelemetry:opentelemetry-exporter-jaeger:1.1.0",
             "io.opentelemetry:opentelemetry-sdk:1.1.0",
+            "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.5",
 
             "com.google.protobuf:protobuf-java:3.15.7",
             "com.google.protobuf:protobuf-java-util:3.15.7",
@@ -135,6 +136,7 @@ dependencies {
             'commons-net:commons-net:3.3',
             "org.apache.commons:commons-lang3:3.+",
             'org.apache.commons:commons-math3:3.6.1',
+            'commons-io:commons-io:2.11.0',
             "org.influxdb:influxdb-java:2.15",
             "rocks.inspectit:opencensus-influxdb-exporter:1.2",
     )
@@ -147,16 +149,16 @@ dependencies {
             "org.springframework.boot:spring-boot-starter-test",
             "io.opencensus:opencensus-impl:${openCensusVersion}",
             'org.apache.httpcomponents:httpclient:4.5.6',
-            'commons-io:commons-io:2.6',
+            'commons-io:commons-io:2.11.0',
             "org.mockito:mockito-core:${mockitoVersion}",
-            'org.junit.jupiter:junit-jupiter-api:5.3.1',
+            'org.junit.jupiter:junit-jupiter-api:5.7.2',
             'org.awaitility:awaitility:3.1.5',
             'org.mockito:mockito-junit-jupiter:2.23.0',
             'org.testcontainers:testcontainers:1.15.2',
             'org.testcontainers:junit-jupiter:1.15.2'
     )
 
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.3.1"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.2"
 }
 
 task copyServerJar(type: Copy) {

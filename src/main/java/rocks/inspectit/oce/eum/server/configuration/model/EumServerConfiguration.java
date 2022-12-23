@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExportersSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.BeaconMetricDefinitionSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.security.SecuritySettings;
 import rocks.inspectit.oce.eum.server.configuration.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.tags.TagsSettings;
 
@@ -54,5 +55,8 @@ public class EumServerConfiguration {
      */
     @Valid
     private ResourceTimingSettings resourceTiming;
+
+    @Valid
+    private SecuritySettings security;
 
 }
