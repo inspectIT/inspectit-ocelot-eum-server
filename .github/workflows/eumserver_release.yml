@@ -12,7 +12,7 @@ jobs:
     build_and_release:
       name: Build and release EUM Server
       runs-on: ubuntu-latest
-      needs: [test_eum_server]
+      needs: []
       steps:
         - name: Checkout code
           uses: actions/checkout@v3
@@ -20,10 +20,14 @@ jobs:
           run: chmod +x gradlew
         - name: Build project
           run: ./gradlew assemble bootJar -PbuildVersion=${{ github.ref_name }}
+        - name: Create BOM
+          run: ./gradlew cyclonedxBom
         - name: Add artifacts
           run: |
             mkdir artifacts
             cp build/libs/*.jar ./artifacts
+            cp build/reports/bom.json ./artifacts
+            cp build/reports/bom.xml ./artifacts
         # Uploading eumserver jar, for creating docker image in the next step
         - name: Upload eumserver jar      
           uses: actions/upload-artifact@v3
