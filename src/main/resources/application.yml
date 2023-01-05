@@ -6,8 +6,8 @@ inspectit-eum-server:
       value-expression: "{t_page}"
       unit: ms
       views:
-        '[page_ready_time/SUM]': {aggregation: SUM}
-        '[page_ready_time/COUNT]': {aggregation: COUNT}
+        '[page_ready_time/SUM]': { aggregation: SUM }
+        '[page_ready_time/COUNT]': { aggregation: COUNT }
 
     load_time:
       measure-type: LONG
@@ -17,8 +17,8 @@ inspectit-eum-server:
           requirement: NOT_EXISTS
       unit: ms
       views:
-        '[load_time/SUM]': {aggregation: SUM}
-        '[load_time/COUNT]': {aggregation: COUNT}
+        '[load_time/SUM]': { aggregation: SUM }
+        '[load_time/COUNT]': { aggregation: COUNT }
 
     calc_load_time:
       measure-type: LONG
@@ -28,8 +28,8 @@ inspectit-eum-server:
           requirement: NOT_EXISTS
       unit: ms
       views:
-        '[calc_load_time/SUM]': {aggregation: SUM}
-        '[calc_load_time/COUNT]': {aggregation: COUNT}
+        '[calc_load_time/SUM]': { aggregation: SUM }
+        '[calc_load_time/COUNT]': { aggregation: COUNT }
 
     start_timestamp:
       measure-type: LONG
@@ -48,7 +48,7 @@ inspectit-eum-server:
       views:
         end_timestamp:
           aggregation: LAST_VALUE
-          tags: {APPLICATION: true}
+          tags: { APPLICATION: true }
 
   tags:
     extra:
@@ -126,6 +126,9 @@ inspectit-eum-server:
         # The port of the prometheus HTTP endpoint.
         port: 8888
 
+        # service name for all exported metrics.
+        service-name: "browser-js"
+
       influx:
         # Determines whether the influx exporter is enabled.
         enabled: IF_CONFIGURED
@@ -164,6 +167,23 @@ inspectit-eum-server:
         # E.g. if the exportInterval is 15s and the buffer-size is 4, the export will keep up to one minute of data in memory.
         buffer-size: 40
 
+      # settings for the OtlpGrpcMetricExporter used in OtlpGrpcMetricExporterService
+      otlp:
+        enabled: IF_CONFIGURED
+        # the export interval of the metrics
+        export-interval: 15s
+        # the URL endpoint, e.g., http://127.0.0.1:4317
+        endpoint: null
+        # the transport protocol, e.g., 'grpc' or 'http/protobuf'
+        protocol: grpc
+        # headers
+        headers: { }
+        # the aggregation temporality, e.g., CUMULATIVE or DELTA
+        preferredTemporality: CUMULATIVE
+        # compression method
+        compression: NONE
+        # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
+        timeout: 10s
     tracing:
       # Specifies whether client IP addresses which are added to spans should be masked.
       mask-span-ip-addresses: true
@@ -178,11 +198,31 @@ inspectit-eum-server:
         # Location of the jaeger gRPC API.
         # Either a valid NameResolver-compliant URI, or an authority string.
         # If this property is not set, the jaeger-exporter will not be started.
-        # endpoint: localhost:14250
+        # endpoint: http://localhost:14250
+
+        # compression method, will only take effect when protocol is set to 'grpc'
+        compression: NONE
+
+        # timeout, i.e., maximum time the Jaeger exporter will wait for each batch export; will only take effect when protocol is set to 'grpc'
+        timeout: 10s
 
 
-        # service name for all exported spans.
-        service-name: browser-js
+      otlp:
+        # If OTLP exporter for the OT received spans is enabled.
+        enabled: IF_CONFIGURED
+        # the URL endpoint, e.g., http://127.0.0.1:4317
+        endpoint: null
+        # the transport protocol, e.g., 'http/thrift' or 'grpc'
+        protocol: grpc
+        # headers
+        headers: { }
+        # compression method
+        compression: NONE
+        # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
+        timeout: 10s
+
+      # service name for all exported spans.
+      service-name: browser-js
 
     beacons:
       http:

@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.eum.server;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -11,6 +12,7 @@ import java.io.InputStreamReader;
 
 @Slf4j
 @Component
+@Data
 public class AppStartupRunner implements ApplicationRunner {
 
     /**
@@ -38,6 +40,11 @@ public class AppStartupRunner implements ApplicationRunner {
      */
     private String bommerangjsVersion;
 
+    /**
+     * The OpenTelemetry API version.
+     */
+    private String openTelemetryVersion;
+
     @Override
     public void run(ApplicationArguments args) {
         readVersionInformation();
@@ -57,11 +64,13 @@ public class AppStartupRunner implements ApplicationRunner {
             serverVersion = reader.readLine();
             serverBuildDate = reader.readLine();
             bommerangjsVersion = reader.readLine();
+            openTelemetryVersion = reader.readLine();
         } catch (Exception e) {
             log.warn("Could not read server version information file.");
             serverVersion = UNKNOWN;
             serverBuildDate = UNKNOWN;
             bommerangjsVersion = UNKNOWN;
+            openTelemetryVersion = UNKNOWN;
         }
     }
 }

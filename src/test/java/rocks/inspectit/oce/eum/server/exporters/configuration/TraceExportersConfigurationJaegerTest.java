@@ -11,10 +11,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This Test class tests whether the annotations on {@link TraceExportersConfiguration#jaegerSpanExporter()} are working as expected,
- * i.e. whether the Bean only gets created when 'jaeger.enabled' is not set to DISABLED and 'jaeger.grpc' is not empty.
+ * i.e. whether the Bean only gets created when 'jaeger.enabled' is not set to DISABLED and 'jaeger.endpoint' is not empty.
  */
 @SpringBootTest
-class TraceExportersConfigurationTest {
+class TraceExportersConfigurationJaegerTest {
 
     @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaeger.endpoint=", "inspectit-eum-server.exporters.tracing.jaeger.enabled=ENABLED"})
     @Nested
@@ -54,5 +54,4 @@ class TraceExportersConfigurationTest {
             assertThat(exporter).isNotNull();
         }
     }
-
 }

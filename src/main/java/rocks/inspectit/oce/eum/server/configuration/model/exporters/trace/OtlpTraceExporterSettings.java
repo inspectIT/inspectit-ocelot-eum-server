@@ -8,45 +8,32 @@ import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnab
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.TransportProtocol;
 
 import java.time.Duration;
+import java.util.Map;
 
+/**
+ * Settings for {@link rocks.inspectit.oce.eum.server.exporters.configuration.TraceExportersConfiguration}
+ */
 @Data
 @NoArgsConstructor
-public class JaegerExporterSettings {
+public class OtlpTraceExporterSettings {
 
-    /**
-     * Whether the exporter should be started.
-     */
     private ExporterEnabledState enabled;
 
-    @Deprecated
     /**
-     * This property is deprecated since v2.0. Please use {@link #endpoint} instead.
-     * The gRPC endpoint of the Jaeger server.
-     */ private String grpc;
-
-    @Deprecated
-    /**
-     * This property is deprecated since v2.0. Please use {@link #endpoint} instead.
-     * The URL of the Jaeger server.
-     */ private String url;
-
-    /**
-     * The URL endpoint of the Jaeger server.
+     * The OTLP traces endpoint to connect to.
      */
     private String endpoint;
 
     /**
      * The transport protocol to use.
-     * Supported protocols are {@link TransportProtocol#HTTP_THRIFT} and {@link TransportProtocol#GRPC}
+     * Supported protocols are {@link TransportProtocol#GRPC} and {@link TransportProtocol#HTTP_PROTOBUF}
      */
     private TransportProtocol protocol;
 
-    @Deprecated
     /**
-     * This property is deprecated in favor of {@link TraceExportersSettings#serviceName}.
-     * The service name. Used in {@link rocks.inspectit.oce.eum.server.exporters.configuration.TraceExportersConfiguration}
+     * Key-value pairs to be used as headers associated with gRPC or HTTP requests.
      */
-    private String serviceName;
+    private Map<String, String> headers;
 
     /**
      * The compression method.
@@ -58,4 +45,5 @@ public class JaegerExporterSettings {
      */
     @DurationMin(millis = 1)
     private Duration timeout;
+
 }

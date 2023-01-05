@@ -15,7 +15,7 @@ import javax.annotation.PreDestroy;
 
 /**
  * Service for the Prometheus OpenCensus exporters.
- * Is enabled, if exporters.metrics.prometheus.enabled is set to ENABLED or IF_CONFIGURED.
+ * Is enabled, if exporters.metrics.prometheus.enabled is set to {@link rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState#ENABLED ENABLED} or {@link rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState IF_CONFIGURED}.
  */
 @Component
 @Slf4j
@@ -47,8 +47,8 @@ public class PrometheusExporterService {
 
     @PreDestroy
     protected boolean doDisable() {
-        log.info("Stopping Prometheus Exporter");
         if (prometheusClient != null) {
+            log.info("Stopping Prometheus Exporter");
             prometheusClient.stop();
             CollectorRegistry.defaultRegistry.clear();
         }
