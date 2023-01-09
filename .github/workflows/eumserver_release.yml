@@ -62,7 +62,7 @@ jobs:
         - name: Download eumserver jar
           uses: actions/download-artifact@v3
           with: 
-            name: eumserver-jar
+            name: eumserver-jar # with the name we are referencing the eumserver-jar uploaded in the build_and_release job
             path: docker/
         - name: Check if jar exists and rename it
           run: |
@@ -85,5 +85,5 @@ jobs:
           with:
             context: .
             push: true
-            tags: danipaniii/testing:${{ github.ref_name }}, danipaniii/testing:latest
+            tags: inspectit/inspectit-ocelot-eum-server${{ github.ref_name }}, inspectit/inspectit-ocelot-eum-server:latest
             file: ./docker/Dockerfile
