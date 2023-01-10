@@ -1,7 +1,7 @@
 plugins {
     id 'org.springframework.boot' version "${springboot_version}"
     id 'com.palantir.docker' version "0.21.0"
-    id "org.cyclonedx.bom" version "1.5.0"
+    id "org.cyclonedx.bom" version "1.7.2"
 }
 
 repositories {
@@ -93,7 +93,9 @@ bootJar {
 }
 
 cyclonedxBom {
-    includeConfigs += ["runtimeClasspath"]
+    includeConfigs = ["runtimeClasspath"]
+    schemaVersion = "1.4"
+    projectType = "application"
 }
 
 test {
