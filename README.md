@@ -279,3 +279,13 @@ INSPECTIT_EUM_SERVER_SECURITY_AUTH_PROVIDER_SIMPLE_TOKEN_DIRECTORY=<my-directory
 INSPECTIT_EUM_SERVER_SECURITY_AUTH_PROVIDER_SIMPLE_ENABLED=TRUE;
 INSPECTIT_EUM_SERVER_SECURITY_ENABLED=TRUE
 ```
+
+##### Local Docker Image
+How to build the docker container for local use.
+
+In order to build a docker image locally, the eum-server should be build locally and the resulting jar should be renamed
+to ```inspectit-ocelot-eum-server.jar``` and copied to the ./docker directory
+
+##### How to Release
+To create a new release, you have to create a new git tag and push it on to GitHub. 
+This Tag is the new version number of the release. Afterwards the actions will be automatically triggered.
