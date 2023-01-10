@@ -85,5 +85,5 @@ jobs:
           with:
             context: .
             push: true
-            tags: inspectit/inspectit-ocelot-eum-server${{ github.ref_name }}, inspectit/inspectit-ocelot-eum-server:latest
+            tags: inspectit/inspectit-ocelot-eum-server:${{ github.ref_name }}, inspectit/inspectit-ocelot-eum-server:latest
             file: ./docker/Dockerfile
