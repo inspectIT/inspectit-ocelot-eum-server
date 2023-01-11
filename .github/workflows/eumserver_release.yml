@@ -8,7 +8,6 @@ on:
 jobs:
     test_eum_server:
         uses: ./.github/workflows/eumserver_test.yml
-
     build_and_release:
       name: Build and release EUM Server
       runs-on: ubuntu-latest
@@ -28,6 +27,10 @@ jobs:
             cp build/libs/*.jar ./artifacts
             cp build/reports/bom.json ./artifacts
             cp build/reports/bom.xml ./artifacts
+        - name: Generate Release Hashes
+          run: | 
+            cd ./artifacts
+            sha256sum * >> inspectit-ocelot-eum-server-sha256-checksums.txt
         # Uploading eumserver jar, for creating docker image in the next step
         - name: Upload eumserver jar      
           uses: actions/upload-artifact@v3
@@ -37,9 +40,9 @@ jobs:
         - name: "Build Changelog"
           id: build_changelog
           uses: mikepenz/release-changelog-builder-action@v3.5.0
-          with: 
-             # Config for the Changelog, reference: https://github.com/marketplace/actions/release-changelog-builder
-            configuration: "eumserver-release-config.json"     
+          with:
+            # Config for the Changelog, reference: https://github.com/marketplace/actions/release-changelog-builder
+            configuration: "eumserver-release-config.json"
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         - name: Create Release
@@ -50,7 +53,7 @@ jobs:
             files: artifacts/*
             generate_release_notes: true
             token: ${{ github.token }}
-            name: Version ${{ github.ref_name }}     
+            name: Version ${{ github.ref_name }}
 
     publish_docker_image:
       name: "Publish docker image"
