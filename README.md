@@ -252,12 +252,12 @@ inspectit-eum-server:
       ....
 ```
 
-##### Simple Token Provider
+###### Simple Token Provider
 The simple token provider can be enabled from config file...
 
 ```yaml
 inspectit-eum-server:
-  ...
+  ....
   security:
     ....
     auth-provider:
@@ -279,6 +279,18 @@ INSPECTIT_EUM_SERVER_SECURITY_AUTH_PROVIDER_SIMPLE_TOKEN_DIRECTORY=<my-directory
 INSPECTIT_EUM_SERVER_SECURITY_AUTH_PROVIDER_SIMPLE_ENABLED=TRUE;
 INSPECTIT_EUM_SERVER_SECURITY_ENABLED=TRUE
 ```
+
+The format for the token files is as follows:
+```yaml
+  # Identifies a token. E.g. you can document which application, person, organization, etc. knows about this token. It has no influence on security.
+- name: "Name for first token"
+  # The value of the token. If an HTTP-request contains this value (without opening and closing double quotes), access is allowed.
+  token: "755f3e71-e43f-4715-bd26-b6e112fd30dd"
+  # You may specify as many elements as you like
+- name: "Name of other token"
+  token: "any token value you like"
+```
+
 
 ##### Build Docker Image Locally.
 
