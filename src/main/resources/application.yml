@@ -136,9 +136,10 @@ inspectit-eum-server:
         # the export interval of the metrics.
         export-interval: 15s
 
-        # The http url of influx.
+        # the url under which the InfluxDB can be accessed, e.g. http://localhost:8086
         # If this property is not set, the influx-exporter will not be started.
-        # url: "http://localhost:8086"
+        # endpoint: "http://localhost:8086"
+        endpoint: null
 
         # The database to write to.
         # If this property is not set, the influx-exporter will not be started.
@@ -180,7 +181,7 @@ inspectit-eum-server:
         headers: { }
         # the aggregation temporality, e.g., CUMULATIVE or DELTA
         preferredTemporality: CUMULATIVE
-        # compression method
+        # compression method, e.g., NONE or GZIP
         compression: NONE
         # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
         timeout: 10s
