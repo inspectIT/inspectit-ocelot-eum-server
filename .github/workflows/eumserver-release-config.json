@@ -1,26 +1,30 @@
 {
     "categories": [
         {
-            "title": "Breaking Changes 🛠",
-            "labels": "breaking-change"
+            "title": "## 🛠 Breaking Changs",
+            "labels": ["breaking-change"]
         },
         {
-            "title": "New Features 🎉",
-            "labels": "enhancement"
+            "title": "## 🚀 Features",
+            "labels": ["feature", "enhancement"]
         },
         {
-            "title": "Bugfixes",
-            "lables": "bug"
+            "title": "## 🐛 Fixes",
+            "labels": ["fix"]
         },
         {
-            "title": "Other Changes",
-            "labels": "*"
+            "title": "## 🧪 Tests",
+            "labels": ["test"]
+        },
+        {
+            "title": "## Other Changes",
+            "labels": ["*"]
         }
     ],
-    "ignore_labels": [
-        "wontfix",
-        "invalid",
-        "duplicate",
-        "question"
-    ]
+    "sort": "ASC",
+    "template": "${{CHANGELOG}}",
+    "pr_template": "- ${{TITLE}}\n   - PR: #${{NUMBER}}",
+    "empty_template": "- no changes",
+    "max_pull_requests": 1000,
+    "max_back_track_time_days": 1000
 }
