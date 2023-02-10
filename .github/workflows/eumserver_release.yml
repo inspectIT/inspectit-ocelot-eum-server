@@ -65,5 +65,5 @@ jobs:
         - name: Push Docker Images
           run: |
             docker login -u ${{ secrets.DOCKER_HUB_USER }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
-            docker push danipaniii/inspectit-ocelot-eum-server:${{ github.ref_name }}
-            docker push danipaniii/inspectit-ocelot-eum-server:latest
+            docker push inspectit/inspectit-ocelot-eum-server:${{ github.ref_name }}
+            docker push inspectit/inspectit-ocelot-eum-server:latest

@@ -5,12 +5,12 @@
             "labels": ["breaking-change"]
         },
         {
-            "title": "## 🚀 Features",
+            "title": "## 🚀 Implemented Enhancements",
             "labels": ["feature", "enhancement"]
         },
         {
-            "title": "## 🐛 Fixes",
-            "labels": ["fix"]
+            "title": "## 🐛 Bugfixes",
+            "labels": ["fix", "bug"]
         },
         {
             "title": "## 🧪 Tests",
