@@ -6,6 +6,6 @@ FROM openjdk:11-jre-slim
 # =====
 # In order to build a docker image locally, the eum-server should be build locally and the resulting jar should be renamed
 # to 'inspectit-ocelot-eum-server.jar' and copied to the ./docker directory
-ADD ./docker/ / 
+ADD ./ / 
 ENTRYPOINT ["sh", "/entrypoint.sh"]
 
