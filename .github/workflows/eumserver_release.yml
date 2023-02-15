@@ -53,7 +53,7 @@ jobs:
             tag_name: ${{ github.ref_name }}
             body: ${{ steps.build_changelog.outputs.changelog }}
             files: artifacts/*
-            generate_release_notes: false
+            generate_release_notes: true
             token: ${{ github.token }}
             name: Version ${{ github.ref_name }}
 
