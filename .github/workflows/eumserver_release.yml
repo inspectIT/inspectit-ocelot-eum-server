@@ -40,7 +40,7 @@ jobs:
           uses: heinrichreimer/github-changelog-generator-action@v2.3
           with:
             token: ${{ secrets.GITHUB_TOKEN }}
-            sinceTag: ${{ steps.previoustag.outputs.tag }}
+            sinceTag: ${{ steps.previoustag.outputs.tag }} # this is a test
             dateFormat: 
             maxIssues: 500
             unreleased: false
