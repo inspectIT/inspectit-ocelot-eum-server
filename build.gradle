@@ -1,6 +1,6 @@
 plugins {
-    id 'org.springframework.boot' version "${springboot_version}"
-    id 'com.palantir.docker' version "0.21.0"
+    id "org.springframework.boot" version "${springboot_version}"
+    id "com.palantir.docker" version "0.21.0"
     id "org.cyclonedx.bom" version "1.7.2"
 }
 
@@ -8,21 +8,21 @@ repositories {
     mavenCentral()
 }
 
-apply plugin: 'java'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: 'jacoco'
+apply plugin: "java"
+apply plugin: "io.spring.dependency-management"
+apply plugin: "jacoco"
 
-group = 'rocks.inspectit.ocelot'
-sourceCompatibility = '1.8'
+group = "rocks.inspectit.ocelot"
+sourceCompatibility = "1.8"
 
-if (!project.hasProperty('buildVersion') || project.getProperty('buildVersion').empty) {
-    ext.buildVersion = 'SNAPSHOT'
+if (!project.hasProperty("buildVersion") || project.getProperty("buildVersion").empty) {
+    ext.buildVersion = "SNAPSHOT"
 }
 
 version = "$buildVersion"
 
 task downloadBoomerangjs() {
-    logger.info('Downloading Boomerangjs version {}.', boomerangVersion)
+    logger.info("Downloading Boomerangjs version {}.", boomerangVersion)
     ext.dest = new File(buildDir, "boomerang-source-${boomerangVersion}.tgz")
     outputs.files(ext.dest)
     doLast {
@@ -39,14 +39,14 @@ task deleteBoomerangjs(type: Delete) {
 task downloadAndExtractBoomerang(dependsOn: [deleteBoomerangjs, downloadBoomerangjs], type: Copy) {
     from tarTree(downloadBoomerangjs.dest)
     into new File(project.buildDir, "boomerangjs-${boomerangVersion}")
-    filter { line -> line.replaceAll('%boomerang_version%', "${boomerangVersion}") }
+    filter { line -> line.replaceAll("%boomerang_version%", "${boomerangVersion}") }
 }
 
 task generateVersionFile {
     ext.versionFile = new File(project.buildDir, "eum-version.info")
     doLast {
         def currentDate = new Date().toString()
-        ext.versionFile.withWriter('UTF-8') { writer ->
+        ext.versionFile.withWriter("UTF-8") { writer ->
             writer << "$version\n$currentDate\n$boomerangVersion"
         }
     }
@@ -68,11 +68,11 @@ bootJar {
     dependsOn downloadAndExtractBoomerang
     dependsOn downloadOpenTelemetryPlugin
 
-    archivesBaseName = 'inspectit-ocelot-eum-server'
+    archivesBaseName = "inspectit-ocelot-eum-server"
     version = "${buildVersion}"
 
     manifest {
-        attributes 'Start-Class': 'rocks.inspectit.oce.eum.server.EUMServerApplication'
+        attributes "Start-Class": "rocks.inspectit.oce.eum.server.EUMServerApplication"
     }
 
     // include version file
@@ -102,14 +102,14 @@ test {
     useJUnitPlatform()
 
     testLogging {
-        exceptionFormat = 'full'
+        exceptionFormat = "full"
     }
 }
 
 dependencies {
     implementation(
             "org.springframework.boot:spring-boot-starter-web",
-            'org.springframework.boot:spring-boot-starter-actuator',
+            "org.springframework.boot:spring-boot-starter-actuator",
             "org.springframework.boot:spring-boot-starter-validation",
             "org.springframework.boot:spring-boot-starter-security",
 
@@ -140,11 +140,11 @@ dependencies {
             "com.google.protobuf:protobuf-java:3.15.7",
             "com.google.protobuf:protobuf-java-util:3.15.7",
 
-            'com.maxmind.geoip2:geoip2:2.12.0',
-            'commons-net:commons-net:3.3',
+            "com.maxmind.geoip2:geoip2:2.12.0",
+            "commons-net:commons-net:3.3",
             "org.apache.commons:commons-lang3:3.+",
-            'org.apache.commons:commons-math3:3.6.1',
-            'commons-io:commons-io:2.11.0',
+            "org.apache.commons:commons-math3:3.6.1",
+            "commons-io:commons-io:2.11.0",
             "org.influxdb:influxdb-java:2.15",
             "rocks.inspectit:opencensus-influxdb-exporter:1.2",
 
@@ -154,27 +154,27 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     testImplementation(
-            //project(':inspectit-ocelot-config'),
+            //project(":inspectit-ocelot-config"),
             "org.springframework.boot:spring-boot-starter-test",
             "io.opencensus:opencensus-impl:${openCensusVersion}",
-            'org.apache.httpcomponents:httpclient:4.5.6',
-            'commons-io:commons-io:2.11.0',
+            "org.apache.httpcomponents:httpclient:4.5.6",
+            "commons-io:commons-io:2.11.0",
             "org.mockito:mockito-core:${mockitoVersion}",
-            'org.junit.jupiter:junit-jupiter-api:5.7.2',
-            'org.awaitility:awaitility:3.1.5',
-            'org.mockito:mockito-junit-jupiter:2.23.0',
-            'org.testcontainers:testcontainers:1.15.2',
-            'org.testcontainers:junit-jupiter:1.15.2',
+            "org.junit.jupiter:junit-jupiter-api:5.7.2",
+            "org.awaitility:awaitility:3.1.5",
+            "org.mockito:mockito-junit-jupiter:2.23.0",
+            "org.testcontainers:testcontainers:1.15.2",
+            "org.testcontainers:junit-jupiter:1.15.2",
 
             // ServerExtension
-            'com.linecorp.armeria:armeria-junit5:1.14.1',
-            'com.linecorp.armeria:armeria-grpc-protocol:1.14.1',
+            "com.linecorp.armeria:armeria-junit5:1.14.1",
+            "com.linecorp.armeria:armeria-grpc-protocol:1.14.1",
 
             "io.opentelemetry:opentelemetry-semconv:1.20.0-alpha",
 
             // for docker test containers
-            'org.testcontainers:testcontainers:1.16.3',
-            'org.testcontainers:junit-jupiter:1.16.3',
+            "org.testcontainers:testcontainers:1.16.3",
+            "org.testcontainers:junit-jupiter:1.16.3",
 
     )
 
@@ -186,13 +186,13 @@ task copyServerJar(type: Copy) {
     from("${buildDir}/libs/inspectit-ocelot-eum-server-${version}.jar")
     into("${buildDir}/docker-jar")
     rename("inspectit-ocelot-eum-server-${version}\\.jar",
-            'inspectit-ocelot-eum-server.jar')
+            "inspectit-ocelot-eum-server.jar")
 }
 
 docker {
+    dependsOn copyServerJar
     name "inspectit/inspectit-ocelot-eum-server"
     tags "${version}"
-    dockerfile file('docker/Dockerfile')
-    files 'docker/entrypoint.sh', "$buildDir/docker-jar/inspectit-ocelot-eum-server.jar"
+    dockerfile file("docker/Dockerfile")
+    files "docker/entrypoint.sh", "$buildDir/docker-jar/inspectit-ocelot-eum-server.jar"
 }
-docker.dependsOn copyServerJar
