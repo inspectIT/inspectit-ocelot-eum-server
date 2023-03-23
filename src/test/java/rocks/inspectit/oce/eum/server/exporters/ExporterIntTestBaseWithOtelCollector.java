@@ -211,9 +211,9 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                                         .getMetricsList()
                                         .stream()
                                         .filter(metric -> metric.getName().equalsIgnoreCase(metricName))
-                                        .anyMatch(metric -> (aggregation == ViewDefinitionSettings.Aggregation.LAST_VALUE ? metric.getDoubleGauge()
-                                                .getDataPointsList() : metric.getDoubleSum()
-                                                .getDataPointsList()).stream().anyMatch(d -> d.getValue() == value)))));
+                                        .anyMatch(metric -> (aggregation == ViewDefinitionSettings.Aggregation.LAST_VALUE ? metric.getGauge()
+                                                .getDataPointsList() : metric.getSum()
+                                                .getDataPointsList()).stream().anyMatch(d -> d.getAsDouble() == value)))));
     }
 
     /**
@@ -230,10 +230,10 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                                 .stream()
                                 .anyMatch(iml -> iml.getMetricsList()
                                         .stream()
-                                        .anyMatch(metric -> metric.getDoubleSum()
+                                        .anyMatch(metric -> metric.getSum()
                                                 .getDataPointsList()
                                                 .stream()
-                                                .anyMatch(d -> expected ? d.getValue() == value : d.getValue() != value))))));
+                                                .anyMatch(d -> expected ? d.getAsDouble() == value : d.getAsDouble() != value)))))).isTrue();
     }
 
     /**

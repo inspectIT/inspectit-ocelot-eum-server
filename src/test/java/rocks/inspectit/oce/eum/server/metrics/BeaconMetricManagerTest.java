@@ -1,6 +1,5 @@
 package rocks.inspectit.oce.eum.server.metrics;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.stats.ViewManager;
@@ -47,7 +46,7 @@ public class BeaconMetricManagerTest {
     ViewManager viewManager;
 
     @Spy
-    List<BeaconRecorder> beaconRecorders = ImmutableList.of(mock(BeaconRecorder.class));
+    List<BeaconRecorder> beaconRecorders = new ArrayList<>(Arrays.asList(mock(BeaconRecorder.class)));
 
     private final Set<String> registeredTags = new HashSet<>(Arrays.asList("first", "second", "third"));
 
