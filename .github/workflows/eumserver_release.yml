@@ -3,7 +3,7 @@ name: Release Eum Server
 on:
   push:
     tags:
-    - '[0-9]*.[0-9]*.[0-9]**'
+      - '[0-9]*.[0-9]*.[0-9]**'
 
 jobs:
   test_eum_server:
@@ -14,49 +14,49 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test_eum_server]
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build project
-      run: ./gradlew assemble bootJar -PbuildVersion=${{ github.ref_name }}
-    - name: Create BOM
-      run: ./gradlew cyclonedxBom
-    - name: Add artifacts
-      run: |
-        mkdir artifacts
-        cp build/libs/*.jar ./artifacts
-        cp build/reports/bom.json ./artifacts
-        cp build/reports/bom.xml ./artifacts
-    - name: Generate Release Hashes
-      run: |
-        cd ./artifacts
-        sha256sum * >> inspectit-ocelot-eum-server-sha256-checksums.txt
-    - name: "Get previous tag"
-      id: previoustag
-      # this gets the tag of the previous release based on the tags in the repo
-      run: echo "tag=$(git ls-remote --tags | cut --delimiter='/' --fields=3  | tail --lines=2 | head  -n -1)" >> $GITHUB_OUTPUT
-    - name: "Build Changelog"
-      id: build_changelog
-      uses: danipaniii/action-github-changelog-generator@v1.2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        sinceTag: ${{ steps.previoustag.outputs.tag }}
-        dateFormat:
-        maxIssues: 500
-        unreleased: false
-        author: false
-        headerLabel: "## Changelog"
-        stripGeneratorNotice: true
-    - name: Create Release
-      uses: softprops/action-gh-release@v0.1.15
-      with:
-        tag_name: ${{ github.ref_name }}
-        body: ${{ steps.build_changelog.outputs.changelog }}
-        files: artifacts/*
-        generate_release_notes: false
-        token: ${{ github.token }}
-        name: Version ${{ github.ref_name }}
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build project
+        run: ./gradlew assemble bootJar -PbuildVersion=${{ github.ref_name }}
+      - name: Create BOM
+        run: ./gradlew cyclonedxBom
+      - name: Add artifacts
+        run: |
+          mkdir artifacts
+          cp build/libs/*.jar ./artifacts
+          cp build/reports/bom.json ./artifacts
+          cp build/reports/bom.xml ./artifacts
+      - name: Generate Release Hashes
+        run: |
+          cd ./artifacts
+          sha256sum * >> inspectit-ocelot-eum-server-sha256-checksums.txt
+      - name: "Get previous tag"
+        id: previoustag
+        # this gets the tag of the previous release based on the tags in the repo
+        run: echo "tag=$(git ls-remote --tags | cut --delimiter='/' --fields=3  | tail --lines=2 | head  -n -1)" >> $GITHUB_OUTPUT
+      - name: "Build Changelog"
+        id: build_changelog
+        uses: danipaniii/action-github-changelog-generator@v1.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          sinceTag: ${{ steps.previoustag.outputs.tag }}
+          dateFormat:
+          maxIssues: 500
+          unreleased: false
+          author: false
+          headerLabel: "## Changelog"
+          stripGeneratorNotice: true
+      - name: Create Release
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          tag_name: ${{ github.ref_name }}
+          body: ${{ steps.build_changelog.outputs.changelog }}
+          files: artifacts/*
+          generate_release_notes: false
+          token: ${{ github.token }}
+          name: Version ${{ github.ref_name }}
 
   build_and_publish_docker_images:
     name: "Build and Push Docker Images"
@@ -64,14 +64,14 @@ jobs:
     needs: build_and_release
     environment: release
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build Docker Images
-      run: ./gradlew dockerTag -PbuildVersion=${{ github.ref_name }}
-    - name: Push Docker Images
-      run: |
-        docker login -u ${{ secrets.DOCKER_HUB_USER }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
-        docker push inspectit/inspectit-ocelot-eum-server:${{ github.ref_name }}
-        docker push inspectit/inspectit-ocelot-eum-server:latest
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build Docker Images
+        run: ./gradlew dockerTag -PbuildVersion=${{ github.ref_name }}
+      - name: Push Docker Images
+        run: |
+          docker login -u ${{ secrets.DOCKER_HUB_USER }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
+          docker push inspectit/inspectit-ocelot-eum-server:${{ github.ref_name }}
+          docker push inspectit/inspectit-ocelot-eum-server:latest
