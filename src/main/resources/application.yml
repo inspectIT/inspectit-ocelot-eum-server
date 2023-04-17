@@ -146,7 +146,7 @@ inspectit-eum-server:
         database: "inspectit"
 
         # The username to be used to connect to the influxDB.
-        # username:
+        # user:
 
         # The password to be used to connect to the influxDB.
         # password:
