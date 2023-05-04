@@ -71,7 +71,7 @@ bootJar {
     dependsOn downloadOpenTelemetryPlugin
 
     archivesBaseName = "inspectit-ocelot-eum-server"
-    version = "${buildVersion}"
+    archiveVersion = "${buildVersion}"
 
     manifest {
         attributes "Start-Class": "rocks.inspectit.oce.eum.server.EUMServerApplication"
