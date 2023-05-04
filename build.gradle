@@ -151,8 +151,8 @@ dependencies {
             "rocks.inspectit:opencensus-influxdb-exporter:${opencensusInfluxdbExporterVersion}",
     )
 
-    compileOnly "org.projectlombok:lombok:${lombokVersion}"
-    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
 
     testImplementation(
             "org.springframework.boot:spring-boot-starter-test",
