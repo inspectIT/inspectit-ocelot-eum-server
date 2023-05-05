@@ -22,7 +22,7 @@ if (!project.hasProperty("buildVersion") || project.getProperty("buildVersion").
 
 version = "$buildVersion"
 
-task downloadBoomerangjs() {
+tasks.register('downloadBoomerangjs') {
     logger.info("Downloading Boomerangjs version {}.", boomerangVersion)
     ext.dest = new File(buildDir, "boomerang-source-${boomerangVersion}.tgz")
     outputs.files(ext.dest)
@@ -33,17 +33,18 @@ task downloadBoomerangjs() {
     }
 }
 
-task deleteBoomerangjs(type: Delete) {
+tasks.register('deleteBoomerangjs', Delete) {
     delete new File(project.buildDir, "boomerangjs-${boomerangVersion}")
 }
 
-task downloadAndExtractBoomerang(dependsOn: [deleteBoomerangjs, downloadBoomerangjs], type: Copy) {
+tasks.register ('downloadAndExtractBoomerang', Copy) {
+    dependsOn deleteBoomerangjs, downloadBoomerangjs
     from tarTree(downloadBoomerangjs.dest)
     into new File(project.buildDir, "boomerangjs-${boomerangVersion}")
     filter { line -> line.replaceAll("%boomerang_version%", "${boomerangVersion}") }
 }
 
-task generateVersionFile {
+tasks.register('generateVersionFile') {
     ext.versionFile = new File(project.buildDir, "eum-version.info")
     doLast {
         def currentDate = new Date().toString()
@@ -53,7 +54,7 @@ task generateVersionFile {
     }
 }
 
-task downloadOpenTelemetryPlugin() {
+tasks.register('downloadOpenTelemetryPlugin') {
     ext.dest = new File(buildDir, "boomerang-opentelemetry.js")
     outputs.files(ext.dest)
     doLast {
@@ -70,7 +71,7 @@ bootJar {
     dependsOn downloadOpenTelemetryPlugin
 
     archivesBaseName = "inspectit-ocelot-eum-server"
-    version = "${buildVersion}"
+    archiveVersion = "${buildVersion}"
 
     manifest {
         attributes "Start-Class": "rocks.inspectit.oce.eum.server.EUMServerApplication"
@@ -126,9 +127,6 @@ dependencies {
             "io.opencensus:opencensus-impl:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
 
-            "io.grpc:grpc-netty-shaded:${grpcVersion}",
-            "io.grpc:grpc-protobuf:${grpcVersion}",
-            "io.grpc:grpc-stub:${grpcVersion}",
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             "io.opentelemetry:opentelemetry-semconv",
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
@@ -154,8 +152,8 @@ dependencies {
             "rocks.inspectit:opencensus-influxdb-exporter:${opencensusInfluxdbExporterVersion}",
     )
 
-    compileOnly "org.projectlombok:lombok:${lombokVersion}"
-    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
 
     testImplementation(
             "org.springframework.boot:spring-boot-starter-test",
@@ -180,7 +178,7 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
 }
 
-task copyServerJar(type: Copy) {
+tasks.register('copyServerJar', Copy) {
     dependsOn bootJar
     from("${buildDir}/libs/inspectit-ocelot-eum-server-${version}.jar")
     into("${buildDir}/docker-jar")
@@ -193,5 +191,5 @@ docker {
     name "inspectit/inspectit-ocelot-eum-server"
     tags "${version}"
     dockerfile file("docker/Dockerfile")
-    files "docker/entrypoint.sh", "$buildDir/docker-jar/inspectit-ocelot-eum-server.jar"
+    files "docker/entrypoint.sh", copyServerJar.outputs
 }

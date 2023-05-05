@@ -92,8 +92,8 @@ public class OtlpMetricsExporterService {
             }
             if (otlp.getEnabled().equals(ExporterEnabledState.ENABLED)) {
                 if (!SUPPORTED_PROTOCOLS.contains(otlp.getProtocol())) {
-                    log.warn("OTLP Metric Exporter is enabled, but wrong 'protocol' is specified. Supported values are ", Arrays.toString(SUPPORTED_PROTOCOLS.stream()
-                            .map(transportProtocol -> transportProtocol.getConfigRepresentation())
+                    log.warn("OTLP Metric Exporter is enabled, but wrong 'protocol' is specified. Supported values are {}", Arrays.toString(SUPPORTED_PROTOCOLS.stream()
+                            .map(TransportProtocol::getConfigRepresentation)
                             .toArray()));
                 }
                 if (!StringUtils.hasText(otlp.getEndpoint())) {
