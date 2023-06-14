@@ -17,7 +17,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.util.SocketUtils;
+import org.springframework.test.util.TestSocketUtils;
 import rocks.inspectit.oce.eum.server.exporters.ExporterIntMockMvcTestBase;
 
 import java.util.Map;
@@ -41,7 +41,7 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
 
         @Override
         public void initialize(ConfigurableApplicationContext applicationContext) {
-            PROMETHEUS_PORT = SocketUtils.findAvailableTcpPort(20000);
+            PROMETHEUS_PORT = TestSocketUtils.findAvailableTcpPort();
             TestPropertyValues.of(String.format("inspectit-eum-server.exporters.metrics.prometheus.port=%d", PROMETHEUS_PORT))
                     .applyTo(applicationContext);
             TestPropertyValues.of(String.format("inspectit-eum-server.exporters.metrics.prometheus.enabled=ENABLED"))
