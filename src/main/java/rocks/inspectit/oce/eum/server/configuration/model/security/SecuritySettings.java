@@ -4,8 +4,8 @@ import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 import rocks.inspectit.oce.eum.server.configuration.model.security.authProvider.AuthenticationProviderSettings;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 
 @Data

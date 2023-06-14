@@ -21,8 +21,8 @@ import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration
 import rocks.inspectit.oce.eum.server.security.ApiTokenAuthentication;
 import rocks.inspectit.oce.eum.server.utils.DirectoryPoller;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

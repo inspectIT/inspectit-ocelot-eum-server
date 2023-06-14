@@ -9,8 +9,8 @@ import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.beacon.BeaconHttpExporterSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import java.util.concurrent.*;
 
 /**

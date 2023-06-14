@@ -4,10 +4,10 @@ import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState;
 
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 
 /**

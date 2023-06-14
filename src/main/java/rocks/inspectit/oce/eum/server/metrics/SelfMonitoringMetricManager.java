@@ -9,7 +9,7 @@ import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.Metr
 import rocks.inspectit.oce.eum.server.configuration.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.Map;
 

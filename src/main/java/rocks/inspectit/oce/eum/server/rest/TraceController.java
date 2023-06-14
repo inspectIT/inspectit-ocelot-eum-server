@@ -19,7 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import rocks.inspectit.oce.eum.server.metrics.SelfMonitoringMetricManager;
 import rocks.inspectit.oce.eum.server.tracing.opentelemtry.OpenTelemetryProtoConverter;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;

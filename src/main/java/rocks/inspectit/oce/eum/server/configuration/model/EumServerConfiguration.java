@@ -10,9 +10,9 @@ import rocks.inspectit.oce.eum.server.configuration.model.security.SecuritySetti
 import rocks.inspectit.oce.eum.server.configuration.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.tags.TagsSettings;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Map;
 

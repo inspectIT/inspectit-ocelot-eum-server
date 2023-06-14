@@ -18,7 +18,7 @@ import rocks.inspectit.oce.eum.server.configuration.model.exporters.beacon.Beaco
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.metrics.SelfMonitoringMetricManager;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.net.URI;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;

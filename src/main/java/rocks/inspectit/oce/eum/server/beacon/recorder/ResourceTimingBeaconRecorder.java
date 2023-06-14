@@ -21,7 +21,7 @@ import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.Metr
 import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
 import rocks.inspectit.oce.eum.server.metrics.MeasuresAndViewsManager;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;

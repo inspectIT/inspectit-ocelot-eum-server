@@ -8,7 +8,6 @@ import rocks.inspectit.oce.eum.server.configuration.model.CompressionMethod;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.TransportProtocol;
 
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.Map;
 
