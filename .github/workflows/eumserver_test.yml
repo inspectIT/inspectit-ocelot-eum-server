@@ -15,7 +15,7 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    container: openjdk:8-jdk
+    container: openjdk:17-jdk-slim
     steps:
       - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
