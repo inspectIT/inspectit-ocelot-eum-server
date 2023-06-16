@@ -2,6 +2,7 @@ package rocks.inspectit.oce.eum.server.rest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -31,9 +32,10 @@ public class BeaconController {
     private BeaconHttpExporter beaconHttpExporter;
 
     @ExceptionHandler({Exception.class})
-    public void handleException(Exception exception) {
+    public ResponseEntity<String> handleException(Exception exception) {
         selfMonitoringService.record("beacons_received", 1, Collections.singletonMap("is_error", "true"));
         log.error("Error while receiving beacon", exception);
+        return new ResponseEntity<>("There was an error", HttpStatus.BAD_REQUEST);
     }
 
     @CrossOrigin

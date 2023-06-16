@@ -15,6 +15,7 @@ apply plugin: "jacoco"
 
 group = "rocks.inspectit.ocelot"
 sourceCompatibility = "17"
+targetCompatibility = "17"
 
 if (!project.hasProperty("buildVersion") || project.getProperty("buildVersion").empty) {
     ext.buildVersion = "SNAPSHOT"

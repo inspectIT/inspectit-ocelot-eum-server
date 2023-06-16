@@ -47,7 +47,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
     protected static final String OTLP_HTTP_METRICS_PATH = "/v1/metrics";
 
-    static final String COLLECTOR_TAG = "0.58.0";
+    static final String COLLECTOR_TAG = "0.70.0";
 
     static final String COLLECTOR_IMAGE = "otel/opentelemetry-collector-contrib:" + COLLECTOR_TAG;
 
@@ -223,6 +223,16 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
      * @param expected whether the value is expected or not
      */
     protected void assertMetric(double value, boolean expected) {
+        assertMetric(value, expected, ViewDefinitionSettings.Aggregation.SUM);
+    }
+
+    /**
+     * Checks if a metric with the given value has been recorded or not
+     *
+     * @param value    the value
+     * @param expected whether the value is expected or not
+     */
+    protected void assertMetric(double value, boolean expected, ViewDefinitionSettings.Aggregation aggregation) {
         assertThat(grpcServer.metricRequests.stream()
                 .anyMatch(mReq -> mReq.getResourceMetricsList()
                         .stream()
@@ -230,10 +240,11 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                                 .stream()
                                 .anyMatch(iml -> iml.getMetricsList()
                                         .stream()
-                                        .anyMatch(metric -> metric.getSum()
-                                                .getDataPointsList()
+                                        .anyMatch(metric -> (aggregation == ViewDefinitionSettings.Aggregation.LAST_VALUE ?
+                                                metric.getGauge().getDataPointsList() : metric.getSum().getDataPointsList())
                                                 .stream()
-                                                .anyMatch(d -> expected ? d.getAsDouble() == value : d.getAsDouble() != value)))))).isTrue();
+                                                .anyMatch(d ->  expected ? d.getAsDouble() == value : d.getAsDouble() != value
+                                                )))))).isTrue();
     }
 
     /**

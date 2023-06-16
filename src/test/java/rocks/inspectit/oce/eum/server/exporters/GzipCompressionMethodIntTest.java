@@ -95,7 +95,6 @@ public class GzipCompressionMethodIntTest extends ExporterIntTestBaseWithOtelCol
         sendBeacon(beacon);
         // wait until metrics have been exported
         awaitMetricsExported(METRIC_END_TIMESTAMP_KEY_NAME, 41, ViewDefinitionSettings.Aggregation.LAST_VALUE);
-        assertMetric(1334, false);
+        assertMetric(1334, false, ViewDefinitionSettings.Aggregation.LAST_VALUE);
     }
-
 }
