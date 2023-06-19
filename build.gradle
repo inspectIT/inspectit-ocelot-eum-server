@@ -56,7 +56,7 @@ tasks.register('generateVersionFile') {
 }
 
 tasks.register('downloadOpenTelemetryPlugin') {
-    ext.dest = new File(buildDir, "boomerang-opentelemetry.js")
+    ext.dest = new File(buildDir, "boomerangjs-${boomerangVersion}/package/plugins/boomerang-opentelemetry.js")
     outputs.files(ext.dest)
     doLast {
         def f = ext.dest
