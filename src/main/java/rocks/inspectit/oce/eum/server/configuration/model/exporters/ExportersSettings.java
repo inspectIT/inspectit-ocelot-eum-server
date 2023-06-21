@@ -6,7 +6,7 @@ import rocks.inspectit.oce.eum.server.configuration.model.exporters.beacon.Beaco
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.metrics.MetricsExportersSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.TraceExportersSettings;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 /**
  * Extended exporter settings.

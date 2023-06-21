@@ -22,7 +22,7 @@ import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.OtlpTr
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.TraceExportersSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.JaegerExporterSettings;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.Map;
 import java.util.Optional;
 

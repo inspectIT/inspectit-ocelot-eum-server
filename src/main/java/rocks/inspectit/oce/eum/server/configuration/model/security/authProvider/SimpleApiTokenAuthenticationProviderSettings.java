@@ -5,7 +5,7 @@ import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.AssertTrue;
 import java.time.Duration;
 
 @Data

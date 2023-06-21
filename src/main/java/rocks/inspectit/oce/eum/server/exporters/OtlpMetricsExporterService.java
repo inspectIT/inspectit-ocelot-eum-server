@@ -31,14 +31,13 @@ import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnab
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.TransportProtocol;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.metrics.OtlpMetricsExporterSettings;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.validation.Valid;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;

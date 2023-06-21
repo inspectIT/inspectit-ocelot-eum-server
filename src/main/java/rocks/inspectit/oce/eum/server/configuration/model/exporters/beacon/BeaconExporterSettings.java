@@ -3,7 +3,7 @@ package rocks.inspectit.oce.eum.server.configuration.model.exporters.beacon;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 /**
  * Beacon exporter settings.

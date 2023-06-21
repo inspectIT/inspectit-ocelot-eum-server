@@ -46,7 +46,7 @@ public class SelfMonitoringMetricManagerTest {
     MeasureMap measureMap;
 
     @Nested
-    class record {
+    class Record {
 
         private SelfMonitoringSettings selfMonitoringSettings = new SelfMonitoringSettings();
 

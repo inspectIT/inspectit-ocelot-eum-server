@@ -4,7 +4,7 @@ import lombok.*;
 import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.util.CollectionUtils;
 
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;

@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RequestUtils {

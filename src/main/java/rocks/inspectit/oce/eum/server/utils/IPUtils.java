@@ -4,7 +4,7 @@ import org.apache.commons.net.util.SubnetUtils;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Util to extract the origin IP from the given request.

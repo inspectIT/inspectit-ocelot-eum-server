@@ -3,7 +3,7 @@ package rocks.inspectit.oce.eum.server.configuration.model.tags.providers;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 @Data
 @NoArgsConstructor
