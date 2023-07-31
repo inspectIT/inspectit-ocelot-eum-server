@@ -62,7 +62,6 @@ jobs:
   build_and_publish_docker_images:
     name: "Build and Push Docker Images"
     runs-on: ubuntu-latest
-    container: openjdk:17-jdk-slim
     needs: build_and_release
     environment: release
     steps:
@@ -70,8 +69,12 @@ jobs:
         uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+      - name: Install Java 17 # We cannot use the openjdk:17-jdk container, since we also need Docker inside the container
+        run: sudo apt update && sudo apt install openjdk-17-jdk
       - name: Build Docker Images
-        run: ./gradlew dockerTag -PbuildVersion=${{ github.ref_name }}
+        run: |
+          export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+          ./gradlew dockerTag -PbuildVersion=${{ github.ref_name }}
       - name: Push Docker Images
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USER }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
