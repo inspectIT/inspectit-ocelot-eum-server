@@ -59,9 +59,7 @@ public class SecurityConfig {
      */
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
-        //http.cors().and().csrf();   //GEHT
-        http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable); //GEHT
-        //http.cors(AbstractHttpConfigurer::disable).csrf(AbstractHttpConfigurer::disable); //GEHT NICHT
+        http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable);
         if (configuration.getSecurity().isEnabled()) {
             http.authorizeHttpRequests(
                     authz -> authz
