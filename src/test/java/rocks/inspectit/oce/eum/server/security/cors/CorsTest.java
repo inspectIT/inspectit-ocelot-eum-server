@@ -11,10 +11,7 @@ import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = CorsTest.Initializer.class)
