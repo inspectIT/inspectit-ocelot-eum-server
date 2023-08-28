@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -20,10 +21,9 @@ import java.util.List;
 
 @Slf4j
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
     @Autowired
     private EumServerConfiguration configuration;
     @Autowired(required = false)
@@ -53,8 +53,8 @@ public class SecurityConfig {
      * @throws Exception In case of any error
      */
     @Bean
-    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(AbstractHttpConfigurer::disable).csrf(AbstractHttpConfigurer::disable);
+    protected SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
+        http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable);
         if (configuration.getSecurity().isEnabled()) {
             http.authorizeHttpRequests(
                     authz -> authz
