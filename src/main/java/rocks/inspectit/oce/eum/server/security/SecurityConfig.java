@@ -9,21 +9,26 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.CorsUtils;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.configuration.model.security.SecuritySettings;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 @Slf4j
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
     @Autowired
     private EumServerConfiguration configuration;
     @Autowired(required = false)
@@ -53,8 +58,10 @@ public class SecurityConfig {
      * @throws Exception In case of any error
      */
     @Bean
-    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(AbstractHttpConfigurer::disable).csrf(AbstractHttpConfigurer::disable);
+    protected SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
+        //http.cors().and().csrf();   //GEHT
+        http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable); //GEHT
+        //http.cors(AbstractHttpConfigurer::disable).csrf(AbstractHttpConfigurer::disable); //GEHT NICHT
         if (configuration.getSecurity().isEnabled()) {
             http.authorizeHttpRequests(
                     authz -> authz
