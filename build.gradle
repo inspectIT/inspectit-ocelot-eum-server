@@ -136,7 +136,7 @@ dependencies {
             "io.opentelemetry:opentelemetry-exporter-jaeger-thrift",
             "io.opentelemetry:opentelemetry-sdk",
             "io.opentelemetry:opentelemetry-proto:${openTelemetryProtoVersion}",
-            
+
             "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
 
             "com.google.protobuf:protobuf-java:${protobufVersion}",
@@ -149,7 +149,13 @@ dependencies {
             "org.apache.commons:commons-lang3",
             "org.apache.commons:commons-math3:${commonsMath3Version}",
             "commons-io:commons-io:${commonsIoVersion}",
+
+            // If indluxdb-java is updated, check new version of the transitive dependency okio-jvm
+            // If there is a higher new version, remove the dependency override of okio-jvm
             "org.influxdb:influxdb-java:${influxdbJavaVersion}",
+            // Override transitive dependency with newer version, due to security concerns
+            "com.squareup.okio:okio-jvm:${okioJvmVersion}",
+
             "rocks.inspectit:opencensus-influxdb-exporter:${opencensusInfluxdbExporterVersion}",
     )
 
