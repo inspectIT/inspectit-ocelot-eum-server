@@ -67,14 +67,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Setup
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17  # Spring 3 needs at least java 17
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Install Java 17 # We cannot use the openjdk:17-jdk container, since we also need Docker inside the container
-        run: sudo apt update && sudo apt install openjdk-17-jdk
       - name: Build Docker Images
-        run: |
-          export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-          ./gradlew dockerTag -PbuildVersion=${{ github.ref_name }}
+        run: ./gradlew dockerTag -PbuildVersion=${{ github.ref_name }}
       - name: Push Docker Images
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USER }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
