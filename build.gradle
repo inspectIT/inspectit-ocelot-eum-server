@@ -1,9 +1,12 @@
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+
 plugins {
     id "org.springframework.boot" version "${springBootVersion}"
     id "com.palantir.docker" version "${palantirDockerVersion}"
     id "org.cyclonedx.bom" version "${cyclonedxBomVersion}"
     id "io.spring.dependency-management" version "${springDependencyManangementVersion}"
     id "org.owasp.dependencycheck" version "${owaspDependencyCheckVersion}"
+    id "com.github.ben-manes.versions" version "${versionsPlugin}"
 }
 
 repositories {
@@ -14,8 +17,11 @@ apply plugin: "java"
 apply plugin: "jacoco"
 
 group = "rocks.inspectit.ocelot"
-sourceCompatibility = "17"
-targetCompatibility = "17"
+
+java {
+    sourceCompatibility = "17"
+    targetCompatibility = "17"
+}
 
 if (!project.hasProperty("buildVersion") || project.getProperty("buildVersion").empty) {
     ext.buildVersion = "SNAPSHOT"
@@ -71,8 +77,11 @@ bootJar {
     dependsOn downloadAndExtractBoomerang
     dependsOn downloadOpenTelemetryPlugin
 
-    archivesBaseName = "inspectit-ocelot-eum-server"
     archiveVersion = "${buildVersion}"
+
+    base {
+        archivesName = "inspectit-ocelot-eum-server"
+    }
 
     manifest {
         attributes "Start-Class": "rocks.inspectit.oce.eum.server.EUMServerApplication"
@@ -82,14 +91,14 @@ bootJar {
     from generateVersionFile.versionFile
 
     // include boomerang
-    from("$buildDir/boomerangjs-${boomerangVersion}/package") {
+    from(layout.buildDirectory.dir("boomerangjs-${boomerangVersion}/package")) {
         include "plugins/*.js"
         include "boomerang.js"
         into "static/boomerang"
     }
 
     //include boomerang opentelemetry
-    from("$buildDir") {
+    from(layout.buildDirectory) {
         include "boomerang-opentelemetry.js"
         into "static/boomerang"
     }
@@ -127,6 +136,8 @@ dependencies {
             "io.opencensus:opencensus-api:${openCensusVersion}",
             "io.opencensus:opencensus-impl:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
+
+            //"io.grpc:grpc-context:1.58.0",
 
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             "io.opentelemetry:opentelemetry-semconv",
@@ -187,8 +198,8 @@ dependencies {
 
 tasks.register('copyServerJar', Copy) {
     dependsOn bootJar
-    from("${buildDir}/libs/inspectit-ocelot-eum-server-${version}.jar")
-    into("${buildDir}/docker-jar")
+    from(layout.buildDirectory.file("libs/inspectit-ocelot-eum-server-${version}.jar"))
+    into(layout.buildDirectory.dir("docker-jar"))
     rename("inspectit-ocelot-eum-server-${version}\\.jar",
             "inspectit-ocelot-eum-server.jar")
 }
@@ -199,4 +210,65 @@ docker {
     tags "${version}"
     dockerfile file("docker/Dockerfile")
     files "docker/entrypoint.sh", copyServerJar.outputs
+}
+
+dependencyCheck {
+    failBuildOnCVSS = 6
+    suppressionFile = "dependencyCheckSuppression.xml"
+    analyzers {
+        assemblyEnabled = false
+        ossIndex {
+            enabled = true
+        }
+    }
+}
+
+def isNonStable = { String candidate ->
+    def stableKeyword = ['RELEASE', 'FINAL', 'GA', 'JRE'].any { it -> candidate.toUpperCase().contains(it) }
+    def versionRegex = /^[0-9,.v-]+(-r)?$/
+    return !stableKeyword && !(candidate ==~ versionRegex)
+}
+
+def isNotSameMajorMinor = { String current, String candidate, boolean matchMinor ->
+    if(current.equals(candidate)) return false
+
+    def firstDot = current.indexOf('.')
+    def secondDot = current.indexOf('.', firstDot + 1)
+    def major = current.substring(0, firstDot)
+    def minor = current.substring(firstDot + 1, secondDot)
+    def majorRegex = /^$major\..*/
+    def minorRegex = /^$major\.${minor}\..*/
+    return !((candidate ==~ majorRegex) && (!matchMinor || (candidate ==~ minorRegex)))
+}
+
+tasks.named("dependencyUpdates").configure {
+    rejectVersionIf {
+        // only patch updates
+        isNonStable(it.candidate.version) || isNotSameMajorMinor(it.currentVersion, it.candidate.version, true)
+    }
+}
+
+tasks.register('dependencyUpdatesMinor', DependencyUpdatesTask) {
+    rejectVersionIf {
+        // only minor updates
+        isNonStable(it.candidate.version) || isNotSameMajorMinor(it.currentVersion, it.candidate.version, false)
+    }
+}
+
+tasks.register('dependencyUpdatesMajor', DependencyUpdatesTask) {
+    rejectVersionIf {
+        // all updates including major updates
+        isNonStable(it.candidate.version)
+    }
+}
+
+tasks.withType(DependencyUpdatesTask).configureEach {
+    // default settings
+    revision = 'milestone'
+    gradleReleaseChannel = "current"
+    checkConstraints = true
+    checkBuildEnvironmentConstraints = true
+    outputFormatter = 'json,plain'
+    outputDir = 'build/reports'
+    reportfileName = 'dependencyUpdates'
 }
