@@ -330,3 +330,6 @@ to ```inspectit-ocelot-eum-server.jar``` and copied to the ./docker directory
 ##### How to Release
 To create a new release, you have to create a new git tag and push it on to GitHub. 
 This Tag is the new version number of the release. Afterwards the release build will be automatically triggered.
+
+Important tasks to check first are `dependencyUpdates` and `dependencyUpdates[Major|Minor]` for newer (patch, minor, major)
+versions and `dependencyCheckAnalyze` for security issues in the used dependencies. 
