@@ -12,6 +12,7 @@ import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse;
+import io.opentelemetry.proto.trace.v1.ScopeSpans;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -170,9 +171,9 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
             Stream<List<io.opentelemetry.proto.trace.v1.Span>> spansLis = grpcServer.traceRequests.stream()
                     .flatMap(tr -> tr.getResourceSpansList()
                             .stream()
-                            .flatMap(rs -> rs.getInstrumentationLibrarySpansList()
+                            .flatMap(rs -> rs.getScopeSpansList()
                                     .stream()
-                                    .map(ils -> ils.getSpansList())));
+                                    .map(ScopeSpans::getSpansList)));
 
             assertThat(spansLis.anyMatch(s -> s.stream()
                     .anyMatch(span -> TraceId.fromBytes(span.getTraceId().toByteArray())
@@ -207,7 +208,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                         .stream()
                         .anyMatch(rm ->
                                 // check for the given metrics
-                                rm.getInstrumentationLibraryMetrics(0)
+                                rm.getScopeMetrics(0)
                                         .getMetricsList()
                                         .stream()
                                         .filter(metric -> metric.getName().equalsIgnoreCase(metricName))
@@ -236,7 +237,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
         assertThat(grpcServer.metricRequests.stream()
                 .anyMatch(mReq -> mReq.getResourceMetricsList()
                         .stream()
-                        .anyMatch(rm -> rm.getInstrumentationLibraryMetricsList()
+                        .anyMatch(rm -> rm.getScopeMetricsList()
                                 .stream()
                                 .anyMatch(iml -> iml.getMetricsList()
                                         .stream()

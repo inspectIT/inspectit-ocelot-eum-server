@@ -30,7 +30,7 @@
         ],
         "droppedAttributesCount": 0
       },
-      "instrumentationLibrarySpans": [
+      "scopeSpans": [
         {
           "spans": [
             {
@@ -51,7 +51,7 @@
               "droppedLinksCount": 0
             }
           ],
-          "instrumentationLibrary": {
+          "scope": {
             "name": "my-library-name"
           }
         }
