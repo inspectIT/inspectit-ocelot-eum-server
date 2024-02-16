@@ -142,12 +142,12 @@ dependencies {
             "io.grpc:grpc-context:${grpcVersion}",
 
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
-            "io.opentelemetry:opentelemetry-semconv",
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
-            "io.opentelemetry:opentelemetry-exporter-otlp",
-            "io.opentelemetry:opentelemetry-exporter-jaeger",
-            "io.opentelemetry:opentelemetry-exporter-jaeger-thrift",
-            "io.opentelemetry:opentelemetry-sdk",
+            "io.opentelemetry:opentelemetry-exporter-otlp:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-semconv:${openTelemetrySemConvVersion}",
+            "io.opentelemetry:opentelemetry-exporter-jaeger:${openTelemetryJaegerVersion}",
+            "io.opentelemetry:opentelemetry-exporter-jaeger-thrift:${openTelemetryJaegerVersion}",
+            "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
             "io.opentelemetry.proto:opentelemetry-proto:${openTelemetryProtoVersion}",
 
             "com.google.protobuf:protobuf-java:${protobufVersion}",
