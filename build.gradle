@@ -126,6 +126,8 @@ dependencies {
             "org.springframework.boot:spring-boot-starter-security",
 
             "org.yaml:snakeyaml:${snakeYamlVersion}",
+            // Has to be included, but is transitive to spring
+            "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
 
             // pin Prometheus client to 0.6.0 to prevent auto prefixing counter metrics with "_total"
             // see: https://github.com/prometheus/client_java/issues/640, https://github.com/prometheus/client_java/pull/653
@@ -147,8 +149,6 @@ dependencies {
             "io.opentelemetry:opentelemetry-exporter-jaeger-thrift",
             "io.opentelemetry:opentelemetry-sdk",
             "io.opentelemetry.proto:opentelemetry-proto:${openTelemetryProtoVersion}",
-
-            "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
 
             "com.google.protobuf:protobuf-java:${protobufVersion}",
             "com.google.protobuf:protobuf-java-util:${protobufVersion}",
