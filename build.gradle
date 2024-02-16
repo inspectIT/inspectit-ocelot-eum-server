@@ -157,7 +157,7 @@ dependencies {
 
             "com.maxmind.geoip2:geoip2:${geoip2Version}",
             "commons-net:commons-net:${commonsNetVersion}",
-            "org.apache.commons:commons-lang3",
+            "org.apache.commons:commons-lang3:${commonsLang3Version}",
             "org.apache.commons:commons-math3:${commonsMath3Version}",
             "commons-io:commons-io:${commonsIoVersion}",
 
@@ -176,11 +176,7 @@ dependencies {
     testImplementation(
             "org.springframework.boot:spring-boot-starter-test",
             "io.opencensus:opencensus-impl:${openCensusVersion}",
-            "org.apache.httpcomponents:httpclient:4.5.14",
-            "org.mockito:mockito-core",
-            "org.junit.jupiter:junit-jupiter-api",
-            "org.awaitility:awaitility",
-            "org.mockito:mockito-junit-jupiter",
+            "org.apache.httpcomponents:httpclient:${httpClientVersion}",
 
             // ServerExtension
             "com.linecorp.armeria:armeria-junit5:${armeriaVersion}",
