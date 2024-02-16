@@ -137,6 +137,8 @@ dependencies {
             "io.opencensus:opencensus-impl:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
 
+            "io.grpc:grpc-context:${grpcVersion}",
+
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             "io.opentelemetry:opentelemetry-semconv",
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
