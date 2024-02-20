@@ -30,7 +30,7 @@
         ],
         "droppedAttributesCount": 0
       },
-      "instrumentationLibrarySpans": [
+      "scopeSpans": [
         {
           "spans": [
             {
@@ -85,7 +85,7 @@
               "droppedLinksCount": 2
             }
           ],
-          "instrumentationLibrary": {
+          "scope": {
             "name": "@opentelemetry/instrumentation-xml-http-request",
             "version": "0.18.2"
           }

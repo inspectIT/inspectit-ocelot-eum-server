@@ -3,12 +3,12 @@ package rocks.inspectit.oce.eum.server.tracing.opentelemtry;
 import com.google.protobuf.util.JsonFormat;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
-import io.opentelemetry.proto.common.v1.InstrumentationLibrary;
+import io.opentelemetry.proto.common.v1.InstrumentationScope;
 import io.opentelemetry.proto.resource.v1.Resource;
-import io.opentelemetry.proto.trace.v1.InstrumentationLibrarySpans;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
+import io.opentelemetry.proto.trace.v1.ScopeSpans;
 import io.opentelemetry.proto.trace.v1.Span;
-import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.trace.data.EventData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.data.StatusData;
@@ -91,9 +91,9 @@ class OpenTelemetryProtoConverterTest {
             assertThat(spanData.getLinks()).isEmpty();
             assertThat(spanData.getTotalRecordedLinks()).isEqualTo(0);
 
-            InstrumentationLibraryInfo libraryInfo = spanData.getInstrumentationLibraryInfo();
-            assertThat(libraryInfo.getName()).isEqualTo("my-library-name");
-            assertThat(libraryInfo.getVersion()).isBlank();
+            InstrumentationScopeInfo scopeInfo = spanData.getInstrumentationScopeInfo();
+            assertThat(scopeInfo.getName()).isEqualTo("my-library-name");
+            assertThat(scopeInfo.getVersion()).isBlank();
 
             io.opentelemetry.sdk.resources.Resource resource = spanData.getResource();
             assertThat(resource.getAttributes()
@@ -134,9 +134,9 @@ class OpenTelemetryProtoConverterTest {
             assertThat(spanData.getLinks()).isEmpty();
             assertThat(spanData.getTotalRecordedLinks()).isEqualTo(2);
 
-            InstrumentationLibraryInfo libraryInfo = spanData.getInstrumentationLibraryInfo();
-            assertThat(libraryInfo.getName()).isEqualTo("@opentelemetry/instrumentation-xml-http-request");
-            assertThat(libraryInfo.getVersion()).isEqualTo("0.18.2");
+            InstrumentationScopeInfo scopeInfo = spanData.getInstrumentationScopeInfo();
+            assertThat(scopeInfo.getName()).isEqualTo("@opentelemetry/instrumentation-xml-http-request");
+            assertThat(scopeInfo.getVersion()).isEqualTo("0.18.2");
 
             io.opentelemetry.sdk.resources.Resource resource = spanData.getResource();
             assertThat(resource.getAttributes()
@@ -149,8 +149,8 @@ class OpenTelemetryProtoConverterTest {
             ExportTraceServiceRequest data = ExportTraceServiceRequest.newBuilder()
                     .addResourceSpans(ResourceSpans.newBuilder()
                             .setResource(Resource.newBuilder().build())
-                            .addInstrumentationLibrarySpans(InstrumentationLibrarySpans.newBuilder()
-                                    .setInstrumentationLibrary(InstrumentationLibrary.newBuilder().build())
+                            .addScopeSpans(ScopeSpans.newBuilder()
+                                    .setScope(InstrumentationScope.newBuilder().build())
                                     .addSpans(Span.newBuilder().build())
                                     .build())
                             .build())

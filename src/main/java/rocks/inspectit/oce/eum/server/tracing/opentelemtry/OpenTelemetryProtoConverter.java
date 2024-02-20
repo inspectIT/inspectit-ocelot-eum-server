@@ -4,9 +4,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
-import io.opentelemetry.proto.common.v1.InstrumentationLibrary;
-import io.opentelemetry.proto.trace.v1.InstrumentationLibrarySpans;
+import io.opentelemetry.proto.common.v1.InstrumentationScope;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
+import io.opentelemetry.proto.trace.v1.ScopeSpans;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.OcelotSpanUtils;
@@ -49,9 +49,9 @@ public class OpenTelemetryProtoConverter {
 
             Map<String, String> customSpanAttributes = getCustomSpanAttributes();
 
-            resourceSpans.getInstrumentationLibrarySpansList()
+            resourceSpans.getScopeSpansList()
                     .stream()
-                    .flatMap(librarySpans -> toSpanData(librarySpans, resource, customSpanAttributes))
+                    .flatMap(scopeSpans -> toSpanData(scopeSpans, resource, customSpanAttributes))
                     .forEach(result::add);
         }
 
@@ -59,13 +59,16 @@ public class OpenTelemetryProtoConverter {
     }
 
     /**
-     * @return Converts an {@link InstrumentationLibrarySpans} instance to a stream of individual {@link SpanData} instances.
+     * @return Converts an {@link ScopeSpans} instance to a stream of individual {@link SpanData} instances.
      */
-    private Stream<SpanData> toSpanData(InstrumentationLibrarySpans librarySpans, Resource resource, Map<String, String> customSpanAttributes) {
-        InstrumentationLibrary library = librarySpans.getInstrumentationLibrary();
-        InstrumentationScopeInfo instrumentationScopeInfo = InstrumentationScopeInfo.builder(library.getName()).setVersion(library.getVersion()).build();
+    private Stream<SpanData> toSpanData(ScopeSpans scopeSpans, Resource resource, Map<String, String> customSpanAttributes) {
+        InstrumentationScope scope = scopeSpans.getScope();
+        InstrumentationScopeInfo instrumentationScopeInfo = InstrumentationScopeInfo
+                .builder(scope.getName())
+                .setVersion(scope.getVersion())
+                .build();
 
-        return librarySpans.getSpansList()
+        return scopeSpans.getSpansList()
                 .stream()
                 .map(protoSpan -> OcelotSpanUtils.createSpanData(protoSpan, resource, instrumentationScopeInfo, customSpanAttributes))
                 .filter(Objects::nonNull);
