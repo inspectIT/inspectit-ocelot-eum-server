@@ -77,9 +77,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build Docker Images
-        run: ./gradlew dockerTag -PbuildVersion=2.5.6
+        run: ./gradlew dockerTag -PbuildVersion=${{ github.ref_name }}
       - name: Push Docker Images
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USER }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
-          docker push inspectit/inspectit-ocelot-eum-server:2.5.6
+          docker push inspectit/inspectit-ocelot-eum-server:${{ github.ref_name }}
           docker push inspectit/inspectit-ocelot-eum-server:latest
