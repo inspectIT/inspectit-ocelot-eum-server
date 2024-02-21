@@ -1,0 +1,27 @@
+name: Build and Push Docker Image
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_and_publish_docker_images:
+    name: "Build and Push Docker Images"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17  # Spring 3 needs at least java 17
+          distribution: temurin
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build Docker Images
+        run: ./gradlew dockerTag -PbuildVersion=2.5.6
+      - name: Push Docker Images
+        run: |
+          docker login -u ${{ secrets.DOCKER_HUB_USER }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
+          docker push inspectit/inspectit-ocelot-eum-server:2.5.6
