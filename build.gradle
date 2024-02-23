@@ -138,24 +138,25 @@ dependencies {
             "io.opencensus:opencensus-api:${openCensusVersion}",
             "io.opencensus:opencensus-impl:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
+            "rocks.inspectit:opencensus-influxdb-exporter:${openCensusInfluxdbExporterVersion}",
 
             "io.grpc:grpc-context:${grpcVersion}",
 
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
-            "io.opentelemetry:opentelemetry-exporter-otlp:${openTelemetryVersion}",
-            "io.opentelemetry:opentelemetry-semconv:${openTelemetrySemConvVersion}",
-            "io.opentelemetry:opentelemetry-exporter-jaeger:${openTelemetryJaegerVersion}",
-            "io.opentelemetry:opentelemetry-exporter-jaeger-thrift:${openTelemetryJaegerVersion}",
             "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-exporter-otlp:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-exporter-jaeger:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-exporter-jaeger-thrift:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-semconv:${openTelemetryAlphaVersion}",
             "io.opentelemetry.proto:opentelemetry-proto:${openTelemetryProtoVersion}",
 
             "com.google.protobuf:protobuf-java:${protobufVersion}",
             "com.google.protobuf:protobuf-java-util:${protobufVersion}",
 
             "com.google.guava:guava:${guavaVersion}",
-
             "com.maxmind.geoip2:geoip2:${geoip2Version}",
+
             "commons-net:commons-net:${commonsNetVersion}",
             "org.apache.commons:commons-lang3:${commonsLang3Version}",
             "org.apache.commons:commons-math3:${commonsMath3Version}",
@@ -165,9 +166,7 @@ dependencies {
             // If there is a higher new version, remove the dependency override of okio-jvm
             "org.influxdb:influxdb-java:${influxdbJavaVersion}",
             // Override transitive dependency with newer version, due to security concerns
-            "com.squareup.okio:okio-jvm:${okioJvmVersion}",
-
-            "rocks.inspectit:opencensus-influxdb-exporter:${opencensusInfluxdbExporterVersion}",
+            "com.squareup.okio:okio-jvm:${okioJvmVersion}"
     )
 
     compileOnly "org.projectlombok:lombok"
@@ -181,8 +180,6 @@ dependencies {
             // ServerExtension
             "com.linecorp.armeria:armeria-junit5:${armeriaVersion}",
             "com.linecorp.armeria:armeria-grpc-protocol:${armeriaVersion}",
-
-            "io.opentelemetry:opentelemetry-semconv:${openTelemetryAlphaVersion}",
 
             // for docker test containers
             "org.testcontainers:testcontainers:${testContainersVersion}",

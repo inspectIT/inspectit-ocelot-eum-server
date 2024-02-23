@@ -26,9 +26,15 @@ public class OtlpGrpcTraceExporterIntTest extends ExporterIntTestBaseWithOtelCol
     }
 
     @Test
-    void verifyTraceSentGrpc() throws Exception {
+    void verifyTraceSentGrpcWithOtlp() throws Exception {
         String grpcTraceId = "497d4e959f574a77d0d3abf05523ec5a";
         postSpan(grpcTraceId);
         awaitSpansExported(grpcTraceId);
+    }
+
+    @Test
+    void verifyTraceWithArrayValueSentGrpcWithOtlp() throws Exception {
+        postResourceSpans();
+        awaitSpansExported(RESOURCE_TRACE_ID);
     }
 }

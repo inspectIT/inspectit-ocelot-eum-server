@@ -27,6 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static io.opentelemetry.api.common.AttributeKey.*;
@@ -36,9 +37,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OpenTelemetryProtoConverterTest {
 
-    public static final String TRACE_REQUEST_FILE_SMALL = "/ot-trace-small-v0.18.2.json";
+    public static final String TRACE_REQUEST_FILE_SMALL = "/ot-trace-small-v0.48.0.json";
 
-    public static final String TRACE_REQUEST_FILE_LARGE = "/ot-trace-large-v0.18.2.json";
+    public static final String TRACE_REQUEST_FILE_LARGE = "/ot-trace-large-v0.48.0.json";
+
+    public static final String TRACE_REQUEST_FILE_ARRAY = "/ot-trace-array-v0.48.0.json";
 
     @InjectMocks
     private OpenTelemetryProtoConverter converter;
@@ -52,6 +55,10 @@ class OpenTelemetryProtoConverterTest {
 
     private ExportTraceServiceRequest getLargeTestRequest() throws Exception {
         return getTestRequest(TRACE_REQUEST_FILE_LARGE);
+    }
+
+    private ExportTraceServiceRequest getArrayTestRequest() throws Exception {
+        return getTestRequest(TRACE_REQUEST_FILE_ARRAY);
     }
 
     private ExportTraceServiceRequest getTestRequest(String file) throws Exception {
@@ -142,6 +149,25 @@ class OpenTelemetryProtoConverterTest {
             assertThat(resource.getAttributes()
                     .asMap()).containsExactly(entry(stringKey("service.name"), "my-application"), entry(stringKey("telemetry.sdk.language"), "webjs"), entry(stringKey("telemetry.sdk.name"), "opentelemetry"), entry(stringKey("telemetry.sdk.version"), "0.18.2"));
             //@formatter:on
+        }
+
+        @Test
+        void convertArrayRequest() throws Exception {
+            ExportTraceServiceRequest request = getArrayTestRequest();
+
+            Collection<SpanData> result = converter.convert(request);
+            List<SpanData> resultList = result.stream().toList();
+
+            assertThat(resultList).hasSize(2).allSatisfy(data -> {
+                assertThat(data.getTraceId()).isEqualTo("a4a68b53c52438381b6cb304410ff0be");
+                assertThat(data.getSpanId()).isNotBlank();
+                assertThat(data.getName()).isNotBlank();
+                assertThat(data.getKind()).isNotNull();
+                assertThat(data.getAttributes()).isNotNull();
+                assertThat(data.getEvents()).isNotNull();
+                assertThat(data.getResource()).isNotNull();
+                assertThat(data.hasEnded()).isTrue();
+            });
         }
 
         @Test
