@@ -63,10 +63,8 @@ public class OcelotSpanUtilsTest {
         }
 
         @Test
-        public void verifyEmptyKeyValue() {
-            List<KeyValue> keyValues = new LinkedList<>();
-            KeyValue kv = KeyValue.newBuilder().build();
-            keyValues.add(kv);
+        public void verifyNullKeyValue() {
+            List<KeyValue> keyValues = Collections.singletonList(null);
 
             Attributes attributes = OcelotSpanUtils.toAttributes(keyValues);
 
@@ -74,12 +72,33 @@ public class OcelotSpanUtilsTest {
         }
 
         @Test
-        public void verifyEmptyValue() {
-            List<KeyValue> keyValues = new LinkedList<>();
+        public void verifyEmptyKeyValue() {
+            KeyValue kv = KeyValue.newBuilder().build();
+            List<KeyValue> keyValues = Collections.singletonList(kv);
+
+            Attributes attributes = OcelotSpanUtils.toAttributes(keyValues);
+
+            assertTrue(attributes.isEmpty());
+        }
+
+        @Test
+        public void verifyNoValue() {
             KeyValue kv = KeyValue.newBuilder()
-                    .setKey("service.name").setValue(AnyValue.newBuilder().build())
+                    .setKey("service.name")
                     .build();
-            keyValues.add(kv);
+            List<KeyValue> keyValues = Collections.singletonList(kv);
+
+            Attributes attributes = OcelotSpanUtils.toAttributes(keyValues);
+
+            assertTrue(attributes.isEmpty());
+        }
+
+        @Test
+        public void verifyNoKey() {
+            KeyValue kv = KeyValue.newBuilder()
+                    .setValue(AnyValue.newBuilder().setStringValue("frontend").build())
+                    .build();
+            List<KeyValue> keyValues = Collections.singletonList(kv);
 
             Attributes attributes = OcelotSpanUtils.toAttributes(keyValues);
 
@@ -88,7 +107,6 @@ public class OcelotSpanUtilsTest {
 
         @Test
         public void verifyValidAttributes() {
-            List<KeyValue> keyValues = new LinkedList<>();
             KeyValue kvString = KeyValue.newBuilder()
                     .setKey("service.name")
                     .setValue(AnyValue.newBuilder().setStringValue("frontend").build())
@@ -106,11 +124,7 @@ public class OcelotSpanUtilsTest {
                     .setValue(AnyValue.newBuilder().setDoubleValue(0.90).build())
                     .build();
             KeyValue empty = KeyValue.newBuilder().build();
-            keyValues.add(kvString);
-            keyValues.add(kvBool);
-            keyValues.add(kvInt);
-            keyValues.add(kvDouble);
-            keyValues.add(empty);
+            List<KeyValue> keyValues = List.of(kvString, kvBool, kvInt, kvDouble, empty);
 
             Attributes expected = Attributes.builder()
                     .put("service.name", "frontend")
@@ -126,7 +140,6 @@ public class OcelotSpanUtilsTest {
 
         @Test
         public void verifyMergedArrayValue() {
-            List<KeyValue> keyValues = new LinkedList<>();
             KeyValue kvArray = KeyValue.newBuilder()
                     .setKey("browser.brands")
                     .setValue(AnyValue.newBuilder().setArrayValue(
@@ -140,10 +153,10 @@ public class OcelotSpanUtilsTest {
                                     .addValues(AnyValue.newBuilder()
                                             .setIntValue(100)
                                             .build())
-                                    .build()
-                    ).build())
+                                    .build())
+                            .build())
                     .build();
-            keyValues.add(kvArray);
+            List<KeyValue> keyValues = Collections.singletonList(kvArray);
 
             Attributes expected = Attributes.builder()
                     .put("browser.brands", "Chrome, Firefox, 100")

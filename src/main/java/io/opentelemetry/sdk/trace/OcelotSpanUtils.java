@@ -229,6 +229,9 @@ public class OcelotSpanUtils {
 
         if (!CollectionUtils.isEmpty(attributesList)) {
             for (KeyValue attribute : attributesList) {
+                // skip invalid data
+                if (attribute == null) continue;
+
                 AttributeKey attributeKey = toAttributeKey(attribute);
                 if (attributeKey != null) {
                     AnyValue value = attribute.getValue();
@@ -261,7 +264,7 @@ public class OcelotSpanUtils {
             case BOOL_VALUE -> AttributeKey.booleanKey(key);
             case INT_VALUE -> AttributeKey.longKey(key);
             case DOUBLE_VALUE -> AttributeKey.doubleKey(key);
-            // Currently, OT is not able to process arrayValue in attributes
+            // Currently, OTel is not able to process arrayValue in attributes
             case ARRAY_VALUE -> AttributeKey.stringKey(key);
             default -> null;
         };
@@ -284,7 +287,7 @@ public class OcelotSpanUtils {
 
     /**
      * Merges all values of an array. The values will always be converted to strings.
-     * Currently, OT is not able to process arrayValue objects in Attributes.
+     * Currently, OTel is not able to process arrayValue objects in Attributes.
      * See <a href="https://github.com/open-telemetry/opentelemetry-java/issues/6243">issue</a>
      *
      * @param arrayValue the array containing any values

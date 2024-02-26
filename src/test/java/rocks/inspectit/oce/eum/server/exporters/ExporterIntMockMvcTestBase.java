@@ -100,7 +100,7 @@ public class ExporterIntMockMvcTestBase {
      * Posts a {@code Span} to {@link rocks.inspectit.oce.eum.server.rest.TraceController#spans(String)}.
      * The span data will be read from a file.
      * <br>
-     * Currently, OT is not able to process arrayValue objects in Attributes.
+     * Currently, OTel is not able to process arrayValue objects in Attributes.
      * Instead, all values will be merged to one string.
      * See <a href="https://github.com/open-telemetry/opentelemetry-java/issues/6243">issue</a>
      *
