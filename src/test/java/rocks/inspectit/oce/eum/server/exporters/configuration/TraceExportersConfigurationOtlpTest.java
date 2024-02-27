@@ -1,6 +1,5 @@
 package rocks.inspectit.oce.eum.server.exporters.configuration;
 
-import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

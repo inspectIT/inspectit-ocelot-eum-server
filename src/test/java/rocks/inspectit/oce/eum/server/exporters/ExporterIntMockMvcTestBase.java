@@ -1,14 +1,19 @@
 package rocks.inspectit.oce.eum.server.exporters;
 
+import com.google.common.io.CharStreams;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +28,9 @@ public class ExporterIntMockMvcTestBase {
     @Autowired
     protected MockMvc mockMvc;
 
+    @Value("classpath:ot-trace-array-v0.48.0.json")
+    private Resource resourceSpans;
+
     public static final String SERVICE_NAME = "E2E-test";
 
     final static String DEFAULT_TRACE_ID = "497d4e959f574a77d0d3abf05523ec5c";
@@ -30,6 +38,9 @@ public class ExporterIntMockMvcTestBase {
     static String URL_KEY = "u";
 
     static String SUT_URL = "http://test.com/login";
+
+    // Trace-Id used in the resource spans
+    protected static String RESOURCE_TRACE_ID = "a4a68b53c52438381b6cb304410ff0be";
 
     protected static String FAKE_BEACON_KEY_NAME = "does_not_exist";
 
@@ -45,6 +56,7 @@ public class ExporterIntMockMvcTestBase {
     protected static String METRIC_LOAD_TIME_KEY_NAME = "load_time/SUM";
 
     protected static String METRIC_END_TIMESTAMP_KEY_NAME ="end_timestamp";
+
     /**
      * Sends a beacon to the mocked endpoint.
      */
@@ -82,6 +94,24 @@ public class ExporterIntMockMvcTestBase {
         mockMvc.perform(post("/spans").contentType(MediaType.APPLICATION_JSON).content(getSpanString(traceId)))
                 .andExpect(status().isAccepted());
 
+    }
+
+    /**
+     * Posts a {@code Span} to {@link rocks.inspectit.oce.eum.server.rest.TraceController#spans(String)}.
+     * The span data will be read from a file.
+     * <br>
+     * Currently, OTel is not able to process arrayValue objects in Attributes.
+     * Instead, all values will be merged to one string.
+     * See <a href="https://github.com/open-telemetry/opentelemetry-java/issues/6243">issue</a>
+     *
+     */
+    protected void postResourceSpans() throws Exception {
+        try (Reader reader = new InputStreamReader(resourceSpans.getInputStream())) {
+            String json = CharStreams.toString(reader);
+
+            mockMvc.perform(post("/spans").contentType(MediaType.APPLICATION_JSON).content(json))
+                    .andExpect(status().isAccepted());
+        }
     }
 
     /**

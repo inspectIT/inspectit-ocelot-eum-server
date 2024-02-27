@@ -26,9 +26,15 @@ public class OtlpHttpTraceExporterIntTest extends ExporterIntTestBaseWithOtelCol
     }
 
     @Test
-    void verifyTraceSentHttp() throws Exception {
+    void verifyTraceSentHttpWithOtlp() throws Exception {
         String httpTraceId = "497d4e959f574a77d0d3abf05523ec5b";
         postSpan(httpTraceId);
         awaitSpansExported(httpTraceId);
+    }
+
+    @Test
+    void verifyTraceWithArrayValueSentHttpWithOtlp() throws Exception {
+        postResourceSpans();
+        awaitSpansExported(RESOURCE_TRACE_ID);
     }
 }

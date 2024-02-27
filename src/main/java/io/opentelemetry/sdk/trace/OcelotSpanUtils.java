@@ -10,6 +10,7 @@ import io.opentelemetry.api.trace.*;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
 import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.ArrayValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.trace.v1.Span;
 import io.opentelemetry.proto.trace.v1.Status;
@@ -164,17 +165,12 @@ public class OcelotSpanUtils {
      */
     @VisibleForTesting
     static StatusCode toStatusCode(Status.StatusCode code) {
-        switch (code) {
-            case STATUS_CODE_UNSET:
-                return StatusCode.UNSET;
-            case STATUS_CODE_OK:
-                return StatusCode.OK;
-            case STATUS_CODE_ERROR:
-                return StatusCode.ERROR;
-            case UNRECOGNIZED:
-            default:
-                return null;
-        }
+        return switch (code) {
+            case STATUS_CODE_UNSET -> StatusCode.UNSET;
+            case STATUS_CODE_OK -> StatusCode.OK;
+            case STATUS_CODE_ERROR -> StatusCode.ERROR;
+            default -> null;
+        };
     }
 
     /**
@@ -233,25 +229,18 @@ public class OcelotSpanUtils {
 
         if (!CollectionUtils.isEmpty(attributesList)) {
             for (KeyValue attribute : attributesList) {
+                // skip invalid data
+                if (attribute == null) continue;
+
                 AttributeKey attributeKey = toAttributeKey(attribute);
                 if (attributeKey != null) {
                     AnyValue value = attribute.getValue();
                     switch (attribute.getValue().getValueCase()) {
-                        case STRING_VALUE:
-                            builder.put(attributeKey, value.getStringValue());
-                            break;
-                        case BOOL_VALUE:
-                            builder.put(attributeKey, value.getBoolValue());
-                            break;
-                        case INT_VALUE:
-                            builder.put(attributeKey, value.getIntValue());
-                            break;
-                        case DOUBLE_VALUE:
-                            builder.put(attributeKey, value.getDoubleValue());
-                            break;
-                        case ARRAY_VALUE:
-                            builder.put(attributeKey, value.getArrayValue());
-                            break;
+                        case STRING_VALUE -> builder.put(attributeKey, value.getStringValue());
+                        case BOOL_VALUE -> builder.put(attributeKey, value.getBoolValue());
+                        case INT_VALUE -> builder.put(attributeKey, value.getIntValue());
+                        case DOUBLE_VALUE -> builder.put(attributeKey, value.getDoubleValue());
+                        case ARRAY_VALUE -> builder.put(attributeKey, mergeArray(value.getArrayValue()));
                     }
                 }
             }
@@ -270,38 +259,59 @@ public class OcelotSpanUtils {
     private static AttributeKey<?> toAttributeKey(KeyValue attribute) {
         String key = attribute.getKey();
         AnyValue.ValueCase valueCase = attribute.getValue().getValueCase();
-        switch (valueCase) {
-            case STRING_VALUE:
-                return AttributeKey.stringKey(key);
-            case BOOL_VALUE:
-                return AttributeKey.booleanKey(key);
-            case INT_VALUE:
-                return AttributeKey.longKey(key);
-            case DOUBLE_VALUE:
-                return AttributeKey.doubleKey(key);
-            case ARRAY_VALUE:
-                return AttributeKey.stringArrayKey(key);
-        }
-        return null;
+        return switch (valueCase) {
+            case STRING_VALUE -> AttributeKey.stringKey(key);
+            case BOOL_VALUE -> AttributeKey.booleanKey(key);
+            case INT_VALUE -> AttributeKey.longKey(key);
+            case DOUBLE_VALUE -> AttributeKey.doubleKey(key);
+            // Currently, OTel is not able to process arrayValue in attributes
+            case ARRAY_VALUE -> AttributeKey.stringKey(key);
+            default -> null;
+        };
     }
 
     /**
      * @return Returns a {@link SpanKind} representing the given {@link Span.SpanKind} instance.
      */
     private static SpanKind toSpanKind(Span.SpanKind spanKind) {
-        switch (spanKind) {
-            case SPAN_KIND_SERVER:
-                return SpanKind.SERVER;
-            case SPAN_KIND_CLIENT:
-                return SpanKind.CLIENT;
-            case SPAN_KIND_PRODUCER:
-                return SpanKind.PRODUCER;
-            case SPAN_KIND_CONSUMER:
-                return SpanKind.CONSUMER;
-            case SPAN_KIND_INTERNAL:
-            default:
+        return switch (spanKind) {
+            case SPAN_KIND_SERVER -> SpanKind.SERVER;
+            case SPAN_KIND_CLIENT -> SpanKind.CLIENT;
+            case SPAN_KIND_PRODUCER -> SpanKind.PRODUCER;
+            case SPAN_KIND_CONSUMER -> SpanKind.CONSUMER;
+            default ->
                 // default value if we can not map
-                return SpanKind.INTERNAL;
-        }
+                    SpanKind.INTERNAL;
+        };
+    }
+
+    /**
+     * Merges all values of an array. The values will always be converted to strings.
+     * Currently, OTel is not able to process arrayValue objects in Attributes.
+     * See <a href="https://github.com/open-telemetry/opentelemetry-java/issues/6243">issue</a>
+     *
+     * @param arrayValue the array containing any values
+     *
+     * @return the merged string of all values
+     */
+    private static String mergeArray(ArrayValue arrayValue) {
+        List<AnyValue> values = arrayValue.getValuesList();
+        String mergedString = values.stream()
+                .map(OcelotSpanUtils::getValueAsString)
+                .collect(Collectors.joining(", "));
+        return mergedString;
+    }
+
+    /**
+     * @return the {@link AnyValue} as string.
+     */
+    private static String getValueAsString(AnyValue value) {
+        return switch (value.getValueCase()) {
+            case STRING_VALUE -> value.getStringValue();
+            case INT_VALUE -> String.valueOf(value.getIntValue());
+            case DOUBLE_VALUE -> String.valueOf(value.getDoubleValue());
+            case BOOL_VALUE -> String.valueOf(value.getBoolValue());
+            default -> "";
+        };
     }
 }
