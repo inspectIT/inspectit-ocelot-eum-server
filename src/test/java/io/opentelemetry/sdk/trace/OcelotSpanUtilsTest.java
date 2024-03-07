@@ -1,5 +1,6 @@
 package io.opentelemetry.sdk.trace;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.StatusCode;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -139,7 +139,7 @@ public class OcelotSpanUtilsTest {
         }
 
         @Test
-        public void verifyMergedArrayValue() {
+        public void verifyArrayValue() {
             KeyValue kvArray = KeyValue.newBuilder()
                     .setKey("browser.brands")
                     .setValue(AnyValue.newBuilder().setArrayValue(
@@ -158,8 +158,9 @@ public class OcelotSpanUtilsTest {
                     .build();
             List<KeyValue> keyValues = Collections.singletonList(kvArray);
 
+            AttributeKey<List<String>> arrayKey = AttributeKey.stringArrayKey("browser.brands");
             Attributes expected = Attributes.builder()
-                    .put("browser.brands", "Chrome, Firefox, 100")
+                    .put(arrayKey, List.of("Chrome", "Firefox", "100"))
                     .build();
 
             Attributes attributes = OcelotSpanUtils.toAttributes(keyValues);

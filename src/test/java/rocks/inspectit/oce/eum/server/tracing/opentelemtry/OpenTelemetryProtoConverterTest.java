@@ -41,7 +41,7 @@ class OpenTelemetryProtoConverterTest {
 
     public static final String TRACE_REQUEST_FILE_LARGE = "/ot-trace-large-v0.48.0.json";
 
-    public static final String TRACE_REQUEST_FILE_ARRAY = "/ot-trace-array-v0.48.0.json";
+    public static final String TRACE_REQUEST_FILE_PROD = "/ot-trace-prod-v0.48.0.json";
 
     @InjectMocks
     private OpenTelemetryProtoConverter converter;
@@ -57,8 +57,8 @@ class OpenTelemetryProtoConverterTest {
         return getTestRequest(TRACE_REQUEST_FILE_LARGE);
     }
 
-    private ExportTraceServiceRequest getArrayTestRequest() throws Exception {
-        return getTestRequest(TRACE_REQUEST_FILE_ARRAY);
+    private ExportTraceServiceRequest getProdTestRequest() throws Exception {
+        return getTestRequest(TRACE_REQUEST_FILE_PROD);
     }
 
     private ExportTraceServiceRequest getTestRequest(String file) throws Exception {
@@ -153,7 +153,7 @@ class OpenTelemetryProtoConverterTest {
 
         @Test
         void convertArrayRequest() throws Exception {
-            ExportTraceServiceRequest request = getArrayTestRequest();
+            ExportTraceServiceRequest request = getProdTestRequest();
 
             Collection<SpanData> result = converter.convert(request);
             List<SpanData> resultList = result.stream().toList();
@@ -196,7 +196,7 @@ class OpenTelemetryProtoConverterTest {
         private HttpServletRequest mockRequest;
 
         @BeforeEach
-        private void beforeEach() {
+        public void beforeEach() {
             converter.requestSupplier = () -> mockRequest;
         }
 

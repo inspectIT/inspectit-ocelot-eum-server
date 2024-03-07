@@ -10,7 +10,6 @@ import io.opentelemetry.api.trace.*;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
 import io.opentelemetry.proto.common.v1.AnyValue;
-import io.opentelemetry.proto.common.v1.ArrayValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.trace.v1.Span;
 import io.opentelemetry.proto.trace.v1.Status;
@@ -232,15 +231,32 @@ public class OcelotSpanUtils {
                 // skip invalid data
                 if (attribute == null) continue;
 
-                AttributeKey attributeKey = toAttributeKey(attribute);
-                if (attributeKey != null) {
-                    AnyValue value = attribute.getValue();
-                    switch (attribute.getValue().getValueCase()) {
-                        case STRING_VALUE -> builder.put(attributeKey, value.getStringValue());
-                        case BOOL_VALUE -> builder.put(attributeKey, value.getBoolValue());
-                        case INT_VALUE -> builder.put(attributeKey, value.getIntValue());
-                        case DOUBLE_VALUE -> builder.put(attributeKey, value.getDoubleValue());
-                        case ARRAY_VALUE -> builder.put(attributeKey, mergeArray(value.getArrayValue()));
+                String key = attribute.getKey();
+                AnyValue value = attribute.getValue();
+                AnyValue.ValueCase valueCase = value.getValueCase();
+                switch (valueCase) {
+                    case STRING_VALUE ->  {
+                        AttributeKey<String> attributeKey = AttributeKey.stringKey(key);
+                        builder.put(attributeKey, value.getStringValue());
+                    }
+                    case BOOL_VALUE -> {
+                        AttributeKey<Boolean> attributeKey = AttributeKey.booleanKey(key);
+                        builder.put(attributeKey, value.getBoolValue());
+                    }
+                    case INT_VALUE -> {
+                        AttributeKey<Long> attributeKey = AttributeKey.longKey(key);
+                        builder.put(attributeKey, value.getIntValue());
+                    }
+                    case DOUBLE_VALUE -> {
+                        AttributeKey<Double> attributeKey = AttributeKey.doubleKey(key);
+                        builder.put(attributeKey, value.getDoubleValue());
+                    }
+                    case ARRAY_VALUE -> {
+                        AttributeKey<List<String>> attributeKey = AttributeKey.stringArrayKey(key);
+                        List<String> stringValues = value.getArrayValue().getValuesList().stream()
+                                .map(OcelotSpanUtils::getValueAsString)
+                                .toList();
+                        builder.put(attributeKey, stringValues);
                     }
                 }
             }
@@ -251,23 +267,6 @@ public class OcelotSpanUtils {
         }
 
         return builder.build();
-    }
-
-    /**
-     * @return Returns a {@link AttributeKey} which represents the given {@link KeyValue}.
-     */
-    private static AttributeKey<?> toAttributeKey(KeyValue attribute) {
-        String key = attribute.getKey();
-        AnyValue.ValueCase valueCase = attribute.getValue().getValueCase();
-        return switch (valueCase) {
-            case STRING_VALUE -> AttributeKey.stringKey(key);
-            case BOOL_VALUE -> AttributeKey.booleanKey(key);
-            case INT_VALUE -> AttributeKey.longKey(key);
-            case DOUBLE_VALUE -> AttributeKey.doubleKey(key);
-            // Currently, OTel is not able to process arrayValue in attributes
-            case ARRAY_VALUE -> AttributeKey.stringKey(key);
-            default -> null;
-        };
     }
 
     /**
@@ -283,23 +282,6 @@ public class OcelotSpanUtils {
                 // default value if we can not map
                     SpanKind.INTERNAL;
         };
-    }
-
-    /**
-     * Merges all values of an array. The values will always be converted to strings.
-     * Currently, OTel is not able to process arrayValue objects in Attributes.
-     * See <a href="https://github.com/open-telemetry/opentelemetry-java/issues/6243">issue</a>
-     *
-     * @param arrayValue the array containing any values
-     *
-     * @return the merged string of all values
-     */
-    private static String mergeArray(ArrayValue arrayValue) {
-        List<AnyValue> values = arrayValue.getValuesList();
-        String mergedString = values.stream()
-                .map(OcelotSpanUtils::getValueAsString)
-                .collect(Collectors.joining(", "));
-        return mergedString;
     }
 
     /**

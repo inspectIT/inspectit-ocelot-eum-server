@@ -31,8 +31,8 @@ public class JaegerGrpcExporterIntTest extends ExporterIntTestBaseWithOtelCollec
     }
 
     @Test
-    void verifyTraceWithArrayValueSentGrpcWithJaeger() throws Exception {
-        postResourceSpans();
+    void verifyProdTraceSentGrpcWithJaeger() throws Exception {
+        postProdSpans();
         awaitSpansExported(RESOURCE_TRACE_ID);
     }
 }
