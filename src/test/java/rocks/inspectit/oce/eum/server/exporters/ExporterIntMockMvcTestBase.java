@@ -28,8 +28,8 @@ public class ExporterIntMockMvcTestBase {
     @Autowired
     protected MockMvc mockMvc;
 
-    @Value("classpath:ot-trace-array-v0.48.0.json")
-    private Resource resourceSpans;
+    @Value("classpath:ot-trace-prod-v0.48.0.json")
+    private Resource prodSpans;
 
     public static final String SERVICE_NAME = "E2E-test";
 
@@ -39,7 +39,9 @@ public class ExporterIntMockMvcTestBase {
 
     static String SUT_URL = "http://test.com/login";
 
-    // Trace-Id used in the resource spans
+    /**
+     * Trace-Id used in {@link #prodSpans}
+     */
     protected static String RESOURCE_TRACE_ID = "a4a68b53c52438381b6cb304410ff0be";
 
     protected static String FAKE_BEACON_KEY_NAME = "does_not_exist";
@@ -97,16 +99,13 @@ public class ExporterIntMockMvcTestBase {
     }
 
     /**
-     * Posts a {@code Span} to {@link rocks.inspectit.oce.eum.server.rest.TraceController#spans(String)}.
+     * Posts {@code Span}s to {@link rocks.inspectit.oce.eum.server.rest.TraceController#spans(String)}.
      * The span data will be read from a file.
      * <br>
-     * Currently, OTel is not able to process arrayValue objects in Attributes.
-     * Instead, all values will be merged to one string.
-     * See <a href="https://github.com/open-telemetry/opentelemetry-java/issues/6243">issue</a>
-     *
+     * The span data originates from production and should always pass valid
      */
-    protected void postResourceSpans() throws Exception {
-        try (Reader reader = new InputStreamReader(resourceSpans.getInputStream())) {
+    protected void postProdSpans() throws Exception {
+        try (Reader reader = new InputStreamReader(prodSpans.getInputStream())) {
             String json = CharStreams.toString(reader);
 
             mockMvc.perform(post("/spans").contentType(MediaType.APPLICATION_JSON).content(json))

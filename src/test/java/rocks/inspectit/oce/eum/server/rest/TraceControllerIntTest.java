@@ -36,8 +36,8 @@ public class TraceControllerIntTest {
     @Value("classpath:ot-trace-large-v0.48.0.json")
     private Resource resourceSpan;
 
-    @Value("classpath:ot-trace-array-v0.48.0.json")
-    private Resource resourceSpans;
+    @Value("classpath:ot-trace-prod-v0.48.0.json")
+    private Resource prodResourceSpans;
 
     @MockBean
     SpanExporter spanExporter;
@@ -88,7 +88,7 @@ public class TraceControllerIntTest {
 
     @Test
     public void verifyTraceWithMultipleResourceSpans() throws Exception {
-        try (Reader reader = new InputStreamReader(resourceSpans.getInputStream())) {
+        try (Reader reader = new InputStreamReader(prodResourceSpans.getInputStream())) {
             String json = CharStreams.toString(reader);
 
             ResponseEntity<Void> result = restTemplate.postForEntity("/spans", json, Void.class);

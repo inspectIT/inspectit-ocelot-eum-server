@@ -12,7 +12,7 @@ import rocks.inspectit.oce.eum.server.exporters.ExporterIntTestBaseWithOtelColle
 
 @DirtiesContext
 @ContextConfiguration(initializers = JaegerHttpExporterIntTest.EnvInitializer.class)
-class JaegerHttpExporterIntTest extends ExporterIntTestBaseWithOtelCollector {
+public class JaegerHttpExporterIntTest extends ExporterIntTestBaseWithOtelCollector {
 
     static class EnvInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -31,8 +31,8 @@ class JaegerHttpExporterIntTest extends ExporterIntTestBaseWithOtelCollector {
     }
 
     @Test
-    void verifyTraceWithArrayValueSentGrpcWithJaeger() throws Exception {
-        postResourceSpans();
+    void verifyProdTraceSentGrpcWithJaeger() throws Exception {
+        postProdSpans();
         awaitSpansExported(RESOURCE_TRACE_ID);
     }
 }
