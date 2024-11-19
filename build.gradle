@@ -214,6 +214,11 @@ dependencyCheck {
             enabled = true
         }
     }
+    nvd {
+        apiKey = System.getProperty("NVD_API_TOKEN")
+        delay = 10000
+        print("API-TOKEN: " + System.getProperty("NVD_API_TOKEN"))
+    }
 }
 
 def isNonStable = { String candidate ->
