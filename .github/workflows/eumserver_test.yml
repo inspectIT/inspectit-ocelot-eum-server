@@ -10,7 +10,7 @@ on:
     paths-ignore:
       - 'README.md'
   workflow_call:
-  
+
 jobs:
   test:
     name: Run Tests
@@ -22,3 +22,14 @@ jobs:
         run: chmod +x gradlew
       - name: test
         run: ./gradlew test
+
+  dependency-scan:
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    container: openjdk:17-jdk-slim
+    steps:
+      - uses: actions/checkout@v3
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Scan dependencies
+        run: ./gradlew dependencyCheckAnalyze
