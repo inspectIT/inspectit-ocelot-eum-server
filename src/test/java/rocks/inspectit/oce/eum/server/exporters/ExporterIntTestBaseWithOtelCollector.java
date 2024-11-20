@@ -58,14 +58,6 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
     static final Integer COLLECTOR_HEALTH_CHECK_PORT = 13133;
 
-    protected static final Integer COLLECTOR_JAEGER_GRPC_PORT = 14250;
-
-    protected static final Integer COLLECTOR_JAEGER_THRIFT_HTTP_PORT = 14268;
-
-    static final Integer COLLECTOR_JAEGER_THRIFT_BINARY_PORT = 6832;
-
-    static final Integer COLLECTOR_JAEGER_THRIFT_COMPACT_PORT = 6831;
-
     static final Integer COLLECTOR_PROMETHEUS_PORT = 8888;
 
     static final Integer COLLECTOR_PROMETHEUS_RECEIVER_PORT = 8889;
@@ -75,10 +67,6 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
     static final int COLLECTOR_ZIPKIN_PORT = 9411;
 
     static final int COLLECTOR_TRACE_QUERY_PORT = 16686;
-
-    static final String JAEGER_THRIFT_PATH = "/api/traces";
-
-    static final String JAEGER_GRPC_PATH = "/v1/traces";
 
     private static final Logger LOGGER = Logger.getLogger(ExporterIntTestBaseWithOtelCollector.class.getName());
 
@@ -115,7 +103,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                 .withCommand("--config", "/otel-config.yaml")
                 .withLogConsumer(outputFrame -> LOGGER.log(Level.INFO, outputFrame.getUtf8String().replace("\n", "")))
                 // expose all relevant ports
-                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_JAEGER_THRIFT_HTTP_PORT, COLLECTOR_JAEGER_THRIFT_BINARY_PORT, COLLECTOR_JAEGER_THRIFT_COMPACT_PORT, COLLECTOR_JAEGER_GRPC_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_INFLUX_DB1_PORT, COLLECTOR_ZIPKIN_PORT, COLLECTOR_PROMETHEUS_RECEIVER_PORT)
+                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_INFLUX_DB1_PORT, COLLECTOR_ZIPKIN_PORT, COLLECTOR_PROMETHEUS_RECEIVER_PORT)
                 .waitingFor(Wait.forHttp("/").forPort(COLLECTOR_HEALTH_CHECK_PORT));
 
         //collector.withStartupTimeout(Duration.of(1, ChronoUnit.MINUTES));

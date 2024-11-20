@@ -47,8 +47,8 @@ public class TraceController {
 
         try {
             if(spanExporters == null){
-                log.warn("A span was sent to the EUM-server for processing but no span exporter is registered/enabled in 'inspectit-eum-server.exporters.tracing'. To fix this, update the configuration at 'inspectit-eum-server.exporters.tracing' accordingly, e.g., by adding a configuration for Jaeger.");
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "No SpanExporter to process the request exists in the EUM server. To fix this, update the EUM server's configuration at 'exporters.tracing' to add a span exporter, e.g. for Jaeger.");
+                log.warn("A span was sent to the EUM-server for processing but no span exporter is registered/enabled in 'inspectit-eum-server.exporters.tracing'. To fix this, update the configuration at 'inspectit-eum-server.exporters.tracing' accordingly, e.g., by adding a configuration for OTLP.");
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "No SpanExporter to process the request exists in the EUM server. To fix this, update the EUM server's configuration at 'exporters.tracing' to add a span exporter, e.g. for OTLP.");
             }
 
             // use protobuf to convert request string to the open-telemetry proto impl
