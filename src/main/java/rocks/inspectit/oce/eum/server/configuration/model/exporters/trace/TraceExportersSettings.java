@@ -10,9 +10,6 @@ import jakarta.validation.Valid;
 public class TraceExportersSettings {
 
     @Valid
-    private JaegerExporterSettings jaeger;
-
-    @Valid
     private OtlpTraceExporterSettings otlp;
 
     /**

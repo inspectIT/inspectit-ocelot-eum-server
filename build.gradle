@@ -146,9 +146,7 @@ dependencies {
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
             "io.opentelemetry:opentelemetry-exporter-otlp:${openTelemetryVersion}",
-            "io.opentelemetry:opentelemetry-exporter-jaeger:${openTelemetryVersion}",
-            "io.opentelemetry:opentelemetry-exporter-jaeger-thrift:${openTelemetryVersion}",
-            "io.opentelemetry:opentelemetry-semconv:${openTelemetryAlphaVersion}",
+            "io.opentelemetry:opentelemetry-semconv:${openTelemetrySemConvVersion}",
             "io.opentelemetry.proto:opentelemetry-proto:${openTelemetryProtoVersion}",
 
             "com.google.protobuf:protobuf-java:${protobufVersion}",
@@ -162,15 +160,11 @@ dependencies {
             "org.apache.commons:commons-math3:${commonsMath3Version}",
             "commons-io:commons-io:${commonsIoVersion}",
 
-            // If indluxdb-java is updated, check new version of the transitive dependency okio-jvm
-            // If there is a higher new version, remove the dependency override of okio-jvm
             "org.influxdb:influxdb-java:${influxdbJavaVersion}",
-            // Override transitive dependency with newer version, due to security concerns
-            "com.squareup.okio:okio-jvm:${okioJvmVersion}"
     )
 
-    compileOnly "org.projectlombok:lombok"
-    annotationProcessor "org.projectlombok:lombok"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     testImplementation(
             "org.springframework.boot:spring-boot-starter-test",
@@ -213,6 +207,10 @@ dependencyCheck {
         ossIndex {
             enabled = true
         }
+    }
+    nvd {
+        apiKey = System.getenv("NVD_API_TOKEN")
+        delay = 10000
     }
 }
 

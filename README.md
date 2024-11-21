@@ -221,7 +221,6 @@ Tracing exporters are responsible for passing the recorded tracing data to a cor
 The inspectIT Ocelot EUM Server currently supports the following trace exporters:
 
 * [OTLP (Traces)](#otlp-exporter-traces) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp/trace)]
-* [Jaeger](#jaeger-exporter) [[Homepage](https://www.jaegertracing.io/)] (deprecated)
 
 ###### General Trace Exporter Settings
 
@@ -248,22 +247,9 @@ The following properties are nested properties below the `inspectit.exporters.tr
 | `.timeout`     | `10s`           | Maximum time the OTLP exporter will wait for each batch export, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/).                           |
 
 
-###### Jaeger Exporter
+###### Jaeger Exporter (removed)
 
-InspectIT EUM Server supports thrift and gRPC Jaeger exporter. However, since OpenTelemetry has announced to [migrate away from the
-Jaeger exporter](https://opentelemetry.io/blog/2023/jaeger-exporter-collector-migration/), it is **deprecated**.
-
-By default, the Jaeger exporters are enabled but the URL/gRPC `endpoint` needed for the exporter to actually start is set to `null`.
-
-The following properties are nested properties below the `inspectit.exporters.tracing.jaeger` property:
-
-|Property | Default         | Description                                                                                                                                                                                                                                          |
-|---|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|`.enabled`| `IF_CONFIGURED` | If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Jaeger exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.                                                      |
-|`.endpoint`| `null`          | URL endpoint under which the Jaeger server can be accessed (e.g. http://127.0.0.1:14268/api/traces).                                                                                                                                                 |
-|`.protocol`| `grpc`          | The transport protocol. Supported protocols are `grpc` and `http/thrift`.                                                                                                                                                                            |
-| `.compression` | `NONE`          | The compression method, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported compression methods are `gzip` and `none`. This property only takes effect when the protocol is set to `grpc`. |
-| `.timeout`     | `10s`           | Maximum time the OTLP exporter will wait for each batch export, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). This property only takes effect when the protocol is set to `grpc`.                                                                                 |
+Since version 2.6.2 the InspectIT EUM-Server does no longer support the Jaeger exporter.
 
 ##### Security
 Currently, the EUM Server only supports a simple API token security concept. In future, additional authentication providers
