@@ -8,6 +8,7 @@ on:
 jobs:
   test_eum_server:
     uses: ./.github/workflows/eumserver_test.yml
+    secrets: inherit
 
   build_and_release:
     name: Build and release EUM Server
