@@ -108,6 +108,8 @@ cyclonedxBom {
     includeConfigs = ["runtimeClasspath"]
     schemaVersion = "1.4"
     projectType = "application"
+    outputName = "bom"
+    outputFormat = "all"
 }
 
 test {
