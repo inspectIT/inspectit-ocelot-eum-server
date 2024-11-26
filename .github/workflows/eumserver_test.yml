@@ -40,6 +40,7 @@ jobs:
       - name: Run DependencyCheck plugin
         uses: dependency-check/Dependency-Check_Action@main
         id: Depcheck
+        continue-on-error: true # we still want to upload the report
         with:
           project: ${{ github.repository }}
           path: '.'
