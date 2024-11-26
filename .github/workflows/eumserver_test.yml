@@ -57,3 +57,9 @@ jobs:
         with:
           name: dependency-check-report-eum-server
           path: ${{ github.workspace }}/reports
+      # if 'Run DependencyCheck plugin' failed, the job should also fail
+      - name: Fix job status
+        if: ${{ steps.depcheck.outcome == 'failure' }}
+        run: |
+          echo "DependencyCheck failed"
+          exit 1
