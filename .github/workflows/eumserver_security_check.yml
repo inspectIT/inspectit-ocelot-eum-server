@@ -43,4 +43,4 @@ jobs:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
-            text: "*EUM-Server DependencyCheck Report*: ${{ job.status }}\nPlease check the report here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            text: "*EUM-Server Dependency-Check Report*: ${{ job.status }}\nPlease check the report here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
