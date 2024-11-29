@@ -1,8 +1,8 @@
 name: EUM Server Tests
 
 on:
-#  schedule:
-#    - cron: "* * * * *"
+  schedule:
+    - cron: "*/30 * * * *" # every 30 min
     # "0 8 1,15 * *" At 08:00 on day-of-month 1 and 15.
   push:
 
@@ -34,7 +34,7 @@ jobs:
             --nvdApiKey ${{ secrets.NVD_API_KEY }}
             --nvdApiDelay 10000
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report-eum-server
           path: ${{ github.workspace }}/reports
@@ -44,4 +44,4 @@ jobs:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
-            text: "*EUM-Server DependencyCheck Report*: ${{ job.status }}\nhttps://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            text: "*EUM-Server DependencyCheck Report*: ${{ job.status }}\nPlease check the report here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
