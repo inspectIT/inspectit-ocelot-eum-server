@@ -1,0 +1,46 @@
+name: Automatic Security Check
+
+on:
+  schedule:
+    - cron: "0 0-23 * * *" # for test every hour
+#    - cron: "0 8 1,15 * *" # At 08:00 on day-of-month 1 and 15
+
+jobs:
+  security-check:
+    name: Security Check
+    runs-on: ubuntu-latest
+    container: openjdk:17-jdk-slim
+    steps:
+      - uses: actions/checkout@v3
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: build
+        run: ./gradlew assemble
+      # the action has not been updated a while, but it always uses the latest plugin version
+      - name: Run DependencyCheck plugin
+        uses: dependency-check/Dependency-Check_Action@main
+        id: depcheck
+        continue-on-error: true # we still want to upload the report
+        with:
+          project: ${{ github.repository }}
+          path: '.'
+          format: 'HTML'
+          out: 'reports'
+          args: >
+            --failOnCVSS 6
+            --suppression dependencyCheckSuppression.xml
+            --disableAssembly
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --nvdApiDelay 10000
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report-eum-server
+          path: ${{ github.workspace }}/reports
+      - name: Send Notification
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*EUM-Server Dependency-Check Report*: ${{ job.status }}\nPlease check the report here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
