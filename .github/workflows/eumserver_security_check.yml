@@ -2,8 +2,7 @@ name: Automatic Security Check
 
 on:
   schedule:
-    - cron: "0 0-23 * * *" # for test every hour
-#    - cron: "0 8 1,15 * *" # At 08:00 on day-of-month 1 and 15
+    - cron: "0 8 1,15 * *" # At 08:00 on day-of-month 1 and 15
 
 jobs:
   security-check:
