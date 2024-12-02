@@ -43,3 +43,9 @@ jobs:
           webhook-type: incoming-webhook
           payload: |
             text: "*EUM-Server Dependency-Check Report*: ${{ job.status }}\nPlease check the report here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      # if DependencyCheck failed, the job should also fail, but only after the results were uploaded
+      - name: Validate DependencyCheck outcome
+        if: ${{ steps.depcheck.outcome == 'failure' }}
+        run: |
+          echo "DependencyCheck failed"
+          exit 1
