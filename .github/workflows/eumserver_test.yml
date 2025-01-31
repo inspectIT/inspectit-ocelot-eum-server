@@ -53,7 +53,7 @@ jobs:
             --nvdApiKey ${{ secrets.NVD_API_KEY }}
             --nvdApiDelay 10000
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report-eum-server
           path: ${{ github.workspace }}/reports
