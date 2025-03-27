@@ -148,7 +148,7 @@ dependencies {
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
             "io.opentelemetry:opentelemetry-exporter-otlp:${openTelemetryVersion}",
-            "io.opentelemetry:opentelemetry-semconv:${openTelemetrySemConvVersion}",
+            "io.opentelemetry.semconv:opentelemetry-semconv:${openTelemetrySemConvVersion}",
             "io.opentelemetry.proto:opentelemetry-proto:${openTelemetryProtoVersion}",
 
             "com.google.protobuf:protobuf-java:${protobufVersion}",

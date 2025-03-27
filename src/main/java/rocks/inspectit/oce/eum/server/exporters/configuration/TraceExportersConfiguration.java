@@ -5,7 +5,7 @@ import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.semconv.ServiceAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -66,7 +66,7 @@ public class TraceExportersConfiguration {
         }
         log.info("Starting OTLP span exporter on {} '{}'", otlpTraceExporterSettings.getProtocol()
                 .getConfigRepresentation(), endpoint);
-        System.setProperty("otel.resource.attributes", ResourceAttributes.SERVICE_NAME.getKey() + "=" + configuration.getExporters()
+        System.setProperty("otel.resource.attributes", ServiceAttributes.SERVICE_NAME.getKey() + "=" + configuration.getExporters()
                 .getTracing()
                 .getServiceName());
 

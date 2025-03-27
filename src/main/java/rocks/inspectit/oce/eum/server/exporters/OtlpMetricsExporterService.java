@@ -11,7 +11,6 @@ import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.opencensusshim.internal.metrics.MetricAdapter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.data.MetricData;
@@ -19,7 +18,8 @@ import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.semconv.ServiceAttributes;
+import io.opentelemetry.semconv.TelemetryAttributes;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,9 +111,9 @@ public class OtlpMetricsExporterService {
             enabled = true;
             otlpMetricsExporterSettings = configuration.getExporters().getMetrics().getOtlp();
             AggregationTemporalitySelector aggregationTemporalitySelector = otlpMetricsExporterSettings.getPreferredTemporality() == AggregationTemporality.DELTA ? AggregationTemporalitySelector.deltaPreferred() : AggregationTemporalitySelector.alwaysCumulative();
-            otelResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters()
+            otelResource = Resource.create(Attributes.of(ServiceAttributes.SERVICE_NAME, configuration.getExporters()
                     .getMetrics()
-                    .getServiceName(), AttributeKey.stringKey("inspectit.eum-server.version"), appStartupRunner.getServerVersion(), ResourceAttributes.TELEMETRY_SDK_VERSION, appStartupRunner.getOpenTelemetryVersion(), ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java", ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"));
+                    .getServiceName(), AttributeKey.stringKey("inspectit.eum-server.version"), appStartupRunner.getServerVersion(), TelemetryAttributes.TELEMETRY_SDK_VERSION, appStartupRunner.getOpenTelemetryVersion(), TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java", TelemetryAttributes.TELEMETRY_SDK_NAME, "opentelemetry"));
             String endpoint = configuration.getExporters().getMetrics().getOtlp().getEndpoint();
             // OTEL expects that the URI starts with 'http://' or 'https://'
             if (!endpoint.startsWith("http")) {
