@@ -4,11 +4,15 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
   pull_request:
     branches:
       - main
     paths-ignore:
-      - 'README.md'
+      - '**.md'
+      - '.github/**'
   workflow_call:
 
 env:
