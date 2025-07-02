@@ -53,7 +53,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 
 /**
  * This class has been copied from the {@code io.opentelemetry.opentelemetry-opencensus-shim}.
@@ -368,7 +367,7 @@ public final class MetricAdapter {
                 exemplar.getValue());
     }
 
-    static long mapTimestamp(@Nullable Timestamp time) {
+    static long mapTimestamp(Timestamp time) {
         // Treat all empty timestamps as "0" (proto3)
         if (time == null) {
             return 0;
