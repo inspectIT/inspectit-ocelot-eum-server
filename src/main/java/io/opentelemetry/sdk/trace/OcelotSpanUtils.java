@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +40,6 @@ public class OcelotSpanUtils {
      * No-operation context.
      */
     private static final Context NOOP_CONTEXT = new Context() {
-        @Nullable
         @Override
         public <V> V get(ContextKey<V> key) {
             return null;
