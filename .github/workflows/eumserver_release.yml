@@ -105,8 +105,7 @@ jobs:
           name: docker-artifact
           path: ./docker-artifact
       - name: Move artifact into Docker folder
-        run: |
-          mv docker-artifact/docker/inspectit-ocelot-eum-server.jar docker
+        run: mv docker-artifact/inspectit-ocelot-eum-server.jar docker
 
       - name: Build and push
         id: build
