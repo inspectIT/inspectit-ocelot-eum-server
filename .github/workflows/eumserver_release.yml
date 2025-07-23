@@ -17,11 +17,19 @@ jobs:
     needs: [test_eum_server]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build project
         run: ./gradlew assemble bootJar -PbuildVersion=${{ github.ref_name }}
+        # copy jar into Docker folder
+      - name: Prepare Docker artifact
+        run: ./gradlew copyServerJar
+      - name: Upload Docker artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-artifact
+          path: docker/inspectit-ocelot-eum-server.jar
       - name: Create BOM
         run: ./gradlew cyclonedxBom
       - name: Add artifacts
@@ -60,25 +68,101 @@ jobs:
           token: ${{ github.token }}
           name: Version ${{ github.ref_name }}
 
-  build_and_publish_docker_images:
+  # Build the Docker images for multiple platforms and prepare for publishing
+  # Check out: https://github.com/docker/build-push-action
+  # And: https://docs.docker.com/build/ci/github-actions/multi-platform/
+  build_docker_images:
     name: "Build and Push Docker Images"
     runs-on: ubuntu-latest
     needs: build_and_release
     environment: release
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17  # Spring 3 needs at least java 17
-          distribution: temurin
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Build Docker Images
-        run: ./gradlew dockerTag -PbuildVersion=${{ github.ref_name }}
-      - name: Push Docker Images
+        uses: actions/checkout@v4
+      - name: Prepare
         run: |
-          docker login -u ${{ secrets.DOCKER_HUB_USER }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
-          docker push inspectit/inspectit-ocelot-eum-server:${{ github.ref_name }}
-          docker push inspectit/inspectit-ocelot-eum-server:latest
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Download Docker artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-artifact
+          path: ./docker-artifact
+      - name: Move artifact into Docker folder
+        run: |
+          mv docker-artifact/docker/inspectit-ocelot-eum-server.jar docker
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: docker
+          file: docker/Dockerfile
+          platforms: ${{ matrix.platform }}
+          outputs: type=image,name=inspectit/inspectit-ocelot-eum-server,push-by-digest=true,name-canonical=true,push=true
+      - name: Export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  # Merge the prepared Docker images and publish to DockerHub
+  merge_and_publish_docker_images:
+    name: "Build and Push Docker Images"
+    runs-on: ubuntu-latest
+    needs: build_docker_images
+    environment: release
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: digests-*
+          path: ${{ runner.temp }}/digests
+          merge-multiple: true
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        uses: docker/metadata-action@v5
+        with:
+          images: inspectit/inspectit-ocelot-eum-server
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest
+      - name: Push
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+          $(printf 'inspectit/inspectit-ocelot-eum-server@sha256:%s ' *)
+      - name: Inspect manifest
+        run: |
+          docker buildx imagetools inspect inspectit/inspectit-ocelot-eum-server:${{ github.ref_name }}
