@@ -72,7 +72,7 @@ jobs:
   # Check out: https://github.com/docker/build-push-action
   # And: https://docs.docker.com/build/ci/github-actions/multi-platform/
   build_docker_images:
-    name: "Build and Push Docker Images"
+    name: "Build Docker Images"
     runs-on: ubuntu-latest
     needs: build_and_release
     environment: release
@@ -130,7 +130,7 @@ jobs:
 
   # Merge the prepared Docker images and publish to DockerHub
   merge_and_publish_docker_images:
-    name: "Build and Push Docker Images"
+    name: "Merge and Publish Docker Images"
     runs-on: ubuntu-latest
     needs: build_docker_images
     environment: release
