@@ -2,7 +2,6 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 plugins {
     id "org.springframework.boot" version "${springBootVersion}"
-    id "com.palantir.docker" version "${palantirDockerVersion}"
     id "org.cyclonedx.bom" version "${cyclonedxBomVersion}"
     id "io.spring.dependency-management" version "${springDependencyManangementVersion}"
     id "org.owasp.dependencycheck" version "${owaspDependencyCheckVersion}"
@@ -185,20 +184,13 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
 }
 
+// Copy the jar into the docker folder without version suffix
 tasks.register('copyServerJar', Copy) {
     dependsOn bootJar
     from(layout.buildDirectory.file("libs/inspectit-ocelot-eum-server-${version}.jar"))
-    into(layout.buildDirectory.dir("docker-jar"))
+    into(layout.projectDirectory.dir("docker"))
     rename("inspectit-ocelot-eum-server-${version}\\.jar",
             "inspectit-ocelot-eum-server.jar")
-}
-
-docker {
-    dependsOn copyServerJar
-    name "inspectit/inspectit-ocelot-eum-server"
-    tags "${version}"
-    dockerfile file("docker/Dockerfile")
-    files "docker/entrypoint.sh", copyServerJar.outputs
 }
 
 dependencyCheck {
