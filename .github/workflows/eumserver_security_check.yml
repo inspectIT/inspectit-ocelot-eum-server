@@ -9,9 +9,9 @@ jobs:
   security-check:
     name: Security Check
     runs-on: ubuntu-latest
-    container: eclipse-temurin:17
+    container: eclipse-temurin:21
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: build
@@ -45,7 +45,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{
               "from": "inspectIT Ocelot DepCheck <inspectit-ocelot-depcheck@resend.dev>",
-              "to": ["info.inspectit.de@cgi.com"],
+              "to": ["info.inspectit@novatec-gmbh.de"],
               "subject": "EUM-Server Dependency-Check Report - ${{ steps.depcheck.outcome }}",
               "html": "<p>The Dependency-Check for inspectit-ocelot-eum-server completed with status: <strong>${{ steps.depcheck.outcome }}</strong></p><p>Please check the report here: <a href='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'>View Report</a></p>"
             }'
