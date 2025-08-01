@@ -1,5 +1,5 @@
 # Use lightweight base image with OpenJDK (supports multi-platform)
-FROM amazoncorretto:17-alpine
+FROM amazoncorretto:21-alpine
 
 # The docker directory contains the Dockerfile, entrypoint.sh and the eum-server jar to build the docker image.
 # So the docker directory gets added to the container to successfully build the docker image.
