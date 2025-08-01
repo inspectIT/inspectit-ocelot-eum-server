@@ -371,3 +371,5 @@ spring:
     # Disable ErrorMvcAutoConfiguration to avoid nasty exceptions if whitelabel error page is disabled
     # https://github.com/spring-projects/spring-boot/issues/2001
     exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+
+  threads.virtual.enabled: true

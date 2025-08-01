@@ -18,8 +18,8 @@ apply plugin: "jacoco"
 group = "rocks.inspectit.ocelot"
 
 java {
-    sourceCompatibility = "17"
-    targetCompatibility = "17"
+    sourceCompatibility = 21
+    targetCompatibility = 21
 }
 
 if (!project.hasProperty("buildVersion") || project.getProperty("buildVersion").empty) {
@@ -30,28 +30,28 @@ version = "$buildVersion"
 
 tasks.register('downloadBoomerangjs') {
     logger.info("Downloading Boomerangjs version {}.", boomerangVersion)
-    ext.dest = new File(buildDir, "boomerang-source-${boomerangVersion}.tgz")
+    ext.dest = layout.buildDirectory.file("boomerang-source-${boomerangVersion}.tgz").get().asFile
     outputs.files(ext.dest)
     doLast {
         def f = ext.dest
-        new URL("https://registry.npmjs.org/boomerangjs/-/boomerangjs-${boomerangVersion}.tgz")
+        new URI("https://registry.npmjs.org/boomerangjs/-/boomerangjs-${boomerangVersion}.tgz").toURL()
                 .withInputStream { i -> f.withOutputStream { it << i } }
     }
 }
 
 tasks.register('deleteBoomerangjs', Delete) {
-    delete new File(project.buildDir, "boomerangjs-${boomerangVersion}")
+    delete layout.buildDirectory.file("boomerangjs-${boomerangVersion}")
 }
 
 tasks.register ('downloadAndExtractBoomerang', Copy) {
     dependsOn deleteBoomerangjs, downloadBoomerangjs
     from tarTree(downloadBoomerangjs.dest)
-    into new File(project.buildDir, "boomerangjs-${boomerangVersion}")
+    into layout.buildDirectory.dir("boomerangjs-${boomerangVersion}")
     filter { line -> line.replaceAll("%boomerang_version%", "${boomerangVersion}") }
 }
 
 tasks.register('generateVersionFile') {
-    ext.versionFile = new File(project.buildDir, "eum-version.info")
+    ext.versionFile = layout.buildDirectory.file("eum-version.info").get().asFile
     doLast {
         def currentDate = new Date().toString()
         ext.versionFile.withWriter("UTF-8") { writer ->
@@ -61,14 +61,13 @@ tasks.register('generateVersionFile') {
 }
 
 tasks.register('downloadOpenTelemetryPlugin') {
-    ext.dest = new File(buildDir, "boomerangjs-${boomerangVersion}/package/plugins/boomerang-opentelemetry.js")
+    ext.dest = layout.buildDirectory.file("boomerangjs-${boomerangVersion}/package/plugins/boomerang-opentelemetry.js").get().asFile
     outputs.files(ext.dest)
     doLast {
         def f = ext.dest
-        new URL("https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin/releases/download/$boomerangOpenTelemetryPluginVersion/boomerang-opentelemetry.js")
+        new URI("https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin/releases/download/$boomerangOpenTelemetryPluginVersion/boomerang-opentelemetry.js").toURL()
                 .withInputStream { i -> f.withOutputStream { it << i } }
     }
-
 }
 
 bootJar {
@@ -96,7 +95,7 @@ bootJar {
         into "static/boomerang"
     }
 
-    //include boomerang opentelemetry
+    // include boomerang opentelemetry
     from(layout.buildDirectory) {
         include "boomerang-opentelemetry.js"
         into "static/boomerang"
@@ -155,7 +154,6 @@ dependencies {
 
             "com.google.guava:guava:${guavaVersion}",
             "com.maxmind.geoip2:geoip2:${geoip2Version}",
-
             "commons-net:commons-net:${commonsNetVersion}",
             "org.apache.commons:commons-lang3:${commonsLang3Version}",
             "org.apache.commons:commons-math3:${commonsMath3Version}",
@@ -193,19 +191,16 @@ tasks.register('copyServerJar', Copy) {
             "inspectit-ocelot-eum-server.jar")
 }
 
+// Normally we use the dependency-check GitHub action to check dependencies
+// We keep this configuration, if you want to run the dependency-check locally
 dependencyCheck {
     failBuildOnCVSS = 6
     suppressionFile = "dependencyCheckSuppression.xml"
-    analyzers {
-        assemblyEnabled = false
-        ossIndex {
-            enabled = true
-        }
-    }
-    nvd {
-        apiKey = System.getenv("NVD_API_TOKEN")
-        delay = 10000
-    }
+    analyzers.assemblyEnabled = false
+    analyzers.ossIndex.enabled = true
+
+    nvd.apiKey = System.getenv("NVD_API_TOKEN")
+    nvd.delay = 10000
 }
 
 def isNonStable = { String candidate ->
@@ -215,7 +210,7 @@ def isNonStable = { String candidate ->
 }
 
 def isNotSameMajorMinor = { String current, String candidate, boolean matchMinor ->
-    if(current.equals(candidate)) return false
+    if(current == candidate) return false
 
     def firstDot = current.indexOf('.')
     def secondDot = current.indexOf('.', firstDot + 1)
