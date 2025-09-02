@@ -147,7 +147,6 @@ The inspectIT Ocelot EUM Server currently supports the following metrics exporte
 |Exporter |Supports run-time updates| Push / Pull |Enabled by default|
 |---|---|---|---|
 |[Prometheus Exporter](#prometheus-exporter)|Yes|Pull|No|
-|[InfluxDB Exporter](#influxdb-exporter)|Yes|Push|No|
 |[OTLP Exporter (Metrics)](#otlp-exporter-metrics) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp/metrics)]|Yes|Push|No|
 
 ###### Prometheus Exporter
@@ -169,36 +168,12 @@ The following properties are nested properties below the `inspectit-eum-server.e
 |`.port`| `8888`     |The port the Prometheus HTTP server should use.
 
 
-###### InfluxDB Exporter
-If enabled, metrics are pushed at a specified interval directly to a given InfluxDB v1.x instance.
-To enable the InfluxDB Exporters, it is only required to specify the `endpoint`.
+###### InfluxDB Exporter (removed)
 
-The InfluxDB exporter provides a special handling for counter and sum metrics which is enabled by default and can be disabled using the `counters-as-differences` option.
-Usually, the absolute value of such counters is irrelevant when querying the data, instead you want to have the increase of it over a certain period of time.
-With the `counters-as-differences` option enabled, counters are preprocessed before being exported.
-
-Instead of writing the absolute value of each counter into the InfluxDB, only the increase since the last export will be written.
-In addition, no value will be exported, if the counter has not changed since the last export.
-This can greatly reduce the amount of data written into the InfluxDB, especially if the metrics are quite constant and won't change much.
-
-The following properties are nested properties below the `inspectit.exporters.metrics.influx` property:
-
-
-|Property | Default                                 | Description|
-|---|-----------------------------------------|---|
-|`.enabled`| `IF_CONFIGURED`                         |If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Influx exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.|
-|`.endpoint`| `null`                                  |The HTTP endpoint of the InfluxDB, e.g. `http://localhost:8086`.|
-|`.user`| `null`                                  | The user to use for connecting to the InfluxDB, can not be empty.|
-|`.password`| `null`                                  |The password to use for connecting to the InfluxDB, can be not be empty.|
-|`.database`| `inspectit`                             | The InfluxDB database to which the metrics are pushed.|
-|`.retention-policy`| `autogen`                               | The retention policy of the database to use for writing metrics.|
-|`.create-database`| `true`                                  | If enabled, the database defined by the `database` property is automatically created on startup with an `autogen` retention policy if it does not exist yet.|
-|`.export-interval`| refers to `inspectit.metrics.frequency` |Defines how often metrics are pushed to the InfluxDB.|
-|<nobr>`.counters-as-differences`</nobr>| `true`                                  |Defines whether counters are exported using their absolute value or as the increase between exports|
-|`buffer-size`| `40`                                    | In case the InfluxDB is not reachable, failed writes will be buffered and written on the next export. This value defines the maximum number of batches to buffer.|
+Since version 3.0.0 the InspectIT EUM-Server does no longer support the InfluxDB exporter.
+Please use the OTLP Exporter instead.
 
 ###### OTLP Exporter (Metrics)
-
 
 The OpenTelemetry Protocol (OTLP) exporters export the metrics to the desired endpoint at a specified interval.
 To enable the OTLP exporters, it is only required to specify the `endpoint`.
@@ -250,6 +225,7 @@ The following properties are nested properties below the `inspectit.exporters.tr
 ###### Jaeger Exporter (removed)
 
 Since version 2.6.2 the InspectIT EUM-Server does no longer support the Jaeger exporter.
+Please use the OTLP Exporter instead.
 
 ##### Security
 Currently, the EUM Server only supports a simple API token security concept. In future, additional authentication providers
@@ -312,12 +288,12 @@ The format for the token files is as follows:
 
 ##### Build Docker Image Locally.
 
-In order to build a docker image locally, the eum-server should be build locally and the resulting jar should be renamed
+In order to build a docker image locally, the eum-server should be built locally and the resulting jar should be renamed
 to ```inspectit-ocelot-eum-server.jar``` and copied to the ./docker directory
 
 ##### How to Release
 To create a new release, you have to create a new git tag and push it on to GitHub. 
-This Tag is the new version number of the release. Afterwards the release build will be automatically triggered.
+This Tag is the new version number of the release. Afterward the release build will be automatically triggered.
 
 Important tasks to check first are `dependencyUpdates` and `dependencyUpdates[Major|Minor]` for newer (patch, minor, major)
 versions and `dependencyCheckAnalyze` for security issues in the used dependencies. 
