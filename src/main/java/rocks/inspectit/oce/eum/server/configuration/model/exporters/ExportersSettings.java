@@ -7,6 +7,7 @@ import rocks.inspectit.oce.eum.server.configuration.model.exporters.metrics.Metr
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.TraceExportersSettings;
 
 import jakarta.validation.Valid;
+import rocks.inspectit.oce.eum.server.exporters.tracing.TraceExportersConfiguration;
 
 /**
  * Extended exporter settings.
@@ -31,4 +32,9 @@ public class ExportersSettings {
      */
     @Valid
     private TraceExportersSettings tracing;
+
+    /**
+     * The service name used for exporters
+     */
+    private String serviceName;
 }

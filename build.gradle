@@ -129,15 +129,8 @@ dependencies {
             // Has to be included, but is transitive to spring
             "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
 
-            // pin Prometheus client to 0.6.0 to prevent auto prefixing counter metrics with "_total"
-            // see: https://github.com/prometheus/client_java/issues/640, https://github.com/prometheus/client_java/pull/653
-            "io.prometheus:simpleclient:${prometheusClientVersion}",
-            "io.prometheus:simpleclient_common:${prometheusClientVersion}",
-            "io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
-
             "io.opencensus:opencensus-api:${openCensusVersion}",
             "io.opencensus:opencensus-impl:${openCensusVersion}",
-            "io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
             "rocks.inspectit:opencensus-influxdb-exporter:${openCensusInfluxdbExporterVersion}",
 
             "io.grpc:grpc-context:${grpcVersion}",
@@ -146,6 +139,7 @@ dependencies {
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
             "io.opentelemetry:opentelemetry-exporter-otlp:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-exporter-prometheus:${openTelemetryAlphaVersion}",
             "io.opentelemetry.semconv:opentelemetry-semconv:${openTelemetrySemConvVersion}",
             "io.opentelemetry.proto:opentelemetry-proto:${openTelemetryProtoVersion}",
 

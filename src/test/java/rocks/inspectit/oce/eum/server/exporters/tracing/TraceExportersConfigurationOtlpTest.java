@@ -1,6 +1,5 @@
-package rocks.inspectit.oce.eum.server.exporters.configuration;
+package rocks.inspectit.oce.eum.server.exporters.tracing;
 
-import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,7 @@ public class TraceExportersConfigurationOtlpTest {
     public class OtlpEndpointTest {
 
         @Autowired(required = false)
-        OtlpGrpcSpanExporter exporter;
+        DelegatingSpanExporter exporter;
 
         @Test
         public void testBeanWasNotCreated() {
@@ -34,7 +33,7 @@ public class TraceExportersConfigurationOtlpTest {
     public class DisabledTest {
 
         @Autowired(required = false)
-        OtlpGrpcSpanExporter exporter;
+        DelegatingSpanExporter exporter;
 
         @Test
         public void testBeanWasNotCreated() {
@@ -47,7 +46,7 @@ public class TraceExportersConfigurationOtlpTest {
     public class BothAvailableTest {
 
         @Autowired
-        OtlpGrpcSpanExporter exporter;
+        DelegatingSpanExporter exporter;
 
         @Test
         public void testBeanWasCreated() {

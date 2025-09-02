@@ -6,6 +6,7 @@ import com.linecorp.armeria.server.ServiceRequestContext;
 import com.linecorp.armeria.server.grpc.protocol.AbstractUnaryGrpcService;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
 import io.opencensus.trace.TraceId;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
@@ -120,6 +121,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
     @BeforeEach
     void reset() {
+        GlobalOpenTelemetry.resetForTest();
         grpcServer.reset();
     }
 

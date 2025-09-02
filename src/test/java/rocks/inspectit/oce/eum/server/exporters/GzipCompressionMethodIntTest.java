@@ -14,6 +14,8 @@ import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.TransportProtocol;
 import rocks.inspectit.oce.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
+import rocks.inspectit.oce.eum.server.exporters.metrics.OtlpMetricsExporterService;
+import rocks.inspectit.oce.eum.server.exporters.tracing.DelegatingSpanExporter;
 
 import java.util.List;
 import java.util.Map;
@@ -62,7 +64,7 @@ public class GzipCompressionMethodIntTest extends ExporterIntTestBaseWithOtelCol
                 .getCompression()).isEqualTo(CompressionMethod.GZIP);
 
         Optional<SpanExporter> spanExporter = spanExporters.stream()
-                .filter(sE -> sE instanceof OtlpGrpcSpanExporter)
+                .filter(sE -> sE instanceof DelegatingSpanExporter)
                 .findFirst();
         assertThat(spanExporter.isPresent()).isTrue();
     }

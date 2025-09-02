@@ -16,9 +16,4 @@ public class TraceExportersSettings {
      * Specifies whether client IP addresses which are added to spans should be masked.
      */
     private boolean maskSpanIpAddresses;
-
-    /**
-     * The service name. Used in {@link rocks.inspectit.oce.eum.server.exporters.configuration.TraceExportersConfiguration}
-     */
-    private String serviceName;
 }
