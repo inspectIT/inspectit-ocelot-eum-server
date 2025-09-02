@@ -1,11 +1,11 @@
-package rocks.inspectit.oce.eum.server.exporters.configuration;
+package rocks.inspectit.oce.eum.server.exporters.tracing;
 
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import io.opentelemetry.semconv.ServiceAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.trace.OtlpTraceExporterSettings;
+import rocks.inspectit.oce.eum.server.opentelemetry.OpenTelemetryController;
 
 import java.util.Map;
 
@@ -23,6 +24,9 @@ public class TraceExportersConfiguration {
 
     @Autowired
     private EumServerConfiguration configuration;
+
+    @Autowired
+    private OpenTelemetryController openTelemetryController;
 
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnProperty({"inspectit-eum-server.exporters.tracing.otlp.enabled", "inspectit-eum-server.exporters.tracing.otlp.endpoint"})
@@ -66,11 +70,8 @@ public class TraceExportersConfiguration {
         }
         log.info("Starting OTLP span exporter on {} '{}'", otlpTraceExporterSettings.getProtocol()
                 .getConfigRepresentation(), endpoint);
-        System.setProperty("otel.resource.attributes", ServiceAttributes.SERVICE_NAME.getKey() + "=" + configuration.getExporters()
-                .getTracing()
-                .getServiceName());
 
-        return spanExporter;
+        Attributes resourceAttributes = openTelemetryController.getResource().getAttributes();
+        return new DelegatingSpanExporter(spanExporter, resourceAttributes);
     }
-
 }

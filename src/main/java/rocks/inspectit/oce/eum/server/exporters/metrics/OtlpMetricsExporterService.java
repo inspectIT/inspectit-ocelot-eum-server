@@ -1,31 +1,22 @@
-package rocks.inspectit.oce.eum.server.exporters;
+package rocks.inspectit.oce.eum.server.exporters.metrics;
 
 import io.opencensus.metrics.Metrics;
 import io.opencensus.metrics.export.Metric;
 import io.opencensus.metrics.export.MetricProducer;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.opencensusshim.internal.metrics.MetricAdapter;
-import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
-import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
+import io.opentelemetry.sdk.metrics.export.*;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ServiceAttributes;
-import io.opentelemetry.semconv.TelemetryAttributes;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import rocks.inspectit.oce.eum.server.AppStartupRunner;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.TransportProtocol;
@@ -34,6 +25,9 @@ import rocks.inspectit.oce.eum.server.configuration.model.exporters.metrics.Otlp
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.validation.Valid;
+import rocks.inspectit.oce.eum.server.exporters.MetricsExporterService;
+import rocks.inspectit.oce.eum.server.opentelemetry.OpenTelemetryController;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +40,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class OtlpMetricsExporterService {
+public class OtlpMetricsExporterService implements MetricsExporterService {
 
     private final List<TransportProtocol> SUPPORTED_PROTOCOLS = Arrays.asList(TransportProtocol.GRPC, TransportProtocol.HTTP_PROTOBUF);
 
@@ -57,21 +51,15 @@ public class OtlpMetricsExporterService {
     private ScheduledExecutorService executor;
 
     @Autowired
-    private AppStartupRunner appStartupRunner;
+    private OpenTelemetryController openTelemetryController;
 
     private Supplier<Set<MetricProducer>> metricProducerSupplier;
 
-    MetricExporter metricExporter;
-
-    PeriodicMetricReaderBuilder metricReaderBuilder;
-
-    OpenTelemetrySdk openTelemetry;
-
-    SdkMeterProvider meterProvider;
-
-    private ScheduledFuture<?> exporterTask;
+    private MetricExporter metricExporter;
 
     private Resource otelResource;
+
+    private ScheduledFuture<?> exporterTask;
 
     OtlpMetricsExporterSettings otlpMetricsExporterSettings;
 
@@ -85,7 +73,7 @@ public class OtlpMetricsExporterService {
                 if (StringUtils.hasText(otlp.getEndpoint())) {
                     return true;
                 } else if (StringUtils.hasText(otlp.getEndpoint())) {
-                    log.warn("OTLP Metric Exporter is enabled but 'endpoint' is not set.");
+                    log.warn("OTLP Metric Exporter is enabled but 'endpoint' is not set");
                     return true;
                 }
             }
@@ -96,7 +84,7 @@ public class OtlpMetricsExporterService {
                             .toArray()));
                 }
                 if (!StringUtils.hasText(otlp.getEndpoint())) {
-                    log.warn("OTLP Metric Exporter is enabled but 'endpoint' is not set.");
+                    log.warn("OTLP Metric Exporter is enabled but 'endpoint' is not set");
                 }
             }
         }
@@ -111,9 +99,7 @@ public class OtlpMetricsExporterService {
             enabled = true;
             otlpMetricsExporterSettings = configuration.getExporters().getMetrics().getOtlp();
             AggregationTemporalitySelector aggregationTemporalitySelector = otlpMetricsExporterSettings.getPreferredTemporality() == AggregationTemporality.DELTA ? AggregationTemporalitySelector.deltaPreferred() : AggregationTemporalitySelector.alwaysCumulative();
-            otelResource = Resource.create(Attributes.of(ServiceAttributes.SERVICE_NAME, configuration.getExporters()
-                    .getMetrics()
-                    .getServiceName(), AttributeKey.stringKey("inspectit.eum-server.version"), appStartupRunner.getServerVersion(), TelemetryAttributes.TELEMETRY_SDK_VERSION, appStartupRunner.getOpenTelemetryVersion(), TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java", TelemetryAttributes.TELEMETRY_SDK_NAME, "opentelemetry"));
+
             String endpoint = configuration.getExporters().getMetrics().getOtlp().getEndpoint();
             // OTEL expects that the URI starts with 'http://' or 'https://'
             if (!endpoint.startsWith("http")) {
@@ -157,6 +143,10 @@ public class OtlpMetricsExporterService {
                     }
                 }
 
+                openTelemetryController.addMetricsExporterService(this);
+                otelResource = openTelemetryController.getResource();
+
+                // TODO With OpenTelemetry, the PeriodicMetricReader should handle this completely
                 exporterTask = executor.scheduleAtFixedRate(this::export, otlpMetricsExporterSettings.getExportInterval()
                         .toMillis(), otlpMetricsExporterSettings.getExportInterval().toMillis(), TimeUnit.MILLISECONDS);
 
@@ -182,6 +172,7 @@ public class OtlpMetricsExporterService {
         }
     }
 
+    // TODO With OpenTelemetry, the PeriodicMetricReader will provide MetricData to the exporter
     private void export() {
         List<Metric> metrics = metricProducerSupplier.get()
                 .stream()
@@ -193,5 +184,12 @@ public class OtlpMetricsExporterService {
                 .collect(Collectors.toList());
 
         metricExporter.export(convertedMetrics);
+    }
+
+    @Override
+    public MetricReader getNewMetricReader() {
+        return PeriodicMetricReader.builder(metricExporter)
+                .setInterval(otlpMetricsExporterSettings.getExportInterval())
+                .build();
     }
 }

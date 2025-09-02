@@ -20,9 +20,4 @@ public class MetricsExportersSettings {
 
     @Valid
     private OtlpMetricsExporterSettings otlp;
-
-    /**
-     * The service name.
-     */
-    private String serviceName;
 }

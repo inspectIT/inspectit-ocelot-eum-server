@@ -115,6 +115,10 @@ inspectit-eum-server:
 
   # metrics exporter settings
   exporters:
+
+    # service name for all exported data
+    service-name: browser-js
+
     metrics:
       prometheus:
         # Determines whether the prometheus exporter is enabled.
@@ -125,9 +129,6 @@ inspectit-eum-server:
 
         # The port of the prometheus HTTP endpoint.
         port: 8888
-
-        # service name for all exported metrics.
-        service-name: "browser-js"
 
       influx:
         # Determines whether the influx exporter is enabled.
@@ -170,6 +171,7 @@ inspectit-eum-server:
 
       # settings for the OtlpGrpcMetricExporter used in OtlpGrpcMetricExporterService
       otlp:
+        # Determines whether the otlp metrics exporter is enabled.
         enabled: IF_CONFIGURED
         # the export interval of the metrics
         export-interval: 15s
@@ -185,6 +187,7 @@ inspectit-eum-server:
         compression: NONE
         # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
         timeout: 10s
+
     tracing:
       # Specifies whether client IP addresses which are added to spans should be masked.
       mask-span-ip-addresses: true
@@ -202,9 +205,6 @@ inspectit-eum-server:
         compression: NONE
         # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
         timeout: 10s
-
-      # service name for all exported spans.
-      service-name: browser-js
 
     beacons:
       http:

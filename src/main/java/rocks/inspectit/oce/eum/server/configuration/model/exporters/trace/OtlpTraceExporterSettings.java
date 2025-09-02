@@ -6,12 +6,13 @@ import org.hibernate.validator.constraints.time.DurationMin;
 import rocks.inspectit.oce.eum.server.configuration.model.CompressionMethod;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.ExporterEnabledState;
 import rocks.inspectit.oce.eum.server.configuration.model.exporters.TransportProtocol;
+import rocks.inspectit.oce.eum.server.exporters.tracing.TraceExportersConfiguration;
 
 import java.time.Duration;
 import java.util.Map;
 
 /**
- * Settings for {@link rocks.inspectit.oce.eum.server.exporters.configuration.TraceExportersConfiguration}
+ * Settings for {@link TraceExportersConfiguration}
  */
 @Data
 @NoArgsConstructor
