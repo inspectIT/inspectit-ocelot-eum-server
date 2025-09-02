@@ -15,8 +15,6 @@ public class InspectitConfigConversionService extends ApplicationConversionServi
 
     private InspectitConfigConversionService() {
         super();
-        addConverter(new BooleanToExporterEnabledStateConverter());
-        addConverter(new StringToExporterEnabledStateConverter());
         addConverter(new StringToTransportProtocolConverter());
     }
 }

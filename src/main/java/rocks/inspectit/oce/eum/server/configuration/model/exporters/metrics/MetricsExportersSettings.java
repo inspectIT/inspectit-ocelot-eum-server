@@ -16,8 +16,5 @@ public class MetricsExportersSettings {
     private PrometheusExporterSettings prometheus;
 
     @Valid
-    private InfluxExporterSettings influx;
-
-    @Valid
     private OtlpMetricsExporterSettings otlp;
 }

@@ -131,7 +131,6 @@ dependencies {
 
             "io.opencensus:opencensus-api:${openCensusVersion}",
             "io.opencensus:opencensus-impl:${openCensusVersion}",
-            "rocks.inspectit:opencensus-influxdb-exporter:${openCensusInfluxdbExporterVersion}",
 
             "io.grpc:grpc-context:${grpcVersion}",
 
@@ -151,9 +150,7 @@ dependencies {
             "commons-net:commons-net:${commonsNetVersion}",
             "org.apache.commons:commons-lang3:${commonsLang3Version}",
             "org.apache.commons:commons-math3:${commonsMath3Version}",
-            "commons-io:commons-io:${commonsIoVersion}",
-
-            "org.influxdb:influxdb-java:${influxdbJavaVersion}",
+            "commons-io:commons-io:${commonsIoVersion}"
     )
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
