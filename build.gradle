@@ -82,7 +82,7 @@ bootJar {
     }
 
     manifest {
-        attributes "Start-Class": "rocks.inspectit.oce.eum.server.EUMServerApplication"
+        attributes "Start-Class": "rocks.inspectit.ocelot.eum.server.EUMServerApplication"
     }
 
     // include version file
