@@ -5,12 +5,13 @@ import io.opentelemetry.sdk.metrics.export.MetricReader;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import rocks.inspectit.ocelot.eum.server.exporters.MetricsExporterService;
 import rocks.inspectit.ocelot.eum.server.opentelemetry.OpenTelemetryController;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExporterEnabledState;
 
@@ -20,7 +21,7 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExporterE
  */
 @Component
 @Slf4j
-public class PrometheusExporterService implements MetricsExporterService {
+public class PrometheusExporterService {
 
     private PrometheusHttpServer httpServer;
 
@@ -30,24 +31,25 @@ public class PrometheusExporterService implements MetricsExporterService {
     @Autowired
     private OpenTelemetryController openTelemetryController;
 
-    @PostConstruct
-    private void doEnable() {
+    // TODO I'm not happy with this style
+    @Bean
+    @ConditionalOnProperty({"inspectit-eum-server.exporters.metrics.prometheus.enabled", "inspectit-eum-server.exporters.metrics.prometheus.endpoint"})
+    @ConditionalOnExpression("(NOT new String('${inspectit-eum-server.exporters.metrics.prometheus.enabled}').toUpperCase().equals(T(rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExporterEnabledState).DISABLED.toString()))")
+    MetricReader prometheusService() {
         val config = configuration.getExporters().getMetrics().getPrometheus();
-        if (!config.getEnabled().isDisabled()) {
-            try {
-                String host = config.getHost();
-                int port = config.getPort();
-                log.info("Starting Prometheus Exporter on {}:{}", host, port);
-                httpServer = PrometheusHttpServer.builder()
-                        .setHost(host)
-                        .setPort(port)
-                        .build();
+        try {
+            String host = config.getHost();
+            int port = config.getPort();
+            log.info("Starting Prometheus Exporter on {}:{}", host, port);
+            httpServer = PrometheusHttpServer.builder()
+                    .setHost(host)
+                    .setPort(port)
+                    .build();
 
-                openTelemetryController.addMetricsExporterService(this);
-            } catch (Exception e) {
-                log.error("Error Starting Prometheus HTTP Endpoint!", e);
-            }
+        } catch (Exception e) {
+            log.error("Error Starting Prometheus HTTP Endpoint!", e);
         }
+        return httpServer;
     }
 
     @PreDestroy
@@ -57,10 +59,5 @@ public class PrometheusExporterService implements MetricsExporterService {
             httpServer.close();
         }
         return true;
-    }
-
-    @Override
-    public MetricReader getNewMetricReader() {
-        return httpServer;
     }
 }

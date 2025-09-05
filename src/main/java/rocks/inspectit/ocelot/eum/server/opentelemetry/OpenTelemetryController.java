@@ -1,38 +1,40 @@
 package rocks.inspectit.ocelot.eum.server.opentelemetry;
 
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.*;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.metrics.SdkMeterProvider;
-import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
+import io.opentelemetry.sdk.metrics.*;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ServiceAttributes;
-import io.opentelemetry.semconv.TelemetryAttributes;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.eum.server.AppStartupRunner;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.exporters.MetricsExporterService;
+import rocks.inspectit.ocelot.eum.server.opentelemetry.metrics.ViewManager;
+import rocks.inspectit.ocelot.eum.server.opentelemetry.resource.ResourceManager;
 
 import java.util.Collection;
-import java.util.LinkedList;
 
 @Slf4j
 @Component
 public class OpenTelemetryController {
 
+    public static final String INSTRUMENTATION_SCOPE_NAME = "rocks.inspectit.ocelot";
+
     @Autowired
     private EumServerConfiguration configuration;
 
     @Autowired
-    private AppStartupRunner appStartupRunner;
+    private ResourceManager resourceManager;
+
+    @Autowired
+    private ViewManager viewManager;
+
+    @Autowired
+    private Collection<MetricReader> metricReaders;
 
     private OpenTelemetrySdk openTelemetry;
-
-    private final Collection<MetricsExporterService> metricsExporterServices = new LinkedList<>();
 
     @PostConstruct
     synchronized void configureOpenTelemetry() {
@@ -40,46 +42,41 @@ public class OpenTelemetryController {
             log.warn("OpenTelemetry already configured!");
             return;
         }
+
         SdkMeterProvider meterProvider = configureMeterProvider();
 
-        // We don't need any tracerProvider, since we only export received tracing data instead of recording it
+        // TODO We don't need any tracerProvider, since we only export received tracing data instead of recording it
+        //  Right?
         openTelemetry = OpenTelemetrySdk.builder()
                 .setMeterProvider(meterProvider)
                 .build();
         // Using buildAndRegisterGlobal() is also possible, but makes cleaning in tests more cumbersome...
     }
 
-    public void addMetricsExporterService(MetricsExporterService service) {
-        metricsExporterServices.add(service);
+    public Meter getMeter() {
+        return openTelemetry.getMeter(INSTRUMENTATION_SCOPE_NAME);
     }
 
     /**
-     * Configure the meter provider with registered metric readers
+     * Configure the meter provider with registered metric readers, metric producers
+     * and register metric views.
      *
      * @return the configured meter provider
      */
     private SdkMeterProvider configureMeterProvider() {
-        Resource resource = getResource();
+        Resource resource = resourceManager.getResource();
         SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(resource);
 
-        for (MetricsExporterService service : metricsExporterServices) {
-            builder.registerMetricReader(service.getNewMetricReader());
+        for (MetricReader metricReader : metricReaders) {
+            builder.registerMetricReader(metricReader);
         }
 
-        return builder.build();
-    }
+        // TODO Register MetricProducer for custom view (percentile, smoothed average, timewindow)
+        //builder.registerMetricProducer()
 
-    /**
-     * @return the OpenTelemetry resources
-     */
-    public Resource getResource() {
-        return Resource.create(Attributes.of(
-                ServiceAttributes.SERVICE_NAME, configuration.getExporters().getServiceName(),
-                TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java",
-                TelemetryAttributes.TELEMETRY_SDK_NAME, "opentelemetry",
-                TelemetryAttributes.TELEMETRY_SDK_VERSION, appStartupRunner.getOpenTelemetryVersion(),
-                AttributeKey.stringKey("inspectit.eum-server.version"), appStartupRunner.getServerVersion()
-        ));
+        viewManager.registerViews(builder);
+
+        return builder.build();
     }
 
     @PreDestroy

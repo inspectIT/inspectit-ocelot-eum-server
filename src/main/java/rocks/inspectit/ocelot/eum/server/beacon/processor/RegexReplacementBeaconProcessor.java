@@ -23,17 +23,17 @@ import java.util.stream.Collectors;
 @Component
 public class RegexReplacementBeaconProcessor implements BeaconProcessor {
 
-    private List<RegexDerivedTag> derivedTags;
+    private List<RegexDerivedAttribute> derivedAttributes;
 
     @Autowired
     public RegexReplacementBeaconProcessor(EumServerConfiguration config) {
-        Map<String, RegexDerivedTag> unorderedTags = config.getTags().getBeacon().entrySet().stream()
-                .map(e -> RegexDerivedTag.fromSettings(e.getKey(), e.getValue()))
-                .collect(Collectors.toMap(RegexDerivedTag::getTagName, t -> t));
-        derivedTags = getInTopologicalOrder(unorderedTags.values(), tag -> {
-            String input = tag.getInputBeaconField();
-            if (unorderedTags.containsKey(input)) {
-                return Collections.singletonList(unorderedTags.get(input));
+        Map<String, RegexDerivedAttribute> unorderedAttributes = config.getAttributes().getBeacon().entrySet().stream()
+                .map(e -> RegexDerivedAttribute.fromSettings(e.getKey(), e.getValue()))
+                .collect(Collectors.toMap(RegexDerivedAttribute::getAttributeName, attr -> attr));
+        derivedAttributes = getInTopologicalOrder(unorderedAttributes.values(), attribute -> {
+            String input = attribute.getInputBeaconField();
+            if (unorderedAttributes.containsKey(input)) {
+                return Collections.singletonList(unorderedAttributes.get(input));
             } else {
                 return Collections.emptyList();
             }
@@ -42,24 +42,24 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
 
     @Override
     public Beacon process(Beacon beacon) {
-        Map<String, String> newTags = new HashMap<>();
+        Map<String, String> newAttributes = new HashMap<>();
 
-        for (RegexDerivedTag derivedTag : derivedTags) {
-            String input = newTags.get(derivedTag.getInputBeaconField());
+        for (RegexDerivedAttribute derivedAttribute : derivedAttributes) {
+            String input = newAttributes.get(derivedAttribute.getInputBeaconField());
             if (input == null) {
-                input = beacon.get(derivedTag.getInputBeaconField());
+                input = beacon.get(derivedAttribute.getInputBeaconField());
             }
 
-            String tagValue = deriveTag(derivedTag, input);
+            String tagValue = deriveAttribute(derivedAttribute, input);
             if (tagValue != null) {
-                newTags.put(derivedTag.getTagName(), tagValue);
+                newAttributes.put(derivedAttribute.getAttributeName(), tagValue);
             }
         }
 
-        return beacon.merge(newTags);
+        return beacon.merge(newAttributes);
     }
 
-    private String deriveTag(RegexDerivedTag tag, String input) {
+    private String deriveAttribute(RegexDerivedAttribute tag, String input) {
         String value = input;
         if (value == null) {
             if (tag.isNullAsEmpty()) {
@@ -102,7 +102,7 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
 
     /**
      * Returns the given elements as a sorted list,
-     * ensuring that each element appears after it's dependencies.
+     * ensuring that each element appears after its dependencies.
      *
      * @param elements        the elements to sort
      * @param getDependencies a function given an element returning its dependencies
@@ -135,12 +135,12 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
 
     @Value
     @Builder
-    private static class RegexDerivedTag {
+    private static class RegexDerivedAttribute {
 
         /**
-         * The name of the resulting tag / beacon field under which the result is stored
+         * The name of the resulting attribute / beacon field under which the result is stored
          */
-        String tagName;
+        String attributeName;
 
         /**
          * The input beacon field.
@@ -154,9 +154,9 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
 
         List<PatternAndReplacement> replacements;
 
-        private static RegexDerivedTag fromSettings(String tagName, BeaconTagSettings settings) {
-            return RegexDerivedTag.builder()
-                    .tagName(tagName)
+        private static RegexDerivedAttribute fromSettings(String attributeName, BeaconTagSettings settings) {
+            return RegexDerivedAttribute.builder()
+                    .attributeName(attributeName)
                     .inputBeaconField(settings.getInput())
                     .nullAsEmpty(settings.isNullAsEmpty())
                     .replacements(settings.getAllReplacements())

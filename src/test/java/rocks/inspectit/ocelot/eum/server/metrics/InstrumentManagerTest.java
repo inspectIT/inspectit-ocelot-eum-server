@@ -9,7 +9,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.events.RegisteredTagsEvent;
+import rocks.inspectit.ocelot.eum.server.events.RegisteredAttributesEvent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -17,16 +17,16 @@ import static org.mockito.Mockito.*;
 import java.util.*;
 
 @ExtendWith(MockitoExtension.class)
-public class MeasuresAndViewsManagerTest {
+public class InstrumentManagerTest {
 
     @InjectMocks
-    private MeasuresAndViewsManager manager = new MeasuresAndViewsManager();
+    private InstrumentManager manager = new InstrumentManager();
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Captor
-    private ArgumentCaptor<RegisteredTagsEvent> eventArgumentCaptor;
+    private ArgumentCaptor<RegisteredAttributesEvent> eventArgumentCaptor;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private EumServerConfiguration configuration;
@@ -38,22 +38,22 @@ public class MeasuresAndViewsManagerTest {
         void registerNoTag() {
             when(configuration.getTags().getExtra()).thenReturn(Collections.emptyMap());
 
-            manager.processRegisteredTags(Collections.emptySet());
+            manager.processRegisteredAttributes(Collections.emptySet());
 
             verify(applicationEventPublisher).publishEvent(eventArgumentCaptor.capture());
-            assertThat(eventArgumentCaptor.getValue().getRegisteredTags()).isEmpty();
-            assertThat(manager.registeredExtraTags).isEmpty();
+            assertThat(eventArgumentCaptor.getValue().getRegisteredAttributes()).isEmpty();
+            assertThat(manager.registeredExtraAttributes).isEmpty();
         }
 
         @Test
         void registerSingleTag() {
             when(configuration.getTags().getExtra()).thenReturn(Collections.singletonMap("first", "value"));
 
-            manager.processRegisteredTags(Collections.singleton("first"));
+            manager.processRegisteredAttributes(Collections.singleton("first"));
 
             verify(applicationEventPublisher).publishEvent(eventArgumentCaptor.capture());
-            assertThat(eventArgumentCaptor.getValue().getRegisteredTags()).containsExactly("first");
-            assertThat(manager.registeredExtraTags).containsExactly("first");
+            assertThat(eventArgumentCaptor.getValue().getRegisteredAttributes()).containsExactly("first");
+            assertThat(manager.registeredExtraAttributes).containsExactly("first");
         }
 
         @Test
@@ -61,11 +61,11 @@ public class MeasuresAndViewsManagerTest {
             Map<String, String> tagMap = ImmutableMap.of("first", "value", "second", "value");
             when(configuration.getTags().getExtra()).thenReturn(tagMap);
 
-            manager.processRegisteredTags(Sets.newHashSet("first", "second"));
+            manager.processRegisteredAttributes(Sets.newHashSet("first", "second"));
 
             verify(applicationEventPublisher).publishEvent(eventArgumentCaptor.capture());
-            assertThat(eventArgumentCaptor.getValue().getRegisteredTags()).containsExactlyInAnyOrder("first", "second");
-            assertThat(manager.registeredExtraTags).containsExactlyInAnyOrder("first", "second");
+            assertThat(eventArgumentCaptor.getValue().getRegisteredAttributes()).containsExactlyInAnyOrder("first", "second");
+            assertThat(manager.registeredExtraAttributes).containsExactlyInAnyOrder("first", "second");
         }
 
         @Test
@@ -74,19 +74,19 @@ public class MeasuresAndViewsManagerTest {
             when(configuration.getTags().getExtra()).thenReturn(tagMap);
 
             // first execution
-            manager.processRegisteredTags(Collections.singleton("first"));
+            manager.processRegisteredAttributes(Collections.singleton("first"));
 
-            assertThat(manager.registeredExtraTags).containsExactly("first");
+            assertThat(manager.registeredExtraAttributes).containsExactly("first");
 
             // second execution
-            manager.processRegisteredTags(Collections.singleton("second"));
+            manager.processRegisteredAttributes(Collections.singleton("second"));
 
-            assertThat(manager.registeredExtraTags).containsExactlyInAnyOrder("first", "second");
+            assertThat(manager.registeredExtraAttributes).containsExactlyInAnyOrder("first", "second");
             verify(applicationEventPublisher, times(2)).publishEvent(eventArgumentCaptor.capture());
-            RegisteredTagsEvent eventOne = eventArgumentCaptor.getAllValues().get(0);
-            RegisteredTagsEvent eventTwo = eventArgumentCaptor.getAllValues().get(1);
-            assertThat(eventOne.getRegisteredTags()).containsExactlyInAnyOrder("first");
-            assertThat(eventTwo.getRegisteredTags()).containsExactlyInAnyOrder("first", "second");
+            RegisteredAttributesEvent eventOne = eventArgumentCaptor.getAllValues().get(0);
+            RegisteredAttributesEvent eventTwo = eventArgumentCaptor.getAllValues().get(1);
+            assertThat(eventOne.getRegisteredAttributes()).containsExactlyInAnyOrder("first");
+            assertThat(eventTwo.getRegisteredAttributes()).containsExactlyInAnyOrder("first", "second");
         }
     }
 

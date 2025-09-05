@@ -11,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 
@@ -34,7 +34,7 @@ public class SelfMonitoringMetricManagerTest {
     EumServerConfiguration configuration;
 
     @Mock
-    MeasuresAndViewsManager measuresAndViewsManager;
+    InstrumentManager instrumentManager;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     StatsRecorder statsRecorder;
@@ -100,7 +100,7 @@ public class SelfMonitoringMetricManagerTest {
             selfMonitoringMetricManager.initMetrics();
 
             ArgumentCaptor<MetricDefinitionSettings> mdsCaptor = ArgumentCaptor.forClass(MetricDefinitionSettings.class);
-            verify(measuresAndViewsManager).updateMetrics(eq("inspectit-eum/self/beacons_received"), mdsCaptor.capture());
+            verify(instrumentManager).updateInstruments(eq("inspectit-eum/self/beacons_received"), mdsCaptor.capture());
             verifyNoMoreInteractions(viewManager, statsRecorder, measureMap);
 
             assertThat(mdsCaptor.getValue().getViews().keySet()).containsExactly("inspectit-eum/self/beacons_received/COUNT");

@@ -63,7 +63,7 @@ public class CountryCodeBeaconProcessor implements BeaconProcessor {
      * @return the CountryCode
      */
     private String resolveCustomIPMapping(String ip) {
-        Map<String, List<String>> customIpMapping = configuration.getTags().getCustomIPMapping();
+        Map<String, List<String>> customIpMapping = configuration.getAttributes().getCustomIPMapping();
         if (customIpMapping != null) {
             for (Map.Entry<String, List<String>> customCountryCodeDefinition : customIpMapping.entrySet()) {
                 if (customCountryCodeDefinition.getValue().stream()

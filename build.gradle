@@ -55,7 +55,7 @@ tasks.register('generateVersionFile') {
     doLast {
         def currentDate = new Date().toString()
         ext.versionFile.withWriter("UTF-8") { writer ->
-            writer << "$version\n$currentDate\n$boomerangVersion"
+            writer << "$version\n$currentDate\n$boomerangVersion\n$openTelemetryVersion"
         }
     }
 }
@@ -129,14 +129,13 @@ dependencies {
             // Has to be included, but is transitive to spring
             "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
 
-            "io.opencensus:opencensus-api:${openCensusVersion}",
-            "io.opencensus:opencensus-impl:${openCensusVersion}",
-
             "io.grpc:grpc-context:${grpcVersion}",
 
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-sdk-metrics:${openTelemetryVersion}",
             "io.opentelemetry:opentelemetry-exporter-otlp:${openTelemetryVersion}",
             "io.opentelemetry:opentelemetry-exporter-prometheus:${openTelemetryAlphaVersion}",
             "io.opentelemetry.semconv:opentelemetry-semconv:${openTelemetrySemConvVersion}",
@@ -158,7 +157,6 @@ dependencies {
 
     testImplementation(
             "org.springframework.boot:spring-boot-starter-test",
-            "io.opencensus:opencensus-impl:${openCensusVersion}",
             "org.apache.httpcomponents:httpclient:${httpClientVersion}",
 
             // ServerExtension
@@ -176,7 +174,7 @@ dependencies {
 // Copy the jar into the docker folder without version suffix
 tasks.register('copyServerJar', Copy) {
     dependsOn bootJar
-    from(layout.buildDirectory.file("libs/inspectit-ocelot-eum-server-${version}.jar"))
+    from(layout.buildDirectory.file("libs/inspectit- lot-eum-server-${version}.jar"))
     into(layout.projectDirectory.dir("docker"))
     rename("inspectit-ocelot-eum-server-${version}\\.jar",
             "inspectit-ocelot-eum-server.jar")

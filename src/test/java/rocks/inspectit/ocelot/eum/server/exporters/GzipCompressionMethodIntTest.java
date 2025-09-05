@@ -13,7 +13,7 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.CompressionMethod;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.TransportProtocol;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.exporters.metrics.OtlpMetricsExporterService;
 import rocks.inspectit.ocelot.eum.server.exporters.tracing.DelegatingSpanExporter;
 

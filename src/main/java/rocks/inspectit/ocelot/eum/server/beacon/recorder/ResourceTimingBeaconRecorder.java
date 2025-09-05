@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.eum.server.beacon.recorder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.opencensus.common.Scope;
+import io.opentelemetry.context.Scope;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -18,8 +18,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.metrics.InstrumentManager;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
@@ -50,10 +50,10 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
     private final ObjectMapper objectMapper;
 
     /**
-     * {@link MeasuresAndViewsManager} for exposing metrics.
+     * {@link InstrumentManager} for exposing metrics.
      */
     @Autowired
-    private final MeasuresAndViewsManager measuresAndViewsManager;
+    private final InstrumentManager instrumentManager;
 
     @Autowired
     private final EumServerConfiguration configuration;
@@ -73,29 +73,31 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      */
     @PostConstruct
     public void initMetric() {
-        Map<String, Boolean> tags = new HashMap<>();
+        Map<String, Boolean> attributes = new HashMap<>();
         if (configuration.getResourceTiming().getTags() != null) {
-            tags.putAll(configuration.getResourceTiming().getTags());
+            attributes.putAll(configuration.getResourceTiming().getTags());
         }
-        tags.put("initiatorType", true);
-        tags.put("cached", true);
-        tags.put("crossOrigin", true);
+        attributes.put("initiatorType", true);
+        attributes.put("cached", true);
+        attributes.put("crossOrigin", true);
+
+        // TODO Add this metric definition to the application.yml and refactor resource-timing property
 
         RESOURCE_TIME = MetricDefinitionSettings.builder()
                 .type(MetricDefinitionSettings.MeasureType.DOUBLE)
                 .description("Response end time of the resource loading")
                 .unit("ms")
                 .view(RESOURCE_TIME_METRIC_NAME + "/SUM", ViewDefinitionSettings.builder()
-                        .tags(tags)
+                        .attributes(attributes)
                         .aggregation(ViewDefinitionSettings.Aggregation.SUM)
                         .build())
                 .view(RESOURCE_TIME_METRIC_NAME + "/COUNT", ViewDefinitionSettings.builder()
-                        .tags(tags)
+                        .attributes(attributes)
                         .aggregation(ViewDefinitionSettings.Aggregation.COUNT)
                         .build())
                 .build();
 
-        measuresAndViewsManager.updateMetrics(RESOURCE_TIME_METRIC_NAME, RESOURCE_TIME);
+        instrumentManager.updateInstruments(RESOURCE_TIME_METRIC_NAME, RESOURCE_TIME);
     }
 
     /**
@@ -130,9 +132,9 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
             extra.put("cached", String.valueOf(resourceTimingEntry.isCached(true)));
         }
 
-        try (Scope scope = measuresAndViewsManager.getTagContext(extra).buildScoped()) {
+        try (Scope scope = instrumentManager.getBaggage(extra).makeCurrent()) {
             Optional<Integer> responseEnd = resourceTimingEntry.getResponseEnd();
-            measuresAndViewsManager.recordMeasure("resource_time", RESOURCE_TIME, responseEnd.orElse(0));
+            instrumentManager.recordInstrument("resource_time", RESOURCE_TIME, responseEnd.orElse(0));
         }
     }
 
@@ -148,7 +150,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         try {
             rootNode = objectMapper.readTree(resourceTiming);
         } catch (IOException e) {
-            log.error("Error converting resource timing json to tree.", e);
+            log.error("Error converting resource timing json to tree", e);
             return Stream.empty();
         }
 

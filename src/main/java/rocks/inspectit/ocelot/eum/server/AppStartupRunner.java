@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.eum.server;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -11,37 +11,37 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 @Slf4j
+@Getter
 @Component
-@Data
 public class AppStartupRunner implements ApplicationRunner {
 
     /**
-     * Version string of unknown versions.
+     * Version string of unknown versions
      */
     private static final String UNKNOWN = "UNKNOWN";
 
     /**
-     * The file used to load the server's version.
+     * The file used to load the server's version
      */
     private static final String SERVER_VERSION_INFORMATION_FILE = "/eum-version.info";
 
     /**
-     * The server's version.
+     * The server's version
      */
     private String serverVersion;
 
     /**
-     * The date the server was built.
+     * The date the server was built
      */
     private String serverBuildDate;
 
     /**
-     * The Boomerangjs version shipped with the server.
+     * The Boomerang.js version shipped with the server
      */
     private String bommerangjsVersion;
 
     /**
-     * The OpenTelemetry API version.
+     * The OpenTelemetry API version
      */
     private String openTelemetryVersion;
 
@@ -53,6 +53,7 @@ public class AppStartupRunner implements ApplicationRunner {
         log.info("\tVersion:             {}", serverVersion);
         log.info("\tBuild Date:          {}", serverBuildDate);
         log.info("\tBoomerangjs Version: {}", bommerangjsVersion);
+        log.info("\tOpenTelemetry Version: {}", openTelemetryVersion);
     }
 
     /**
@@ -66,7 +67,7 @@ public class AppStartupRunner implements ApplicationRunner {
             bommerangjsVersion = reader.readLine();
             openTelemetryVersion = reader.readLine();
         } catch (Exception e) {
-            log.warn("Could not read server version information file.");
+            log.warn("Could not read server version information file");
             serverVersion = UNKNOWN;
             serverBuildDate = UNKNOWN;
             bommerangjsVersion = UNKNOWN;

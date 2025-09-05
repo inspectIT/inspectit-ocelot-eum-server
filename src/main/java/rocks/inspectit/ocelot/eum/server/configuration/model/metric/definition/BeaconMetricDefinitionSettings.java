@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition;
 
+import io.opentelemetry.sdk.metrics.InstrumentType;
+import io.opentelemetry.sdk.metrics.InstrumentValueType;
 import lombok.*;
 import rocks.inspectit.ocelot.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
@@ -10,6 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import rocks.inspectit.ocelot.eum.server.arithmetic.ArithmeticExpression;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
 
 import java.util.List;
 import java.util.Map;
@@ -40,10 +43,11 @@ public class BeaconMetricDefinitionSettings extends MetricDefinitionSettings {
     private List<BeaconRequirement> beaconRequirements;
 
     @Builder(builderMethodName = "beaconMetricBuilder")
-    public BeaconMetricDefinitionSettings(boolean enabled, @NotBlank String unit, @NotNull MeasureType type, String description,
-                                          Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotEmpty List<BeaconRequirement> beaconRequirements,
-                                          String valueExpression) {
-        super(enabled, unit, type, description, views);
+    public BeaconMetricDefinitionSettings(boolean enabled, @NotBlank String unit, @NotNull InstrumentType instrumentType,
+                                          @NotNull InstrumentValueType valueType, @NotNull  String description,
+                                          Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views,
+                                          @NotEmpty List<BeaconRequirement> beaconRequirements, String valueExpression) {
+        super(enabled, unit, instrumentType, valueType, description, views);
         this.beaconRequirements = beaconRequirements;
         this.valueExpression = valueExpression;
     }
@@ -57,7 +61,8 @@ public class BeaconMetricDefinitionSettings extends MetricDefinitionSettings {
                 .valueExpression(getValueExpression())
                 .description(metricDefinition.getDescription())
                 .unit(metricDefinition.getUnit())
-                .type(metricDefinition.getType())
+                .instrumentType(metricDefinition.getInstrumentType())
+                .valueType(metricDefinition.getValueType())
                 .enabled(metricDefinition.isEnabled())
                 .views(metricDefinition.getViews())
                 .build();

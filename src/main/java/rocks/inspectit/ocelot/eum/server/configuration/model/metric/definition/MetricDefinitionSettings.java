@@ -1,16 +1,20 @@
 package rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition;
 
+import io.opentelemetry.sdk.metrics.InstrumentType;
+import io.opentelemetry.sdk.metrics.InstrumentValueType;
 import lombok.*;
 import org.springframework.util.CollectionUtils;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
+
 import java.time.Duration;
 import java.util.Map;
 
 /**
- * Defines an OpenCensus measure in combination with one or multiple views
+ * Defines an OpenTelemetry instrument in combination with one or multiple views
  */
 @Data
 @NoArgsConstructor
@@ -18,15 +22,11 @@ import java.util.Map;
 @Builder(toBuilder = true)
 public class MetricDefinitionSettings {
 
-    public enum MeasureType {
-        LONG, DOUBLE
-    }
-
     /**
      * Defines if this metric is enabled.
      * If this metric is disabled:
      * - no views for it are created
-     * - no measurements for it are collected in the instrumentation. However the actions are still executed!
+     * - no measurements for it are collected in the instrumentation. However, the actions are still executed!
      */
     @Builder.Default
     private boolean enabled = true;
@@ -35,8 +35,11 @@ public class MetricDefinitionSettings {
     private String unit;
 
     @NotNull
+    private InstrumentType instrumentType;
+
+    @NotNull
     @Builder.Default
-    private MetricDefinitionSettings.MeasureType type = MeasureType.DOUBLE;
+    private InstrumentValueType valueType = InstrumentValueType.DOUBLE;
 
     /**
      * The description of the measure.
@@ -55,7 +58,7 @@ public class MetricDefinitionSettings {
      * Copies the settings of this object but applies the defaults, like creating a default view if no views were defined.
      * Does not provide a default time window for windowed views.
      *
-     * @param metricName the name of the measure, derived form the key in {@link MetricsSettings#getDefinitions()}
+     * @param metricName the name of the measure
      *
      * @return a copy of this view definition with the default populated
      */
@@ -66,7 +69,7 @@ public class MetricDefinitionSettings {
     /**
      * Copies the settings of this object but applies the defaults, like creating a default view if no views were defined.
      *
-     * @param metricName        the name of the measure, derived form the key in {@link MetricsSettings#getDefinitions()}
+     * @param metricName        the name of the measure
      * @param defaultTimeWindow the size of the time window to use as default for windowed metrics (e.g. quantiles)
      *
      * @return a copy of this view definition with the default populated
@@ -74,14 +77,7 @@ public class MetricDefinitionSettings {
     public MetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName, Duration defaultTimeWindow) {
         val resultDescription = description == null ? metricName : description;
         val result = toBuilder().description(resultDescription).clearViews();
-        if (!CollectionUtils.isEmpty(views)) {
-            views.forEach((name, def) -> result.view(name, def.getCopyWithDefaultsPopulated(resultDescription, unit, defaultTimeWindow)));
-        } else {
-            result.view(metricName, ViewDefinitionSettings.builder()
-                    .aggregation(ViewDefinitionSettings.Aggregation.LAST_VALUE)
-                    .build()
-                    .getCopyWithDefaultsPopulated(resultDescription, unit, defaultTimeWindow));
-        }
+        views.forEach((name, def) -> result.view(name, def.getCopyWithDefaultsPopulated(resultDescription, unit, defaultTimeWindow)));
         return result.build();
     }
 

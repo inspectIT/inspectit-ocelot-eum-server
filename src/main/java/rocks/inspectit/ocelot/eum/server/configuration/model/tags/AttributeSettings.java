@@ -12,27 +12,27 @@ import jakarta.validation.constraints.Pattern;
 import java.util.*;
 
 /**
- * Holds an additional map of tags, which will be resolved based on the EUM beacon.
+ * Holds an additional map of attributes, which will be resolved based on the EUM beacon.
  */
 @Data
 @NoArgsConstructor
-public class TagsSettings {
+public class AttributeSettings {
 
     /**
-     * Settings for available tags providers.
+     * Settings for available attributes providers.
      */
     @Valid
     private TagsProvidersSettings providers;
 
     /**
-     * Map of arbitrary user defined tags.
+     * Map of arbitrary user defined attributes.
      */
     private Map<String, String> extra = new HashMap<>();
 
     private static final String IP_PATTERN = "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])($|(\\/[1-9]$|\\/[1-2][0-9]$|\\/3[0-2]$))";
 
     /**
-     * List of tags, which are defined as global
+     * List of attributes, which are defined as global
      */
     private final Set<String> defineAsGlobal = new HashSet<>();
 
@@ -42,9 +42,9 @@ public class TagsSettings {
     private final Map<String, List<@Pattern(regexp = IP_PATTERN) String>> customIPMapping = new HashMap<>();
 
     /**
-     * Tags which are derived using regex-replace operations.
+     * Attributes which are derived using regex-replace operations.
      * The keys are the names of the beacon fields under which the results of the given replacement operation will be stored.
-     * Tags via regexes can depend on each other, as long as no cyclic dependency is involved.
+     * Attributes via regexes can depend on each other, as long as no cyclic dependency is involved.
      */
     private Map<String, BeaconTagSettings> beacon = new HashMap<>();
 
@@ -53,7 +53,7 @@ public class TagsSettings {
      */
     private IPUtils ipUtils = new IPUtils();
 
-    @AssertFalse(message = "All defined global tags should exist either in extra tags or beacon tags")
+    @AssertFalse(message = "All defined global attributes should exist either in extra tags or beacon tags")
     public boolean isGlobalTagMissing() {
         return defineAsGlobal.stream()
                 .anyMatch(globalTag ->
@@ -63,25 +63,26 @@ public class TagsSettings {
                 );
     }
 
-    @AssertTrue(message = "Each tag should only be defined once")
+    @AssertTrue(message = "Each attributes should only be defined once")
     public boolean isCheckUniquenessOfTags() {
-        return getExtra().keySet().stream().allMatch(extraTag -> !beacon.containsKey(extraTag));
+        return getExtra().keySet().stream().allMatch(extraAttribute -> !beacon.containsKey(extraAttribute));
     }
 
     @AssertTrue(message = "The ip definitions between the different categories must not overlap")
     public boolean isCheckIpRangesDoNotOverlap() {
         return customIPMapping.values().stream()
                 .allMatch(ipList -> ipList.stream()
-                        .allMatch(adresse -> customIPMapping.values().stream()
-                                .allMatch(listToCompare -> listToCompare == ipList || listToCompare.stream().noneMatch(adresseToCompare -> areOverlapping(adresse, adresseToCompare)))));
+                        .allMatch(address -> customIPMapping.values().stream()
+                                .allMatch(listToCompare -> listToCompare == ipList ||
+                                        listToCompare.stream()
+                                                .noneMatch(adresseToCompare -> areOverlapping(address, adresseToCompare))
+                                )
+                        )
+                );
     }
 
     /**
      * Helper method, which compares two address entries.
-     *
-     * @param address1
-     * @param address2
-     * @return
      */
     private boolean areOverlapping(String address1, String address2) {
         if (address1.contains("/") && address2.contains("/")) {

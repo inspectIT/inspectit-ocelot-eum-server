@@ -5,7 +5,7 @@ import io.opentelemetry.sdk.trace.data.DelegatingSpanData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
 /**
- * Wrapper class to add custom attributes - like resource attributes - to span data
+ * Wrapper class to add custom attributes - like resource attributes - to span data.
  */
 public class EnrichedSpanData extends DelegatingSpanData {
 

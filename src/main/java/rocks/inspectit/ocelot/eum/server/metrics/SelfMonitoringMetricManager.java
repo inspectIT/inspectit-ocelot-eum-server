@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.eum.server.metrics;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.common.Scope;
+import io.opentelemetry.context.Scope;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ public class SelfMonitoringMetricManager {
     private EumServerConfiguration configuration;
 
     @Autowired
-    private MeasuresAndViewsManager measuresAndViewsManager;
+    private InstrumentManager instrumentManager;
 
     @PostConstruct
     @VisibleForTesting
@@ -37,33 +37,33 @@ public class SelfMonitoringMetricManager {
             String metricName = selfMonitoringSettings.getMetricPrefix() + measureName;
             log.info("Registering self-monitoring metric: {}", metricName);
 
-            measuresAndViewsManager.updateMetrics(metricName, metricDefinitionSettings);
+            instrumentManager.updateInstruments(metricName, metricDefinitionSettings);
         }
     }
 
     /**
-     * Records a self-monitoring measurement with the common tags.
+     * Records a self-monitoring measurement with the common attributes.
      * Only records a measurement if self monitoring is enabled.
      *
      * @param measureName the name of the measure, excluding the metrics prefix
      * @param value       the actual value
-     * @param customTags  custom tags
+     * @param customAttributes  custom attributes
      */
-    public void record(String measureName, Number value, Map<String, String> customTags) {
+    public void record(String measureName, Number value, Map<String, String> customAttributes) {
         SelfMonitoringSettings selfMonitoringSettings = configuration.getSelfMonitoring();
         if (selfMonitoringSettings.isEnabled() && selfMonitoringSettings.getMetrics().containsKey(measureName)) {
             MetricDefinitionSettings metricDefinitionSettings = selfMonitoringSettings.getMetrics().get(measureName);
 
             String metricName = selfMonitoringSettings.getMetricPrefix() + measureName;
 
-            try (Scope scope = measuresAndViewsManager.getTagContext(customTags).buildScoped()) {
-                measuresAndViewsManager.recordMeasure(metricName, metricDefinitionSettings, value);
+            try (Scope scope = instrumentManager.getBaggage(customAttributes).makeCurrent()) {
+                instrumentManager.recordInstrument(metricName, metricDefinitionSettings, value);
             }
         }
     }
 
     /**
-     * Records a self-monitoring measurement with the common tags.
+     * Records a self-monitoring measurement with the common attributes.
      * Only records a measurement if self monitoring is enabled.
      *
      * @param measureName the name of the measure, excluding the metrics prefix

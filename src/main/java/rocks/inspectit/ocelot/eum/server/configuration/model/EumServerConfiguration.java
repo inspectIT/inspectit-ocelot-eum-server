@@ -8,7 +8,7 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.Exporters
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconMetricDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.security.SecuritySettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.selfmonitoring.SelfMonitoringSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.tags.TagsSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.tags.AttributeSettings;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * The configuration of the EUM server.
+ * The configuration of the EUM server
  */
 @ConfigurationProperties("inspectit-eum-server")
 @Component
@@ -33,10 +33,10 @@ public class EumServerConfiguration {
     private Map<@NotBlank String, @NotNull @Valid BeaconMetricDefinitionSettings> definitions = Collections.emptyMap();
 
     /**
-     * Map of tags
+     * Map of attributes
      */
     @Valid
-    private TagsSettings tags;
+    private AttributeSettings attributes;
 
     /**
      * Self Monitoring
@@ -58,5 +58,4 @@ public class EumServerConfiguration {
 
     @Valid
     private SecuritySettings security;
-
 }

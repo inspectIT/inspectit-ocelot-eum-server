@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.stats.ViewManager;
 import io.opencensus.tags.Tags;
+import io.opentelemetry.sdk.metrics.InstrumentValueType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,10 +15,10 @@ import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.beacon.recorder.BeaconRecorder;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconMetricDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.tags.BeaconTagSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.events.RegisteredTagsEvent;
+import rocks.inspectit.ocelot.eum.server.events.RegisteredAttributesEvent;
 
 import java.util.*;
 
@@ -37,7 +38,7 @@ public class BeaconMetricManagerTest {
     EumServerConfiguration configuration;
 
     @Mock
-    MeasuresAndViewsManager measuresAndViewsManager;
+    InstrumentManager instrumentManager;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     StatsRecorder statsRecorder;
@@ -58,9 +59,9 @@ public class BeaconMetricManagerTest {
             Map<String, BeaconTagSettings> beaconSettings = Collections.singletonMap("first", new BeaconTagSettings());
             when(configuration.getTags().getBeacon()).thenReturn(beaconSettings);
 
-            beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
+            beaconMetricManager.processUsedTags(new RegisteredAttributesEvent(this, registeredTags));
 
-            assertThat(beaconMetricManager.registeredBeaconTags).containsExactly("first");
+            assertThat(beaconMetricManager.registeredBeaconAttributes).containsExactly("first");
         }
 
         @Test
@@ -68,18 +69,18 @@ public class BeaconMetricManagerTest {
             Map<String, BeaconTagSettings> beaconSettings = ImmutableMap.of("first", new BeaconTagSettings(), "third", new BeaconTagSettings());
             when(configuration.getTags().getBeacon()).thenReturn(beaconSettings);
 
-            beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
+            beaconMetricManager.processUsedTags(new RegisteredAttributesEvent(this, registeredTags));
 
-            assertThat(beaconMetricManager.registeredBeaconTags).containsExactlyInAnyOrder("first", "third");
+            assertThat(beaconMetricManager.registeredBeaconAttributes).containsExactlyInAnyOrder("first", "third");
         }
 
         @Test
         void processNoTags() {
             when(configuration.getTags().getBeacon()).thenReturn(Collections.emptyMap());
 
-            beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
+            beaconMetricManager.processUsedTags(new RegisteredAttributesEvent(this, registeredTags));
 
-            assertThat(beaconMetricManager.registeredBeaconTags).isEmpty();
+            assertThat(beaconMetricManager.registeredBeaconAttributes).isEmpty();
         }
     }
 
@@ -102,7 +103,8 @@ public class BeaconMetricManagerTest {
             BeaconMetricDefinitionSettings dummyMetricDefinition = BeaconMetricDefinitionSettings.beaconMetricBuilder()
                     .valueExpression("{dummy_beacon_field}")
                     .description("Dummy description")
-                    .type(MetricDefinitionSettings.MeasureType.DOUBLE)
+                    //.instrumentType()
+                    .valueType(InstrumentValueType.DOUBLE)
                     .unit("ms")
                     .enabled(true)
                     .views(views)
@@ -114,7 +116,7 @@ public class BeaconMetricManagerTest {
 
         @BeforeEach
         public void setupMocks() {
-            when(measuresAndViewsManager.getTagContext()).thenReturn(Tags.getTagger().emptyBuilder());
+            when(instrumentManager.getTagContext()).thenReturn(Tags.getTagger().emptyBuilder());
         }
 
         @Test
