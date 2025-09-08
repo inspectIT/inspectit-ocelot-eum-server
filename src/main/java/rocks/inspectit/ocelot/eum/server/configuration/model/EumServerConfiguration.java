@@ -50,12 +50,6 @@ public class EumServerConfiguration {
     @Valid
     private ExportersSettings exporters;
 
-    /**
-     * The resource timing settings.
-     */
-    @Valid
-    private ResourceTimingSettings resourceTiming;
-
     @Valid
     private SecuritySettings security;
 }

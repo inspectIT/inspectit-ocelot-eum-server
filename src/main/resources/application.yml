@@ -1,6 +1,25 @@
 inspectit-eum-server:
 
   definitions:
+    resource_time:
+      enabled: true
+      description: Response end time of the resource loading
+      measure-type: DOUBLE
+      unit: ms
+      views:
+        '[resource_time/SUM]':
+          aggregation: SUM
+          attributes:
+            initiatorType: true
+            cached: true
+            crossOrigin: true
+        '[resource_time/COUNT]':
+          aggregation: COUNT
+          attributes:
+            initiatorType: true
+            cached: true
+            crossOrigin: true
+
     page_ready_time:
       measure-type: LONG
       value-expression: "{t_page}"
@@ -48,9 +67,9 @@ inspectit-eum-server:
       views:
         end_timestamp:
           aggregation: LAST_VALUE
-          tags: { APPLICATION: true }
+          attributes: { APPLICATION: true }
 
-  tags:
+  attributes:
     extra:
       APPLICATION: my-application
     beacon:
@@ -208,7 +227,7 @@ inspectit-eum-server:
         views:
           '[inspectit-eum/self/beacons_received/count]':
             aggregation: COUNT
-            tags:
+            attributes:
               is_error: true
 
       beacons_export:
@@ -218,13 +237,13 @@ inspectit-eum-server:
           # the amount of beacon exports
           '[inspectit-eum/self/beacons_export/count]':
             aggregation: COUNT
-            tags:
+            attributes:
               exporter: true
               is_error: true
           # the export duration
           '[inspectit-eum/self/beacons_export/duration/sum]':
             aggregation: SUM
-            tags:
+            attributes:
               exporter: true
               is_error: true
 
@@ -235,7 +254,7 @@ inspectit-eum-server:
           # the amount of elements in a single export execution
           '[inspectit-eum/self/beacons_export/batch/sum]':
             aggregation: SUM
-            tags:
+            attributes:
               exporter: true
               is_error: true
 
@@ -246,13 +265,13 @@ inspectit-eum-server:
           # the amount of beacon processors
           '[inspectit-eum/self/beacons_processor/count]':
             aggregation: COUNT
-            tags:
+            attributes:
               beacon_processor: true
               is_error: true
           # the export duration
           '[inspectit-eum/self/beacons_processor/duration/sum]':
             aggregation: SUM
-            tags:
+            attributes:
               beacon_processor: true
               is_error: true
 
@@ -263,12 +282,12 @@ inspectit-eum-server:
           # the number of received traces
           '[inspectit-eum/self/traces_received/count]':
             aggregation: COUNT
-            tags:
+            attributes:
               is_error: true
           # the export duration
           '[inspectit-eum/self/traces_received/duration/sum]':
             aggregation: SUM
-            tags:
+            attributes:
               is_error: true
 
       traces_span_size:
@@ -278,13 +297,8 @@ inspectit-eum-server:
           # the amount of elements in a single export execution
           '[inspectit-eum/self/traces_span_size/sum]':
             aggregation: SUM
-            tags:
+            attributes:
               is_error: true
-
-  # settings for exposing resource timing metrics
-  resource-timing:
-    enabled: true
-
 
   security:
     # Enable/Disable Security

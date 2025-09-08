@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  * Boomerang documentation first.
  */
 @Component
-@ConditionalOnProperty(value = "inspectit-eum-server.resource-timing.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "inspectit-eum-server.definitions.resource_time.enabled", havingValue = "true")
 @RequiredArgsConstructor
 @Slf4j
 public class ResourceTimingBeaconRecorder implements BeaconRecorder {
@@ -50,7 +50,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
     private final ObjectMapper objectMapper;
 
     /**
-     * {@link InstrumentManager} for exposing metrics.
+     * {@link InstrumentManager} for exposing metrics
      */
     @Autowired
     private final InstrumentManager instrumentManager;
@@ -62,43 +62,6 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      * Name of the metric
      */
     public final String RESOURCE_TIME_METRIC_NAME = "resource_time";
-
-    /**
-     * Metric definition for the resource timing metric.
-     */
-    private MetricDefinitionSettings RESOURCE_TIME;
-
-    /**
-     * Init metric(s).
-     */
-    @PostConstruct
-    public void initMetric() {
-        Map<String, Boolean> attributes = new HashMap<>();
-        if (configuration.getResourceTiming().getTags() != null) {
-            attributes.putAll(configuration.getResourceTiming().getTags());
-        }
-        attributes.put("initiatorType", true);
-        attributes.put("cached", true);
-        attributes.put("crossOrigin", true);
-
-        // TODO Add this metric definition to the application.yml and refactor resource-timing property
-
-        RESOURCE_TIME = MetricDefinitionSettings.builder()
-                .type(MetricDefinitionSettings.MeasureType.DOUBLE)
-                .description("Response end time of the resource loading")
-                .unit("ms")
-                .view(RESOURCE_TIME_METRIC_NAME + "/SUM", ViewDefinitionSettings.builder()
-                        .attributes(attributes)
-                        .aggregation(ViewDefinitionSettings.Aggregation.SUM)
-                        .build())
-                .view(RESOURCE_TIME_METRIC_NAME + "/COUNT", ViewDefinitionSettings.builder()
-                        .attributes(attributes)
-                        .aggregation(ViewDefinitionSettings.Aggregation.COUNT)
-                        .build())
-                .build();
-
-        instrumentManager.updateInstruments(RESOURCE_TIME_METRIC_NAME, RESOURCE_TIME);
-    }
 
     /**
      * {@inheritDoc}
@@ -124,6 +87,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      * @param url                 URL of the page where the resource has been loaded from.
      */
     private void record(ResourceTimingEntry resourceTimingEntry, String url) {
+        MetricDefinitionSettings metricDefinition = configuration.getDefinitions().get(RESOURCE_TIME_METRIC_NAME);
         Map<String, String> extra = new HashMap<>();
         boolean sameOrigin = isSameOrigin(url, resourceTimingEntry.url);
         extra.put("crossOrigin", String.valueOf(!sameOrigin));
@@ -134,7 +98,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
 
         try (Scope scope = instrumentManager.getBaggage(extra).makeCurrent()) {
             Optional<Integer> responseEnd = resourceTimingEntry.getResponseEnd();
-            instrumentManager.recordInstrument("resource_time", RESOURCE_TIME, responseEnd.orElse(0));
+            instrumentManager.recordInstrument(RESOURCE_TIME_METRIC_NAME, metricDefinition, responseEnd.orElse(0));
         }
     }
 
