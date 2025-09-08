@@ -113,5 +113,4 @@ public class GeolocationResolverIntTest {
         verify(beaconMetricManager).processBeacon(beaconCaptor.capture());
         assertThat(beaconCaptor.getValue().get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEmpty();
     }
-
 }

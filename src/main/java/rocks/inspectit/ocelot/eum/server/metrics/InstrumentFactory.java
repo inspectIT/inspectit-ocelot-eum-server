@@ -64,8 +64,8 @@ public class InstrumentFactory {
                 .setUnit(metricDefinition.getUnit());
 
         return switch (metricDefinition.getValueType()) {
-            case LONG -> builder.build();
-            case DOUBLE -> builder.ofLongs().build();
+            case LONG -> builder.ofLongs().build();
+            case DOUBLE -> builder.build();
         };
     }
 
@@ -76,8 +76,8 @@ public class InstrumentFactory {
                 .setUnit(metricDefinition.getUnit());
 
         return switch (metricDefinition.getValueType()) {
-            case LONG -> builder.build();
-            case DOUBLE -> builder.ofLongs().build();
+            case LONG -> builder.ofLongs().build();
+            case DOUBLE -> builder.build();
         };
     }
 }

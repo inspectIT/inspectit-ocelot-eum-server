@@ -55,7 +55,8 @@ public class OpenTelemetryController {
     }
 
     public Meter getMeter() {
-        return openTelemetry.getMeter(INSTRUMENTATION_SCOPE_NAME);
+        Meter meter = openTelemetry.getMeter(INSTRUMENTATION_SCOPE_NAME);
+        return meter; // For debugging
     }
 
     /**
@@ -73,6 +74,7 @@ public class OpenTelemetryController {
                 builder.registerMetricReader(metricReader);
             }
         }
+        else log.warn("OpenTelemetry has not registered any MetricReader! Thus no metrics can be recorded");
 
         // TODO Register MetricProducer for custom view (percentile, smoothed average, timewindow)
         //builder.registerMetricProducer()
