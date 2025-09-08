@@ -1,8 +1,8 @@
-package rocks.inspectit.ocelot.eum.server.configuration.model.tags;
+package rocks.inspectit.ocelot.eum.server.configuration.model.attributes;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import rocks.inspectit.ocelot.eum.server.configuration.model.tags.providers.TagsProvidersSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.providers.AttributesProviderSettings;
 import rocks.inspectit.ocelot.eum.server.utils.IPUtils;
 
 import jakarta.validation.Valid;
@@ -21,8 +21,9 @@ public class AttributeSettings {
     /**
      * Settings for available attributes providers.
      */
+    // TODO Is this even used anywhere?
     @Valid
-    private TagsProvidersSettings providers;
+    private AttributesProviderSettings providers;
 
     /**
      * Map of arbitrary user defined attributes.
@@ -46,7 +47,7 @@ public class AttributeSettings {
      * The keys are the names of the beacon fields under which the results of the given replacement operation will be stored.
      * Attributes via regexes can depend on each other, as long as no cyclic dependency is involved.
      */
-    private Map<String, BeaconTagSettings> beacon = new HashMap<>();
+    private Map<String, BeaconAttributeSettings> beacon = new HashMap<>();
 
     /**
      * IPUtils

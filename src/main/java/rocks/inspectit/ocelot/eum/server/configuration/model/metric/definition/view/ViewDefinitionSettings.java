@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view;
 
+import io.opentelemetry.sdk.metrics.internal.view.Base2ExponentialHistogramAggregation;
 import lombok.*;
 import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.util.CollectionUtils;
@@ -11,6 +12,8 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import static io.opentelemetry.sdk.metrics.internal.aggregator.ExplicitBucketHistogramUtils.DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES;
 
 /**
  * Defines a single OpenTelemetry view for a instrument.
@@ -48,8 +51,25 @@ public class ViewDefinitionSettings {
      * Only relevant if aggregation is "HISTOGRAM".
      * In this case this list defines the boundaries of the buckets in the histogram
      */
-    @Singular
-    private List<@NotNull Double> bucketBoundaries;
+    @Builder.Default
+    private List<@NotNull Double> bucketBoundaries = DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES;
+
+    /**
+     * Only relevant if aggregation is "EXPONENTIAL_HISTOGRAM".
+     * In this case this defines the max number of positive buckets and negative buckets
+     * (max total buckets is 2 * maxBuckets + 1 zero bucket).
+     * Default from {@link Base2ExponentialHistogramAggregation}.
+     */
+    @Builder.Default
+    private Integer maxBuckets = 160;
+
+    /**
+     * Only relevant if aggregation is "EXPONENTIAL_HISTOGRAM".
+     * In this case this defines the maximum and initial scale.
+     * Default from {@link Base2ExponentialHistogramAggregation}.
+     */
+    @Builder.Default
+    private Integer maxScale = 20;
 
     /**
      * In case the view is a quantile view, this list defines which quantiles shall be captured.
@@ -121,15 +141,18 @@ public class ViewDefinitionSettings {
         return result.build();
     }
 
-    @AssertFalse(message = "When using QUANTILES aggregation you must specify the quantiles to use!") boolean isQuantilesNotSpecifiedForercentileType() {
+    @AssertFalse(message = "When using QUANTILES aggregation you must specify the quantiles to use!")
+    boolean isQuantilesNotSpecifiedForercentileType() {
         return enabled && aggregation == AggregationType.QUANTILES && CollectionUtils.isEmpty(quantiles);
     }
 
-    @AssertFalse(message = "When using HISTOGRAM aggregation you must specify the bucket-boundaries!") boolean isBucketBoundariesNotSpecifiedForHistogram() {
+    @AssertFalse(message = "When using HISTOGRAM aggregation you must specify the bucket-boundaries!")
+    boolean isBucketBoundariesNotSpecifiedForHistogram() {
         return enabled && aggregation == AggregationType.HISTOGRAM && CollectionUtils.isEmpty(bucketBoundaries);
     }
 
-    @AssertTrue(message = "When using HISTOGRAM the specified bucket-boundaries must be sorted in ascending order and must contain each value at most once!") boolean isBucketBoundariesSorted() {
+    @AssertTrue(message = "When using HISTOGRAM the specified bucket-boundaries must be sorted in ascending order and must contain each value at most once!")
+    boolean isBucketBoundariesSorted() {
         if (enabled && aggregation == AggregationType.HISTOGRAM && !CollectionUtils.isEmpty(bucketBoundaries)) {
             Double previous = null;
             for (double boundary : bucketBoundaries) {
@@ -142,7 +165,8 @@ public class ViewDefinitionSettings {
         return true;
     }
 
-    @AssertTrue(message = "The quantiles must be in the range [0,1]") boolean isQuantilesInRange() {
+    @AssertTrue(message = "The quantiles must be in the range [0,1]")
+    boolean isQuantilesInRange() {
         return !enabled || aggregation != AggregationType.QUANTILES || quantiles.stream().noneMatch(q -> q < 0 || q > 1);
     }
 }

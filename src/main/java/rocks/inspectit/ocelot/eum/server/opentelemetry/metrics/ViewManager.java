@@ -1,20 +1,19 @@
 package rocks.inspectit.ocelot.eum.server.opentelemetry.metrics;
 
+import io.opentelemetry.sdk.metrics.Aggregation;
 import io.opentelemetry.sdk.metrics.InstrumentSelector;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
 import io.opentelemetry.sdk.metrics.View;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.AggregationType;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
- * Stores all user-specified views.
+ * Stores all user-specified metric views.
  */
 @Component
 public class ViewManager {
@@ -22,7 +21,7 @@ public class ViewManager {
     @Autowired
     private EumServerConfiguration configuration;
 
-    private Set<View> registeredViews;
+    private final Set<View> registeredViews = new HashSet<>();
 
     /**
      * Registers all configured views in the {@link SdkMeterProviderBuilder} and caches them in {@link #registeredViews}.
@@ -53,6 +52,18 @@ public class ViewManager {
     }
 
     /**
+     * Checks, if the view is already registered.
+     *
+     * @param viewName the name to check
+     *
+     * @return true, if the view is already registered
+     */
+    public boolean isRegistered(String viewName) {
+        return registeredViews.stream()
+                .anyMatch(view -> Objects.equals(view.getName(), viewName));
+    }
+
+    /**
      * @return the map of all metric names and their particular view settings
      */
     private Map<String, Map<String, ViewDefinitionSettings>> getAllViewsForMetrics() {
@@ -74,11 +85,12 @@ public class ViewManager {
      * @return the created view
      */
     private View createView(String viewName, ViewDefinitionSettings settings) {
+        Aggregation aggregation = convertAggregation(settings);
         return View.builder()
                 .setName(viewName)
                 .setDescription(settings.getDescription())
                 .setAttributeFilter(attribute -> settings.getAttributes().get(attribute))
-                .setAggregation(settings.getAggregation().convert())
+                .setAggregation(aggregation)
                 .setCardinalityLimit(settings.getCardinalityLimit())
                 .build();
     }
@@ -98,14 +110,23 @@ public class ViewManager {
     }
 
     /**
-     * Checks, if the view is already registered.
+     * Converts the {@link AggregationType} to a proper OpenTelemetry {@link Aggregation}.
      *
-     * @param viewName the name to check
+     * @param settings the view settings
      *
-     * @return true, if the view is already registered
+     * @return the converted {@link Aggregation}
      */
-    public boolean isRegistered(String viewName) {
-        return registeredViews.stream()
-                .anyMatch(view -> Objects.equals(view.getName(), viewName));
+    private Aggregation convertAggregation(ViewDefinitionSettings settings) {
+        AggregationType type = settings.getAggregation();
+        return switch (type) {
+            case SUM -> Aggregation.sum();
+            case LAST_VALUE -> Aggregation.lastValue();
+            case HISTOGRAM -> Aggregation.explicitBucketHistogram(settings.getBucketBoundaries());
+            case EXPONENTIAL_HISTOGRAM -> Aggregation.base2ExponentialBucketHistogram(settings.getMaxBuckets(), settings.getMaxScale());
+            // TODO Don't know yet what to do with custom aggregations
+            //  Drop them, because we will produce the values by ourselves?
+            case QUANTILES -> Aggregation.drop();
+            case SMOOTHED_AVERAGE -> Aggregation.drop();
+        };
     }
 }

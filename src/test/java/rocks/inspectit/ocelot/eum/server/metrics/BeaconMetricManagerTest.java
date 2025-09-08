@@ -14,9 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.beacon.recorder.BeaconRecorder;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconMetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.tags.BeaconTagSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.BeaconAttributeSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.events.RegisteredAttributesEvent;
 
@@ -56,7 +55,7 @@ public class BeaconMetricManagerTest {
 
         @Test
         void processOneUsedTag() {
-            Map<String, BeaconTagSettings> beaconSettings = Collections.singletonMap("first", new BeaconTagSettings());
+            Map<String, BeaconAttributeSettings> beaconSettings = Collections.singletonMap("first", new BeaconAttributeSettings());
             when(configuration.getTags().getBeacon()).thenReturn(beaconSettings);
 
             beaconMetricManager.processUsedTags(new RegisteredAttributesEvent(this, registeredTags));
@@ -66,7 +65,7 @@ public class BeaconMetricManagerTest {
 
         @Test
         void processMultipleUsedTags() {
-            Map<String, BeaconTagSettings> beaconSettings = ImmutableMap.of("first", new BeaconTagSettings(), "third", new BeaconTagSettings());
+            Map<String, BeaconAttributeSettings> beaconSettings = ImmutableMap.of("first", new BeaconAttributeSettings(), "third", new BeaconAttributeSettings());
             when(configuration.getTags().getBeacon()).thenReturn(beaconSettings);
 
             beaconMetricManager.processUsedTags(new RegisteredAttributesEvent(this, registeredTags));

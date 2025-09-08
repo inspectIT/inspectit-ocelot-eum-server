@@ -20,7 +20,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Defines the mapping of a beacon value to a OpenCensus Measure and the corresponding views.
+ * Defines the mapping of a beacon value to a OpenTelemetry instrument and the corresponding views.
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

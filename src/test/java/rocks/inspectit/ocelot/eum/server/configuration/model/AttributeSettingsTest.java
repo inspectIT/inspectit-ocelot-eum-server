@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.eum.server.configuration.model.tags.BeaconTagSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.tags.AttributeSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.BeaconAttributeSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.AttributeSettings;
 
 import java.util.Arrays;
 
@@ -40,7 +40,7 @@ class AttributeSettingsTest {
         public void hasBeaconTag() {
             AttributeSettings settings = new AttributeSettings();
             settings.getDefineAsGlobal().add("beacon-tag");
-            settings.getBeacon().put("beacon-tag", BeaconTagSettings.builder().input("beacon-field").build());
+            settings.getBeacon().put("beacon-tag", BeaconAttributeSettings.builder().input("beacon-field").build());
 
             boolean result = settings.isGlobalTagMissing();
 
@@ -75,7 +75,7 @@ class AttributeSettingsTest {
         public void noDuplicateTags() {
             AttributeSettings settings = new AttributeSettings();
             settings.getExtra().put("tag_a", "");
-            settings.getBeacon().put("tag_b", BeaconTagSettings.builder().build());
+            settings.getBeacon().put("tag_b", BeaconAttributeSettings.builder().build());
 
             boolean result = settings.isCheckUniquenessOfTags();
 
@@ -86,7 +86,7 @@ class AttributeSettingsTest {
         public void hasDuplicateTags() {
             AttributeSettings settings = new AttributeSettings();
             settings.getExtra().put("tag_a", "");
-            settings.getBeacon().put("tag_a", BeaconTagSettings.builder().build());
+            settings.getBeacon().put("tag_a", BeaconAttributeSettings.builder().build());
 
             boolean result = settings.isCheckUniquenessOfTags();
 

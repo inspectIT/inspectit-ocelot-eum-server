@@ -10,6 +10,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.opentelemetry.metrics.ViewManager;
 import rocks.inspectit.ocelot.eum.server.opentelemetry.resource.ResourceManager;
@@ -31,7 +32,7 @@ public class OpenTelemetryController {
     @Autowired
     private ViewManager viewManager;
 
-    @Autowired
+    @Autowired(required = false)
     private Collection<MetricReader> metricReaders;
 
     private OpenTelemetrySdk openTelemetry;
@@ -67,8 +68,10 @@ public class OpenTelemetryController {
         Resource resource = resourceManager.getResource();
         SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(resource);
 
-        for (MetricReader metricReader : metricReaders) {
-            builder.registerMetricReader(metricReader);
+        if(!CollectionUtils.isEmpty(metricReaders)) {
+            for (MetricReader metricReader : metricReaders) {
+                builder.registerMetricReader(metricReader);
+            }
         }
 
         // TODO Register MetricProducer for custom view (percentile, smoothed average, timewindow)

@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.eum.server.configuration.model.tags;
+package rocks.inspectit.ocelot.eum.server.configuration.model.attributes;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,15 +11,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@Builder
-@AllArgsConstructor
 /**
  * Defines how a custom beacon field is derived using a RegEx replaceAll operation from an existing beacon field.
  * If no regex is specified, the provided input field will simply be copied.
  */
-public class BeaconTagSettings {
+@Data
+@NoArgsConstructor
+@Builder
+@AllArgsConstructor
+public class BeaconAttributeSettings {
 
     /**
      * Deprecated in favor of {@link #replacements}.
@@ -58,13 +58,13 @@ public class BeaconTagSettings {
     private String replacement = "";
 
     /**
-     * Specify whether the input field should be considered as an empty string if it does not exists.
+     * Specify whether the input field should be considered as an empty string if it does not exist.
      */
     @Builder.Default
     private boolean nullAsEmpty = false;
 
     /**
-     * After the tag value has been extracted, these replacements will be applied in order to the tag value.
+     * After the tag value has been extracted, these replacements will be applied in order to the attribute value.
      */
     @Builder.Default
     private List<PatternAndReplacement> replacements = Collections.emptyList();

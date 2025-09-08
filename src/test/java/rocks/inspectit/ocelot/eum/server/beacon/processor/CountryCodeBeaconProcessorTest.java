@@ -14,7 +14,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.configuration.model.tags.AttributeSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.AttributeSettings;
 import rocks.inspectit.ocelot.eum.server.utils.GeolocationResolver;
 import rocks.inspectit.ocelot.eum.server.utils.IPUtils;
 

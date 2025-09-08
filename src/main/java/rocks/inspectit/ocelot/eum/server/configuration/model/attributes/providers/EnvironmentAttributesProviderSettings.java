@@ -1,11 +1,11 @@
-package rocks.inspectit.ocelot.eum.server.configuration.model.tags.providers;
+package rocks.inspectit.ocelot.eum.server.configuration.model.attributes.providers;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class EnvironmentTagsProviderSettings {
+public class EnvironmentAttributesProviderSettings {
 
     /**
      * If providers is enabled.

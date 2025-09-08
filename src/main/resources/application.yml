@@ -1,67 +1,75 @@
 inspectit-eum-server:
 
   definitions:
+
     resource_time:
       enabled: true
       description: Response end time of the resource loading
-      measure-type: DOUBLE
+      instrument-type: HISTOGRAM
+      value-type: DOUBLE
+      value-expression: "{restiming}"
       unit: ms
       views:
-        '[resource_time/SUM]':
-          aggregation: SUM
-          attributes:
-            initiatorType: true
-            cached: true
-            crossOrigin: true
-        '[resource_time/COUNT]':
-          aggregation: COUNT
+        resource_time:
+          aggregation: HISTOGRAM
           attributes:
             initiatorType: true
             cached: true
             crossOrigin: true
 
     page_ready_time:
-      measure-type: LONG
+      instrument-type: HISTOGRAM
+      value-type: LONG
       value-expression: "{t_page}"
       unit: ms
       views:
-        '[page_ready_time/SUM]': { aggregation: SUM }
-        '[page_ready_time/COUNT]': { aggregation: COUNT }
+        page_ready_time: { aggregation: HISTOGRAM }
 
     load_time:
-      measure-type: LONG
+      instrument-type: HISTOGRAM
+      value-type: LONG
       value-expression: "{t_done}"
       beacon-requirements:
         - field: rt.quit
           requirement: NOT_EXISTS
       unit: ms
       views:
-        '[load_time/SUM]': { aggregation: SUM }
-        '[load_time/COUNT]': { aggregation: COUNT }
+        load_time: { aggregation: HISTOGRAM }
 
     calc_load_time:
-      measure-type: LONG
+      instrument-type: HISTOGRAM
+      value-type: LONG
       value-expression: "{rt.end} - {rt.tstart}"
       beacon-requirements:
         - field: rt.quit
           requirement: NOT_EXISTS
       unit: ms
       views:
-        '[calc_load_time/SUM]': { aggregation: SUM }
-        '[calc_load_time/COUNT]': { aggregation: COUNT }
+        calc_load_time: { aggregation: HISTOGRAM }
 
     start_timestamp:
-      measure-type: LONG
+      instrument-type: GAUGE
+      value-type: LONG
       value-expression: "{rt.tstart}"
       unit: ms
+      views:
+        start_timestamp:
+          aggregation: LAST_VALUE
+          attributes: { APPLICATION: true }
 
     navigation_start_timestamp:
-      measure-type: LONG
+      instrument-type: GAUGE
+      value-type: LONG
       value-expression: "{rt.nstart}"
       unit: ms
+      views:
+        navigation_start_timestamp:
+          aggregation: LAST_VALUE
+          attributes: { APPLICATION: true }
 
     end_timestamp:
-      measure-type: LONG
+      instrument-type: GAUGE
+      value-type: LONG
       value-expression: "{rt.end}"
       unit: ms
       views:
@@ -222,80 +230,65 @@ inspectit-eum-server:
     metrics:
       # counts the amount of received EUM beacons
       beacons_received:
-        measure-type: LONG
+        instrument-type: COUNTER
+        value-type: LONG
         unit: amount
         views:
-          '[inspectit-eum/self/beacons_received/count]':
-            aggregation: COUNT
+          '[inspectit-eum/self/beacons_received]':
+            aggregation: SUM
             attributes:
               is_error: true
 
       beacons_export:
-        measure-type: LONG
+        instrument-type: HISTOGRAM
+        value-type: LONG
         unit: amount
         views:
-          # the amount of beacon exports
-          '[inspectit-eum/self/beacons_export/count]':
-            aggregation: COUNT
-            attributes:
-              exporter: true
-              is_error: true
-          # the export duration
-          '[inspectit-eum/self/beacons_export/duration/sum]':
-            aggregation: SUM
+          '[inspectit-eum/self/beacons_export]':
+            aggregation: HISTOGRAM
             attributes:
               exporter: true
               is_error: true
 
       beacons_export_batch:
-        measure-type: LONG
+        instrument-type: COUNTER
+        value-type: LONG
         unit: amount
         views:
           # the amount of elements in a single export execution
-          '[inspectit-eum/self/beacons_export/batch/sum]':
+          '[inspectit-eum/self/beacons_export/batch]':
             aggregation: SUM
             attributes:
               exporter: true
               is_error: true
 
       beacons_processor:
-        measure-type: LONG
+        instrument-type: HISTOGRAM
+        value-type: LONG
         unit: amount
         views:
-          # the amount of beacon processors
-          '[inspectit-eum/self/beacons_processor/count]':
-            aggregation: COUNT
-            attributes:
-              beacon_processor: true
-              is_error: true
-          # the export duration
-          '[inspectit-eum/self/beacons_processor/duration/sum]':
-            aggregation: SUM
+          '[inspectit-eum/self/beacons_processor]':
+            aggregation: HISTOGRAM
             attributes:
               beacon_processor: true
               is_error: true
 
       traces_received:
-        measure-type: LONG
+        instrument-type: HISTOGRAM
+        value-type: LONG
         unit: amount
         views:
-          # the number of received traces
-          '[inspectit-eum/self/traces_received/count]':
-            aggregation: COUNT
-            attributes:
-              is_error: true
-          # the export duration
-          '[inspectit-eum/self/traces_received/duration/sum]':
-            aggregation: SUM
+          '[inspectit-eum/self/traces_received]':
+            aggregation: HISTOGRAM
             attributes:
               is_error: true
 
       traces_span_size:
-        measure-type: LONG
+        instrument-type: COUNTER
+        value-type: LONG
         unit: amount
         views:
-          # the amount of elements in a single export execution
-          '[inspectit-eum/self/traces_span_size/sum]':
+          '[inspectit-eum/self/traces_span_size]':
             aggregation: SUM
             attributes:
               is_error: true

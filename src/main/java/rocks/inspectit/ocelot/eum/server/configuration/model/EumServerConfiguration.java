@@ -8,7 +8,7 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.Exporters
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconMetricDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.security.SecuritySettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.selfmonitoring.SelfMonitoringSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.tags.AttributeSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.AttributeSettings;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -50,6 +50,9 @@ public class EumServerConfiguration {
     @Valid
     private ExportersSettings exporters;
 
+    /**
+     * The security settings for the REST API
+     */
     @Valid
     private SecuritySettings security;
 }

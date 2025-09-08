@@ -16,4 +16,12 @@ public interface BeaconRecorder {
      */
     void record(Beacon beacon);
 
+    /**
+     * Checks, if the recorder is able to record the metric. A recorder should support only one metric.
+     *
+     * @param metricName the metric name
+     *
+     * @return true, if the recorder can record the metric
+     */
+    boolean canRecord(String metricName);
 }

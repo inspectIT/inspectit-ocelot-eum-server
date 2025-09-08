@@ -77,7 +77,7 @@ public class Beacon {
     }
 
     /**
-     * Checks whether the beacon contains all of the given fields.
+     * Checks whether the beacon contains all the given fields.
      *
      * @param fieldKeys field keys to check
      *
@@ -88,7 +88,7 @@ public class Beacon {
     }
 
     /**
-     * Checks whether the beacon contains all of the fields contained in the given list.
+     * Checks whether the beacon contains all the fields contained in the given list.
      *
      * @param fieldKeys List containing field keys to check
      *

@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.eum.server.configuration.model.tags;
+package rocks.inspectit.ocelot.eum.server.configuration.model.attributes;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

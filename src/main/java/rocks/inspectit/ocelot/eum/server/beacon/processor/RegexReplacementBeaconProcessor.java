@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
-import rocks.inspectit.ocelot.eum.server.configuration.model.tags.BeaconTagSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.BeaconAttributeSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.configuration.model.tags.PatternAndReplacement;
+import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.PatternAndReplacement;
 
 import java.util.*;
 import java.util.function.Function;
@@ -154,7 +154,7 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
 
         List<PatternAndReplacement> replacements;
 
-        private static RegexDerivedAttribute fromSettings(String attributeName, BeaconTagSettings settings) {
+        private static RegexDerivedAttribute fromSettings(String attributeName, BeaconAttributeSettings settings) {
             return RegexDerivedAttribute.builder()
                     .attributeName(attributeName)
                     .inputBeaconField(settings.getInput())
