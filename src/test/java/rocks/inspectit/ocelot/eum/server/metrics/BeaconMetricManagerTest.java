@@ -38,10 +38,14 @@ public class BeaconMetricManagerTest {
     @Mock
     InstrumentManager instrumentManager;
 
-    @Spy
-    List<BeaconRecorder> beaconRecorders = new ArrayList<>(Arrays.asList(mock(BeaconRecorder.class)));
+    BeaconRecorder recorder = mock(BeaconRecorder.class);
 
-    private final Set<String> registeredTags = new HashSet<>(Arrays.asList("first", "second", "third"));
+    @Spy
+    List<BeaconRecorder> beaconRecorders = new ArrayList<>(Collections.singletonList(recorder));
+
+    private final Set<String> registeredAttributes = new HashSet<>(Arrays.asList("first", "second", "third"));
+
+    private final String METRIC_NAME = "Dummy metric name";
 
     @Nested
     class ProcessUsedTags {
@@ -51,7 +55,7 @@ public class BeaconMetricManagerTest {
             Map<String, BeaconAttributeSettings> beaconSettings = Collections.singletonMap("first", new BeaconAttributeSettings());
             when(configuration.getAttributes().getBeacon()).thenReturn(beaconSettings);
 
-            beaconMetricManager.processUsedAttributes(new RegisteredAttributesEvent(this, registeredTags));
+            beaconMetricManager.processUsedAttributes(new RegisteredAttributesEvent(this, registeredAttributes));
 
             assertThat(beaconMetricManager.registeredBeaconAttributes).containsExactly("first");
         }
@@ -61,7 +65,7 @@ public class BeaconMetricManagerTest {
             Map<String, BeaconAttributeSettings> beaconSettings = ImmutableMap.of("first", new BeaconAttributeSettings(), "third", new BeaconAttributeSettings());
             when(configuration.getAttributes().getBeacon()).thenReturn(beaconSettings);
 
-            beaconMetricManager.processUsedAttributes(new RegisteredAttributesEvent(this, registeredTags));
+            beaconMetricManager.processUsedAttributes(new RegisteredAttributesEvent(this, registeredAttributes));
 
             assertThat(beaconMetricManager.registeredBeaconAttributes).containsExactlyInAnyOrder("first", "third");
         }
@@ -70,7 +74,7 @@ public class BeaconMetricManagerTest {
         void processNoTags() {
             when(configuration.getAttributes().getBeacon()).thenReturn(Collections.emptyMap());
 
-            beaconMetricManager.processUsedAttributes(new RegisteredAttributesEvent(this, registeredTags));
+            beaconMetricManager.processUsedAttributes(new RegisteredAttributesEvent(this, registeredAttributes));
 
             assertThat(beaconMetricManager.registeredBeaconAttributes).isEmpty();
         }
@@ -90,7 +94,7 @@ public class BeaconMetricManagerTest {
                     .attribute("TAG_2", true)
                     .build();
             Map<String, ViewDefinitionSettings> views = new HashMap<>();
-            views.put("Dummy metric name/HISTOGRAM", view);
+            views.put(METRIC_NAME + "/HISTOGRAM", view);
 
             BeaconMetricDefinitionSettings dummyMetricDefinition = BeaconMetricDefinitionSettings.beaconMetricBuilder()
                     .valueExpression("{dummy_beacon_field}")
@@ -103,12 +107,7 @@ public class BeaconMetricManagerTest {
                     .build();
 
             definitionMap = new HashMap<>();
-            definitionMap.put("Dummy metric name", dummyMetricDefinition);
-        }
-
-        @BeforeEach
-        public void setupMocks() {
-            when(instrumentManager.getBaggage()).thenReturn(Baggage.empty());
+            definitionMap.put(METRIC_NAME, dummyMetricDefinition);
         }
 
         @Test
@@ -134,7 +133,10 @@ public class BeaconMetricManagerTest {
 
         @Test
         void beaconRecordersProcessed() {
+            when(instrumentManager.getBaggage()).thenReturn(Baggage.empty());
             when(configuration.getDefinitions()).thenReturn(definitionMap);
+            when(recorder.canRecord(anyString())).thenReturn(true);
+
             HashMap<String, String> beaconMap = new HashMap<>();
             beaconMap.put("fake_beacon_field", "12d");
             Beacon beacon = Beacon.of(beaconMap);
@@ -142,11 +144,11 @@ public class BeaconMetricManagerTest {
             beaconMetricManager.processBeacon(beacon);
 
             assertThat(beaconRecorders).allSatisfy(beaconRecorder -> {
+                verify(beaconRecorder).canRecord(METRIC_NAME);
                 verify(beaconRecorder).record(beacon);
                 verifyNoMoreInteractions(beaconRecorder);
             });
             verifyNoMoreInteractions(instrumentManager);
         }
-
     }
 }
