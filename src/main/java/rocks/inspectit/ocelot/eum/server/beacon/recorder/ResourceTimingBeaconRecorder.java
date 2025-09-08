@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import rocks.inspectit.ocelot.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
@@ -67,11 +68,14 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      * The raw expression to extract resource timing data from the beacon.
      * Default: {@code {restiming}}
      */
-    private String resourceTimeExpression = "{restiming}";
+    private RawExpression resourceTimeExpression = new RawExpression("{restiming}");
 
     @PostConstruct
     void setUp() {
-        resourceTimeExpression = configuration.getDefinitions().get(RESOURCE_TIME_METRIC_NAME).getValueExpression();
+        String expression = configuration.getDefinitions()
+                .get(RESOURCE_TIME_METRIC_NAME)
+                .getValueExpression();
+        resourceTimeExpression = new RawExpression(expression);
     }
 
     /**
@@ -85,7 +89,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         // this is the URL where the resources have been loaded
         String url = beacon.get("u");
 
-        String resourceTimings = beacon.get(resourceTimeExpression);
+        String resourceTimings = beacon.get(resourceTimeExpression.getFields().getFirst());
         if (resourceTimings != null) {
             decodeResourceTimings(resourceTimings).forEach(rs -> this.record(rs, url));
         }
