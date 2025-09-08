@@ -13,8 +13,9 @@ import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.beacon.recorder.BeaconRecorder;
+import rocks.inspectit.ocelot.eum.server.beacon.recorder.ResourceTimingBeaconRecorder;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconRequirement;
-import rocks.inspectit.ocelot.eum.server.configuration.model.tags.BeaconTagSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.BeaconAttributeSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconMetricDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.events.RegisteredAttributesEvent;
@@ -23,7 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Central component, which is responsible for writing beacon entries as OpenTelemetry instruments.
+ * Central component, which is responsible for writing beacon entries as OpenTelemetry metrics.
  */
 @Component
 @Slf4j
@@ -35,6 +36,9 @@ public class BeaconMetricManager {
     @Autowired
     private InstrumentManager instrumentManager;
 
+    /**
+     * Currently just {@link ResourceTimingBeaconRecorder}
+     */
     @Autowired(required = false)
     private List<BeaconRecorder> beaconRecorders;
 
@@ -45,13 +49,13 @@ public class BeaconMetricManager {
     Set<String> registeredBeaconAttributes = Collections.emptySet();
 
     /**
-     * Maps metric definitions to expressions.
+     * Maps metric definitions to expressions
      */
     private final Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new HashMap<>();
 
     @EventListener
     public void processUsedAttributes(RegisteredAttributesEvent registeredAttributesEvent) {
-        Map<String, BeaconTagSettings> beaconAttributeSettings = configuration.getAttributes().getBeacon();
+        Map<String, BeaconAttributeSettings> beaconAttributeSettings = configuration.getAttributes().getBeacon();
 
         registeredBeaconAttributes = registeredAttributesEvent.getRegisteredAttributes()
                 .stream()
@@ -98,14 +102,42 @@ public class BeaconMetricManager {
             }
         }
 
-        // allow each beacon recorder to record stuff
+        return successful;
+    }
+
+    /**
+     * Records the metric via {@link BeaconRecorder} or directly.
+     *
+     * @param metricName the current metric name
+     * @param metricDefinition the current metric definition
+     * @param beacon the entire beacon
+     */
+    private void recordMetric(String metricName, BeaconMetricDefinitionSettings metricDefinition, Beacon beacon) {
+        boolean recorded = recordWithBeaconRecorder(metricName, beacon);
+
+        if(!recorded) recordBeaconMetric(metricName, metricDefinition, beacon);
+    }
+
+    /**
+     * Tries to record the metric with a {@link BeaconRecorder}. Return true, if a fitting recorder was found.
+     *
+     * @param metricName the current metric name
+     * @param beacon the entire beacon
+     *
+     * @return true, if the metric was recorder via {@link BeaconRecorder}
+     */
+    private boolean recordWithBeaconRecorder(String metricName, Beacon beacon) {
         if (!CollectionUtils.isEmpty(beaconRecorders)) {
-            try (Scope scope = getBaggageForBeacon(beacon).makeCurrent()) {
-                beaconRecorders.forEach(beaconRecorder -> beaconRecorder.record(beacon));
+            for (BeaconRecorder recorder : beaconRecorders) {
+                if (recorder.canRecord(metricName)) {
+                    try (Scope scope = getBaggageForBeacon(beacon).makeCurrent()) {
+                        recorder.record(beacon);
+                        return true;
+                    }
+                }
             }
         }
-
-        return successful;
+        return false;
     }
 
     /**
@@ -117,7 +149,7 @@ public class BeaconMetricManager {
      * @param metricDefinition the metric's definition
      * @param beacon           the current beacon
      */
-    private void recordMetric(String metricName, BeaconMetricDefinitionSettings metricDefinition, Beacon beacon) {
+    private void recordBeaconMetric(String metricName, BeaconMetricDefinitionSettings metricDefinition, Beacon beacon) {
         RawExpression expression = expressionCache.computeIfAbsent(metricDefinition, definition -> new RawExpression(definition
                 .getValueExpression()));
 

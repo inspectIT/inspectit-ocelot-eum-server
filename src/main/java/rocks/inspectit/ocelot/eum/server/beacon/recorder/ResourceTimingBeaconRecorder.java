@@ -30,11 +30,11 @@ import java.util.stream.Stream;
 /**
  * This {@link BeaconRecorder} processes plain resource timing entry from the {@link Beacon} and exposes metric that:
  * <ul>
- *     <li>reports number of resources loaded sliced by type, cross-origin and cached tags</li>
+ *     <li>reports number of resources loaded sliced by type, cross-origin and cached attributes</li>
  * </ul>
  * <p>
  * The impl depends heavily on the Boomerang compression of the resource timing entries in the beacon. Please read
- * <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.plugins.ResourceTiming.html">ResourceTiming</a>
+ * <a href="https://akamai.github.io/boomerang/akamai/BOOMR.plugins.ResourceTiming.html">ResourceTiming</a>
  * Boomerang documentation first.
  */
 @Component
@@ -64,6 +64,17 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
     public final String RESOURCE_TIME_METRIC_NAME = "resource_time";
 
     /**
+     * The raw expression to extract resource timing data from the beacon.
+     * Default: {@code {restiming}}
+     */
+    private String resourceTimeExpression = "{restiming}";
+
+    @PostConstruct
+    void setUp() {
+        resourceTimeExpression = configuration.getDefinitions().get(RESOURCE_TIME_METRIC_NAME).getValueExpression();
+    }
+
+    /**
      * {@inheritDoc}
      * <p>
      * Parses the <code>restiming</code> entry from the beacon and exposes metric(s) about resource timing if parsing is
@@ -74,10 +85,15 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         // this is the URL where the resources have been loaded
         String url = beacon.get("u");
 
-        String resourceTimings = beacon.get("restiming");
+        String resourceTimings = beacon.get(resourceTimeExpression);
         if (resourceTimings != null) {
             decodeResourceTimings(resourceTimings).forEach(rs -> this.record(rs, url));
         }
+    }
+
+    @Override
+    public boolean canRecord(String metricName) {
+        return RESOURCE_TIME_METRIC_NAME.equals(metricName);
     }
 
     /**
