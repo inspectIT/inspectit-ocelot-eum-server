@@ -4,7 +4,6 @@ import com.google.common.io.CharStreams;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.sdk.trace.export.SpanExporter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -18,6 +17,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import rocks.inspectit.ocelot.eum.server.exporters.tracing.DelegatingSpanExporter;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -40,7 +40,7 @@ public class TraceControllerIntTest {
     private Resource prodResourceSpans;
 
     @MockBean
-    SpanExporter spanExporter;
+    DelegatingSpanExporter spanExporter;
 
     @Captor
     ArgumentCaptor<Collection<SpanData>> spanCaptor;

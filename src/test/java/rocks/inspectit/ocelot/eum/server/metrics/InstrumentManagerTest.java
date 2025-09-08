@@ -36,7 +36,7 @@ public class InstrumentManagerTest {
 
         @Test
         void registerNoTag() {
-            when(configuration.getTags().getExtra()).thenReturn(Collections.emptyMap());
+            when(configuration.getAttributes().getExtra()).thenReturn(Collections.emptyMap());
 
             manager.processRegisteredAttributes(Collections.emptySet());
 
@@ -47,7 +47,7 @@ public class InstrumentManagerTest {
 
         @Test
         void registerSingleTag() {
-            when(configuration.getTags().getExtra()).thenReturn(Collections.singletonMap("first", "value"));
+            when(configuration.getAttributes().getExtra()).thenReturn(Collections.singletonMap("first", "value"));
 
             manager.processRegisteredAttributes(Collections.singleton("first"));
 
@@ -59,7 +59,7 @@ public class InstrumentManagerTest {
         @Test
         void registerMultipleTags() {
             Map<String, String> tagMap = ImmutableMap.of("first", "value", "second", "value");
-            when(configuration.getTags().getExtra()).thenReturn(tagMap);
+            when(configuration.getAttributes().getExtra()).thenReturn(tagMap);
 
             manager.processRegisteredAttributes(Sets.newHashSet("first", "second"));
 
@@ -71,7 +71,7 @@ public class InstrumentManagerTest {
         @Test
         void registerTagsMultipleTimes() {
             Map<String, String> tagMap = ImmutableMap.of("first", "value", "second", "value");
-            when(configuration.getTags().getExtra()).thenReturn(tagMap);
+            when(configuration.getAttributes().getExtra()).thenReturn(tagMap);
 
             // first execution
             manager.processRegisteredAttributes(Collections.singleton("first"));
@@ -89,5 +89,4 @@ public class InstrumentManagerTest {
             assertThat(eventTwo.getRegisteredAttributes()).containsExactlyInAnyOrder("first", "second");
         }
     }
-
 }

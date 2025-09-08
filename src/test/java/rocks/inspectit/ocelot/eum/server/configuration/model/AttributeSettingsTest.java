@@ -15,13 +15,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AttributeSettingsTest {
 
     @Nested
-    public class IsGlobalTagMissing {
+    public class IsGlobalAttributeMissing {
 
         @Test
         public void emptySettings() {
             AttributeSettings settings = new AttributeSettings();
 
-            boolean result = settings.isGlobalTagMissing();
+            boolean result = settings.isGlobalAttributeMissing();
 
             assertThat(result).isFalse();
         }
@@ -31,7 +31,7 @@ class AttributeSettingsTest {
             AttributeSettings settings = new AttributeSettings();
             settings.getDefineAsGlobal().add("missing-tag");
 
-            boolean result = settings.isGlobalTagMissing();
+            boolean result = settings.isGlobalAttributeMissing();
 
             assertThat(result).isTrue();
         }
@@ -42,7 +42,7 @@ class AttributeSettingsTest {
             settings.getDefineAsGlobal().add("beacon-tag");
             settings.getBeacon().put("beacon-tag", BeaconAttributeSettings.builder().input("beacon-field").build());
 
-            boolean result = settings.isGlobalTagMissing();
+            boolean result = settings.isGlobalAttributeMissing();
 
             assertThat(result).isFalse();
         }
@@ -50,23 +50,23 @@ class AttributeSettingsTest {
         @Test
         public void hasExtraTag() {
             AttributeSettings settings = new AttributeSettings();
-            settings.getDefineAsGlobal().add("extra-tag");
-            settings.getExtra().put("extra-tag", "constant-value");
+            settings.getDefineAsGlobal().add("extra-attribute");
+            settings.getExtra().put("extra-attribute", "constant-value");
 
-            boolean result = settings.isGlobalTagMissing();
+            boolean result = settings.isGlobalAttributeMissing();
 
             assertThat(result).isFalse();
         }
     }
 
     @Nested
-    public class IsCheckUniquenessOfTags {
+    public class IsCheckUniquenessOfAttributes {
 
         @Test
         public void emptySettings() {
             AttributeSettings settings = new AttributeSettings();
 
-            boolean result = settings.isCheckUniquenessOfTags();
+            boolean result = settings.isCheckUniquenessOfAttributes();
 
             assertThat(result).isTrue();
         }
@@ -77,7 +77,7 @@ class AttributeSettingsTest {
             settings.getExtra().put("tag_a", "");
             settings.getBeacon().put("tag_b", BeaconAttributeSettings.builder().build());
 
-            boolean result = settings.isCheckUniquenessOfTags();
+            boolean result = settings.isCheckUniquenessOfAttributes();
 
             assertThat(result).isTrue();
         }
@@ -88,7 +88,7 @@ class AttributeSettingsTest {
             settings.getExtra().put("tag_a", "");
             settings.getBeacon().put("tag_a", BeaconAttributeSettings.builder().build());
 
-            boolean result = settings.isCheckUniquenessOfTags();
+            boolean result = settings.isCheckUniquenessOfAttributes();
 
             assertThat(result).isFalse();
         }

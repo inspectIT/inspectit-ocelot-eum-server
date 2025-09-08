@@ -55,17 +55,17 @@ public class AttributeSettings {
     private IPUtils ipUtils = new IPUtils();
 
     @AssertFalse(message = "All defined global attributes should exist either in extra tags or beacon tags")
-    public boolean isGlobalTagMissing() {
+    public boolean isGlobalAttributeMissing() {
         return defineAsGlobal.stream()
-                .anyMatch(globalTag ->
-                        !(getExtra().containsKey(globalTag)
-                                || getBeacon().containsKey(globalTag)
+                .anyMatch(globalAttribute ->
+                        !(getExtra().containsKey(globalAttribute)
+                                || getBeacon().containsKey(globalAttribute)
                         )
                 );
     }
 
-    @AssertTrue(message = "Each attributes should only be defined once")
-    public boolean isCheckUniquenessOfTags() {
+    @AssertTrue(message = "Each attribute should only be defined once")
+    public boolean isCheckUniquenessOfAttributes() {
         return getExtra().keySet().stream().allMatch(extraAttribute -> !beacon.containsKey(extraAttribute));
     }
 
@@ -76,7 +76,7 @@ public class AttributeSettings {
                         .allMatch(address -> customIPMapping.values().stream()
                                 .allMatch(listToCompare -> listToCompare == ipList ||
                                         listToCompare.stream()
-                                                .noneMatch(adresseToCompare -> areOverlapping(address, adresseToCompare))
+                                                .noneMatch(addressToCompare -> areOverlapping(address, addressToCompare))
                                 )
                         )
                 );

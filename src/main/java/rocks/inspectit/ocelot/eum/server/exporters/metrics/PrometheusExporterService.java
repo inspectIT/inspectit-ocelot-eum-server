@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 
 import jakarta.annotation.PreDestroy;
-import rocks.inspectit.ocelot.eum.server.opentelemetry.OpenTelemetryController;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExporterEnabledState;
 
 /**
@@ -27,9 +26,6 @@ public class PrometheusExporterService {
 
     @Autowired
     private EumServerConfiguration configuration;
-
-    @Autowired
-    private OpenTelemetryController openTelemetryController;
 
     // TODO I'm not happy with this style
     @Bean

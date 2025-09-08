@@ -95,8 +95,6 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
      * The application should expose one view, since one beacon entry maps to the default implementation.
      */
     @Test
-    @Disabled("Disabled until we record metrics via OpenTelemetry")
-    // TODO Disabled until we record metrics via OpenTelemetry
     public void expectOneView() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
         // send the beacon. use a different metric (t_load) as the different metric exporter test cases overload the metrics

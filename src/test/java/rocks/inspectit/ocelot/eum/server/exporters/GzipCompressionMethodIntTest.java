@@ -13,6 +13,7 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.CompressionMethod;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.TransportProtocol;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.AggregationType;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.exporters.metrics.OtlpMetricsExporterService;
 import rocks.inspectit.ocelot.eum.server.exporters.tracing.DelegatingSpanExporter;
@@ -96,7 +97,7 @@ public class GzipCompressionMethodIntTest extends ExporterIntTestBaseWithOtelCol
         beacon.put(BEACON_END_TIMESTAMP_KEY_NAME, "41");
         sendBeacon(beacon);
         // wait until metrics have been exported
-        awaitMetricsExported(METRIC_END_TIMESTAMP_KEY_NAME, 41, ViewDefinitionSettings.Aggregation.LAST_VALUE);
-        assertMetric(1334, false, ViewDefinitionSettings.Aggregation.LAST_VALUE);
+        awaitMetricsExported(METRIC_END_TIMESTAMP_KEY_NAME, 41, AggregationType.LAST_VALUE);
+        assertMetric(1334, false, AggregationType.LAST_VALUE);
     }
 }

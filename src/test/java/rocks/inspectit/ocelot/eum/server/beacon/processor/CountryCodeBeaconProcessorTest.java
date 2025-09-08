@@ -64,7 +64,7 @@ class CountryCodeBeaconProcessorTest {
         @Test
         public void addEmptyCountryCode() {
             when(geolocationResolver.getCountryCode(DEFAULT_IP_ADDRESS)).thenReturn("");
-            when(configuration.getTags()).thenReturn(attributeSettings);
+            when(configuration.getAttributes()).thenReturn(attributeSettings);
 
             Beacon b = preProcessor.process(beacon);
             assertThat(b.get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEqualTo("");
@@ -73,7 +73,7 @@ class CountryCodeBeaconProcessorTest {
         @Test
         public void addGeoIPDBCountryCode() {
             when(geolocationResolver.getCountryCode(DEFAULT_IP_ADDRESS)).thenReturn("DE");
-            when(configuration.getTags()).thenReturn(attributeSettings);
+            when(configuration.getAttributes()).thenReturn(attributeSettings);
 
             Beacon b = preProcessor.process(beacon);
             assertThat(b.contains(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isTrue();
@@ -83,7 +83,7 @@ class CountryCodeBeaconProcessorTest {
         @Test
         public void addCustomLabelIPMatches() {
             attributeSettings.getCustomIPMapping().put("CUSTOM_TAG_1", Arrays.asList(new String[]{"10.10.10.10"}));
-            when(configuration.getTags()).thenReturn(attributeSettings);
+            when(configuration.getAttributes()).thenReturn(attributeSettings);
 
             Beacon b = preProcessor.process(beacon);
             assertThat(b.get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEqualTo("CUSTOM_TAG_1");
@@ -94,7 +94,7 @@ class CountryCodeBeaconProcessorTest {
             attributeSettings.getCustomIPMapping().put("CUSTOM_TAG_1", Arrays.asList(new String[]{"10.10.10.11"}));
 
             when(geolocationResolver.getCountryCode(DEFAULT_IP_ADDRESS)).thenReturn("DE");
-            when(configuration.getTags()).thenReturn(attributeSettings);
+            when(configuration.getAttributes()).thenReturn(attributeSettings);
 
             Beacon b = preProcessor.process(beacon);
             assertThat(b.get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEqualTo("DE");
@@ -105,7 +105,7 @@ class CountryCodeBeaconProcessorTest {
             attributeSettings.getCustomIPMapping().put("CUSTOM_TAG_1", Arrays.asList(new String[]{"10.11.0.0/16"}));
 
             when(geolocationResolver.getCountryCode(DEFAULT_IP_ADDRESS)).thenReturn("DE");
-            when(configuration.getTags()).thenReturn(attributeSettings);
+            when(configuration.getAttributes()).thenReturn(attributeSettings);
 
             Beacon b = preProcessor.process(beacon);
             assertThat(b.get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEqualTo("DE");
@@ -114,7 +114,7 @@ class CountryCodeBeaconProcessorTest {
         @Test
         public void addCustomLabelCIDRMatches1() {
             attributeSettings.getCustomIPMapping().put("CUSTOM_TAG_1", Arrays.asList(new String[]{"10.10.0.0/16"}));
-            when(configuration.getTags()).thenReturn(attributeSettings);
+            when(configuration.getAttributes()).thenReturn(attributeSettings);
 
             Beacon b = preProcessor.process(beacon);
             assertThat(b.get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEqualTo("CUSTOM_TAG_1");
@@ -124,7 +124,7 @@ class CountryCodeBeaconProcessorTest {
         public void addCustomLabelCIDRMatches2() {
             attributeSettings.getCustomIPMapping().put("CUSTOM_TAG_1", Arrays.asList(new String[]{"10.11.0.0/16"}));
             attributeSettings.getCustomIPMapping().put("CUSTOM_TAG_2", Arrays.asList(new String[]{"10.10.0.0/16"}));
-            when(configuration.getTags()).thenReturn(attributeSettings);
+            when(configuration.getAttributes()).thenReturn(attributeSettings);
 
             Beacon b = preProcessor.process(beacon);
             assertThat(b.get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEqualTo("CUSTOM_TAG_2");
@@ -133,7 +133,7 @@ class CountryCodeBeaconProcessorTest {
         @Test
         public void respectForwardedHeader() {
             when(geolocationResolver.getCountryCode("10.0.0.0")).thenReturn("DE");
-            when(configuration.getTags()).thenReturn(attributeSettings);
+            when(configuration.getAttributes()).thenReturn(attributeSettings);
             request.addHeader("X-Forwarded-For", "10.0.0.0");
 
             Beacon result = preProcessor.process(beacon);
@@ -145,7 +145,7 @@ class CountryCodeBeaconProcessorTest {
         @Test
         public void respectForwardedHeader_multiValue() {
             when(geolocationResolver.getCountryCode("10.0.0.0")).thenReturn("DE");
-            when(configuration.getTags()).thenReturn(attributeSettings);
+            when(configuration.getAttributes()).thenReturn(attributeSettings);
             request.addHeader("X-Forwarded-For", new String[]{"10.0.0.0", "10.0.0.1"});
 
             Beacon result = preProcessor.process(beacon);

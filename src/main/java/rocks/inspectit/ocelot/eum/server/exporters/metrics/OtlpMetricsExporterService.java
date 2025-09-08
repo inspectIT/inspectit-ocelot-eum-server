@@ -19,7 +19,6 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.metrics.O
 
 import jakarta.annotation.PreDestroy;
 import jakarta.validation.Valid;
-import rocks.inspectit.ocelot.eum.server.opentelemetry.OpenTelemetryController;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,9 +37,6 @@ public class OtlpMetricsExporterService {
 
     @Autowired
     private ScheduledExecutorService executor;
-
-    @Autowired
-    private OpenTelemetryController openTelemetryController;
 
     private MetricExporter metricExporter;
 

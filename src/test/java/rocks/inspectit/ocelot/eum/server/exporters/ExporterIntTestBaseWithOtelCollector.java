@@ -5,8 +5,8 @@ import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.ServiceRequestContext;
 import com.linecorp.armeria.server.grpc.protocol.AbstractUnaryGrpcService;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
-import io.opencensus.trace.TraceId;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.TraceId;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
@@ -23,6 +23,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.AggregationType;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
 
 import java.io.UncheckedIOException;
@@ -40,8 +41,10 @@ import static org.awaitility.Awaitility.await;
 import static org.testcontainers.Testcontainers.exposeHostPorts;
 
 /**
- * Base class for exporter integration tests. Verifies integration with the OpenTelemetry Collector. The Collector can be configured to accept the required data over gRPC or HTTP and exports the data over gRPC to a server running in process, allowing assertions to be made against the data.
- * This class is based on the {@link io.opentelemetry.integrationtest.OtlpExporterIntegrationTest}
+ * Base class for exporter integration tests. Verifies integration with the OpenTelemetry Collector.
+ * The Collector can be configured to accept the required data over gRPC or HTTP and exports the data over gRPC
+ * to a server running in process, allowing assertions to be made against the data.
+ * This class is based on the {@link io.opentelemetry.integrationtest.OtlpExporterIntegrationTest}.
  */
 @Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest
@@ -49,7 +52,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
     protected static final String OTLP_HTTP_METRICS_PATH = "/v1/metrics";
 
-    static final String COLLECTOR_TAG = "0.70.0";
+    static final String COLLECTOR_TAG = "0.70.0"; // TODO Update tag
 
     static final String COLLECTOR_IMAGE = "otel/opentelemetry-collector-contrib:" + COLLECTOR_TAG;
 
@@ -66,8 +69,6 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
     static final Integer COLLECTOR_INFLUX_DB1_PORT = 8086;
 
     static final int COLLECTOR_ZIPKIN_PORT = 9411;
-
-    static final int COLLECTOR_TRACE_QUERY_PORT = 16686;
 
     private static final Logger LOGGER = Logger.getLogger(ExporterIntTestBaseWithOtelCollector.class.getName());
 
@@ -167,11 +168,8 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
             assertThat(spansLis.anyMatch(s -> s.stream()
                     .anyMatch(span -> TraceId.fromBytes(span.getTraceId().toByteArray())
-                            .toLowerBase16()
-                            .equals(expectedTraceId)))).isTrue();
-
+                            .equals(expectedTraceId)))).isTrue(); // TODO Verify this works as intended
         });
-
     }
 
     /**
@@ -181,7 +179,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
      * @param value
      */
     protected void awaitMetricsExported(String metricName, double value) {
-        awaitMetricsExported(metricName, value, ViewDefinitionSettings.Aggregation.SUM);
+        awaitMetricsExported(metricName, value, AggregationType.SUM);
     }
 
     /**
@@ -191,7 +189,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
      * @param value
      * @param aggregation
      */
-    protected void awaitMetricsExported(String metricName, double value, ViewDefinitionSettings.Aggregation aggregation) {
+    protected void awaitMetricsExported(String metricName, double value, AggregationType aggregation) {
         await().atMost(30, TimeUnit.SECONDS)
                 .pollInterval(500, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream()).anyMatch(mReq -> mReq.getResourceMetricsList()
@@ -202,7 +200,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                                         .getMetricsList()
                                         .stream()
                                         .filter(metric -> metric.getName().equalsIgnoreCase(metricName))
-                                        .anyMatch(metric -> (aggregation == ViewDefinitionSettings.Aggregation.LAST_VALUE ? metric.getGauge()
+                                        .anyMatch(metric -> (aggregation == AggregationType.LAST_VALUE ? metric.getGauge()
                                                 .getDataPointsList() : metric.getSum()
                                                 .getDataPointsList()).stream().anyMatch(d -> d.getAsDouble() == value)))));
     }
@@ -214,7 +212,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
      * @param expected whether the value is expected or not
      */
     protected void assertMetric(double value, boolean expected) {
-        assertMetric(value, expected, ViewDefinitionSettings.Aggregation.SUM);
+        assertMetric(value, expected, AggregationType.SUM);
     }
 
     /**
@@ -223,7 +221,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
      * @param value    the value
      * @param expected whether the value is expected or not
      */
-    protected void assertMetric(double value, boolean expected, ViewDefinitionSettings.Aggregation aggregation) {
+    protected void assertMetric(double value, boolean expected, AggregationType aggregation) {
         assertThat(grpcServer.metricRequests.stream()
                 .anyMatch(mReq -> mReq.getResourceMetricsList()
                         .stream()
@@ -231,11 +229,12 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                                 .stream()
                                 .anyMatch(iml -> iml.getMetricsList()
                                         .stream()
-                                        .anyMatch(metric -> (aggregation == ViewDefinitionSettings.Aggregation.LAST_VALUE ?
-                                                metric.getGauge().getDataPointsList() : metric.getSum().getDataPointsList())
-                                                .stream()
-                                                .anyMatch(d ->  expected ? d.getAsDouble() == value : d.getAsDouble() != value
-                                                )))))).isTrue();
+                                        .anyMatch(metric -> (aggregation == AggregationType.LAST_VALUE ?
+                                                metric.getGauge().getDataPointsList() :
+                                                metric.getSum().getDataPointsList()
+                                        ).stream()
+                                            .anyMatch(d ->  expected ? d.getAsDouble() == value : d.getAsDouble() != value))
+                                )))).isTrue();
     }
 
     /**
