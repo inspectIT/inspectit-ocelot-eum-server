@@ -59,6 +59,10 @@ public class BeaconMetricManager {
      */
     private final Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new HashMap<>();
 
+    /**
+     * We listen to the {@link ApplicationStartedEvent}, because {@link PostConstruct} is too early to receive
+     * {@link RegisteredAttributesEvent}s
+     */
     @EventListener(ApplicationStartedEvent.class)
     void initMetrics() {
         Map<String, BeaconMetricDefinitionSettings> definitions = configuration.getDefinitions();

@@ -26,7 +26,7 @@ public class OtlpGrpcMetricExporterServiceIntTest extends ExporterIntTestBaseWit
     }
 
     @Test
-    void verifyOtlpGrpcMetrics() throws Exception { // TODO fix
+    void verifyOtlpGrpcMetrics() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
         // fake beacon that we don't expect
         beacon.put(FAKE_BEACON_KEY_NAME, "1338");
@@ -35,8 +35,7 @@ public class OtlpGrpcMetricExporterServiceIntTest extends ExporterIntTestBaseWit
         beacon.put(BEACON_PAGE_READY_TIME_KEY_NAME, "42");
         sendBeacon(beacon);
         // wait until metrics have been exported
-        awaitMetricsExported(METRIC_PAGE_READY_TIME_KEY_NAME, 42);
-        assertMetric(1338, false);
+        awaitMetricsExported(METRIC_PAGE_READY_TIME_KEY_NAME);
+        assertHistogram(METRIC_PAGE_READY_TIME_KEY_NAME, 1, 42);
     }
-
 }

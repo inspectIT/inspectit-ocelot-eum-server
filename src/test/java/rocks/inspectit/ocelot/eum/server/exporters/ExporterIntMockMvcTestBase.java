@@ -34,8 +34,6 @@ public class ExporterIntMockMvcTestBase {
 
     public static final String SERVICE_NAME = "E2E-test";
 
-    final static String DEFAULT_TRACE_ID = "497d4e959f574a77d0d3abf05523ec5c";
-
     static String URL_KEY = "u";
 
     static String SUT_URL = "http://test.com/login";
@@ -79,13 +77,6 @@ public class ExporterIntMockMvcTestBase {
         Map<String, String> beacon = new HashMap<>();
         beacon.put(URL_KEY, SUT_URL);
         return beacon;
-    }
-
-    /**
-     * Posts a {@code Span} to {@link TraceController#spans(String)} using {@link #postSpan(String)} using the {@link #DEFAULT_TRACE_ID}
-     */
-    void postSpan() throws Exception {
-        postSpan(DEFAULT_TRACE_ID);
     }
 
     /**

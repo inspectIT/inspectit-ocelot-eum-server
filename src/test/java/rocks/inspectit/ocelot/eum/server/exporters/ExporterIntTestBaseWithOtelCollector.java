@@ -168,7 +168,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
             assertThat(spansLis.anyMatch(s -> s.stream()
                     .anyMatch(span -> TraceId.fromBytes(span.getTraceId().toByteArray())
-                            .equals(expectedTraceId)))).isTrue(); // TODO Verify this works as intended
+                            .equals(expectedTraceId)))).isTrue();
         });
     }
 
@@ -176,52 +176,31 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
      * Verifies that the metric has been exported to and received by the {@link #grpcServer}
      *
      * @param metricName
-     * @param value
      */
-    protected void awaitMetricsExported(String metricName, double value) {
-        awaitMetricsExported(metricName, value, AggregationType.SUM);
-    }
-
-    /**
-     * Verifies that the metric has been exported to and received by the {@link #grpcServer}
-     *
-     * @param metricName
-     * @param value
-     * @param aggregation
-     */
-    protected void awaitMetricsExported(String metricName, double value, AggregationType aggregation) {
+    protected void awaitMetricsExported(String metricName) {
         await().atMost(30, TimeUnit.SECONDS)
                 .pollInterval(500, TimeUnit.MILLISECONDS)
-                .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream()).anyMatch(mReq -> mReq.getResourceMetricsList()
-                        .stream()
-                        .anyMatch(rm ->
+                .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream())
+                        .anyMatch(mReq -> mReq.getResourceMetricsList()
+                            .stream()
+                            .anyMatch(rm ->
                                 // check for the given metrics
                                 rm.getScopeMetrics(0)
                                         .getMetricsList()
                                         .stream()
-                                        .filter(metric -> metric.getName().equalsIgnoreCase(metricName))
-                                        .anyMatch(metric -> (aggregation == AggregationType.LAST_VALUE ? metric.getGauge()
-                                                .getDataPointsList() : metric.getSum()
-                                                .getDataPointsList()).stream().anyMatch(d -> d.getAsDouble() == value)))));
+                                        .anyMatch(metric -> metric.getName().equalsIgnoreCase(metricName))
+                            )
+                        )
+                );
     }
 
     /**
-     * Checks if a metric with the given value has been recorded or not
+     * Checks if a histogram with the given count and sum has been recorded
      *
-     * @param value    the value
-     * @param expected whether the value is expected or not
+     * @param count the expected data point count
+     * @param sum the expected data point sum
      */
-    protected void assertMetric(double value, boolean expected) {
-        assertMetric(value, expected, AggregationType.SUM);
-    }
-
-    /**
-     * Checks if a metric with the given value has been recorded or not
-     *
-     * @param value    the value
-     * @param expected whether the value is expected or not
-     */
-    protected void assertMetric(double value, boolean expected, AggregationType aggregation) {
+    protected void assertHistogram(String metricName, int count, double sum) {
         assertThat(grpcServer.metricRequests.stream()
                 .anyMatch(mReq -> mReq.getResourceMetricsList()
                         .stream()
@@ -229,12 +208,41 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                                 .stream()
                                 .anyMatch(iml -> iml.getMetricsList()
                                         .stream()
-                                        .anyMatch(metric -> (aggregation == AggregationType.LAST_VALUE ?
-                                                metric.getGauge().getDataPointsList() :
-                                                metric.getSum().getDataPointsList()
-                                        ).stream()
-                                            .anyMatch(d ->  expected ? d.getAsDouble() == value : d.getAsDouble() != value))
-                                )))).isTrue();
+                                        .anyMatch(metric -> metric.getName().equalsIgnoreCase(metricName)
+                                                && metric.getHistogram().getDataPointsList()
+                                                .stream()
+                                                .anyMatch(dataPoint ->
+                                                        dataPoint.getCount() == count && dataPoint.getSum() == sum
+                                                )
+                                        )
+                                )
+                        )
+                )
+        ).isTrue();
+    }
+
+    /**
+     * Checks if a gauge with the given count and sum has been recorded
+     *
+     * @param value the expected value
+     */
+    protected void assertGauge(String metricName, int value) {
+        assertThat(grpcServer.metricRequests.stream()
+                .anyMatch(mReq -> mReq.getResourceMetricsList()
+                        .stream()
+                        .anyMatch(rm -> rm.getScopeMetricsList()
+                                .stream()
+                                .anyMatch(iml -> iml.getMetricsList()
+                                        .stream()
+                                        .anyMatch(metric -> metric.getName().equalsIgnoreCase(metricName) &&
+                                                metric.getGauge().getDataPointsList()
+                                                        .stream()
+                                                .anyMatch(dataPoint -> dataPoint.getAsInt() == value)
+                                        )
+                                )
+                        )
+                )
+        ).isTrue();
     }
 
     /**
@@ -260,7 +268,8 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                 @Override
                 protected CompletionStage<byte[]> handleMessage(ServiceRequestContext ctx, byte[] message) {
                     try {
-                        traceRequests.add(ExportTraceServiceRequest.parseFrom(message));
+                        ExportTraceServiceRequest request = ExportTraceServiceRequest.parseFrom(message);
+                        traceRequests.add(request);
                     } catch (InvalidProtocolBufferException e) {
                         throw new UncheckedIOException(e);
                     }
@@ -271,7 +280,8 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                 @Override
                 protected CompletionStage<byte[]> handleMessage(ServiceRequestContext ctx, byte[] message) {
                     try {
-                        metricRequests.add(ExportMetricsServiceRequest.parseFrom(message));
+                        ExportMetricsServiceRequest request = ExportMetricsServiceRequest.parseFrom(message);
+                        metricRequests.add(request);
                     } catch (InvalidProtocolBufferException e) {
                         throw new UncheckedIOException(e);
                     }
@@ -282,7 +292,8 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                 @Override
                 protected CompletionStage<byte[]> handleMessage(ServiceRequestContext ctx, byte[] message) {
                     try {
-                        logRequests.add(ExportLogsServiceRequest.parseFrom(message));
+                        ExportLogsServiceRequest request = ExportLogsServiceRequest.parseFrom(message);
+                        logRequests.add(request);
                     } catch (InvalidProtocolBufferException e) {
                         throw new UncheckedIOException(e);
                     }

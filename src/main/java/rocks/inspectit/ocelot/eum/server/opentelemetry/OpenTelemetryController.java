@@ -46,8 +46,7 @@ public class OpenTelemetryController {
 
         SdkMeterProvider meterProvider = configureMeterProvider();
 
-        // TODO We don't need any tracerProvider, since we only export received tracing data instead of recording it
-        //  Right?
+        // We don't need any tracerProvider, since we do not record traces via API here
         openTelemetry = OpenTelemetrySdk.builder()
                 .setMeterProvider(meterProvider)
                 .build();

@@ -97,7 +97,7 @@ public class GzipCompressionMethodIntTest extends ExporterIntTestBaseWithOtelCol
         beacon.put(BEACON_END_TIMESTAMP_KEY_NAME, "41");
         sendBeacon(beacon);
         // wait until metrics have been exported
-        awaitMetricsExported(METRIC_END_TIMESTAMP_KEY_NAME, 41, AggregationType.LAST_VALUE);
-        assertMetric(1334, false, AggregationType.LAST_VALUE);
+        awaitMetricsExported(METRIC_END_TIMESTAMP_KEY_NAME);
+        assertGauge(METRIC_END_TIMESTAMP_KEY_NAME, 41);
     }
 }
