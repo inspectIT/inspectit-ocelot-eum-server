@@ -9,15 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.AppStartupRunner;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.ocelot.eum.server.utils.VersionUtil;
 
 @Component
 public class ResourceManager {
 
     @Autowired
     private EumServerConfiguration configuration;
-
-    @Autowired
-    private AppStartupRunner appStartupRunner;
 
     /**
      * @return the OpenTelemetry resources
@@ -27,8 +25,8 @@ public class ResourceManager {
                 ServiceAttributes.SERVICE_NAME, configuration.getExporters().getServiceName(),
                 TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java",
                 TelemetryAttributes.TELEMETRY_SDK_NAME, "opentelemetry",
-                TelemetryAttributes.TELEMETRY_SDK_VERSION, appStartupRunner.getOpenTelemetryVersion(),
-                AttributeKey.stringKey("inspectit.eum-server.version"), appStartupRunner.getServerVersion()
+                TelemetryAttributes.TELEMETRY_SDK_VERSION, VersionUtil.getOpenTelemetryVersion(),
+                AttributeKey.stringKey("inspectit.eum-server.version"), VersionUtil.getServerVersion()
         ));
     }
 }
