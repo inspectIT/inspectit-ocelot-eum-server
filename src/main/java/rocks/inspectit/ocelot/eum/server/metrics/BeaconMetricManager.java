@@ -7,6 +7,9 @@ import io.opentelemetry.context.Scope;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -36,6 +39,9 @@ public class BeaconMetricManager {
     @Autowired
     private InstrumentManager instrumentManager;
 
+    @Autowired
+    private SelfMonitoringMetricManager selfMonitoringMetricManager;
+
     /**
      * Currently just {@link ResourceTimingBeaconRecorder}
      */
@@ -53,17 +59,7 @@ public class BeaconMetricManager {
      */
     private final Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new HashMap<>();
 
-    @EventListener
-    public void processUsedAttributes(RegisteredAttributesEvent registeredAttributesEvent) {
-        Map<String, BeaconAttributeSettings> beaconAttributeSettings = configuration.getAttributes().getBeacon();
-
-        registeredBeaconAttributes = registeredAttributesEvent.getRegisteredAttributes()
-                .stream()
-                .filter(beaconAttributeSettings::containsKey)
-                .collect(Collectors.toSet());
-    }
-
-    @PostConstruct
+    @EventListener(ApplicationStartedEvent.class)
     void initMetrics() {
         Map<String, BeaconMetricDefinitionSettings> definitions = configuration.getDefinitions();
         for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : definitions.entrySet()) {
@@ -73,6 +69,20 @@ public class BeaconMetricManager {
             log.debug("Registering beacon metric: {}", metricName);
             instrumentManager.updateInstruments(metricName, metricDefinition);
         }
+        // Initialize self-monitoring metrics after beacon metrics
+        selfMonitoringMetricManager.initMetrics();
+        log.info("Registration of metrics completed");
+    }
+
+    // TODO Refactor this
+    @EventListener
+    void processUsedAttributes(RegisteredAttributesEvent registeredAttributesEvent) {
+        Map<String, BeaconAttributeSettings> beaconAttributeSettings = configuration.getAttributes().getBeacon();
+
+        registeredBeaconAttributes = registeredAttributesEvent.getRegisteredAttributes()
+                .stream()
+                .filter(beaconAttributeSettings::containsKey)
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -169,7 +179,7 @@ public class BeaconMetricManager {
      *
      * @param beacon Used to resolve baggage values, which refer to a beacon entry
      *
-     * @return the
+     * @return the baggage for the provided beacon
      */
     private Baggage getBaggageForBeacon(Beacon beacon) {
         BaggageBuilder builder = instrumentManager.getBaggage().toBuilder();

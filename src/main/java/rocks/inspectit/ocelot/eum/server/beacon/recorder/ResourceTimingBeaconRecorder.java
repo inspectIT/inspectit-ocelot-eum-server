@@ -108,15 +108,15 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      */
     private void record(ResourceTimingEntry resourceTimingEntry, String url) {
         MetricDefinitionSettings metricDefinition = configuration.getDefinitions().get(RESOURCE_TIME_METRIC_NAME);
-        Map<String, String> extra = new HashMap<>();
+        Map<String, String> attributes = new HashMap<>();
         boolean sameOrigin = isSameOrigin(url, resourceTimingEntry.url);
-        extra.put("crossOrigin", String.valueOf(!sameOrigin));
-        extra.put("initiatorType", resourceTimingEntry.getInitiatorType().toString());
+        attributes.put("crossOrigin", String.valueOf(!sameOrigin));
+        attributes.put("initiatorType", resourceTimingEntry.getInitiatorType().toString());
         if (sameOrigin) {
-            extra.put("cached", String.valueOf(resourceTimingEntry.isCached(true)));
+            attributes.put("cached", String.valueOf(resourceTimingEntry.isCached(true)));
         }
 
-        try (Scope scope = instrumentManager.getBaggage(extra).makeCurrent()) {
+        try (Scope scope = instrumentManager.getBaggage(attributes).makeCurrent()) {
             Optional<Integer> responseEnd = resourceTimingEntry.getResponseEnd();
             instrumentManager.recordInstrument(RESOURCE_TIME_METRIC_NAME, metricDefinition, responseEnd.orElse(0));
         }

@@ -22,6 +22,6 @@ public class RegisteredAttributesEvent extends ApplicationEvent {
      */
     public RegisteredAttributesEvent(Object source, Set<String> registeredAttributes) {
         super(source);
-        this.registeredAttributes = Collections.unmodifiableSet(new HashSet<>(registeredAttributes));
+        this.registeredAttributes = Set.copyOf(registeredAttributes);
     }
 }

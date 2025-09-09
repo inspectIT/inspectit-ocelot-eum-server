@@ -1,11 +1,9 @@
 package rocks.inspectit.ocelot.eum.server.opentelemetry.metrics;
 
-import io.opentelemetry.sdk.metrics.Aggregation;
-import io.opentelemetry.sdk.metrics.InstrumentSelector;
-import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
-import io.opentelemetry.sdk.metrics.View;
+import io.opentelemetry.sdk.metrics.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.AggregationType;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
@@ -86,13 +84,17 @@ public class ViewManager {
      */
     private View createView(String viewName, ViewDefinitionSettings settings) {
         Aggregation aggregation = convertAggregation(settings);
-        return View.builder()
+        ViewBuilder builder =  View.builder()
                 .setName(viewName)
                 .setDescription(settings.getDescription())
-                .setAttributeFilter(attribute -> settings.getAttributes().get(attribute))
                 .setAggregation(aggregation)
-                .setCardinalityLimit(settings.getCardinalityLimit())
-                .build();
+                .setCardinalityLimit(settings.getCardinalityLimit());
+
+        if(!CollectionUtils.isEmpty(settings.getAttributes())) {
+           builder.setAttributeFilter(attribute -> settings.getAttributes().getOrDefault(attribute, false));
+        }
+
+        return builder.build();
     }
 
     /**

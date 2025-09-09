@@ -27,7 +27,7 @@ public class OtlpHttpMetricExporterServiceIntTest extends ExporterIntTestBaseWit
     }
 
     @Test
-    void verifyOtlpHttpMetrics() throws Exception {
+    void verifyOtlpHttpMetrics() throws Exception { // TODO fix
         Map<String, String> beacon = getBasicBeacon();
         // fake beacon that we don't expect
         beacon.put(FAKE_BEACON_KEY_NAME, "1339");

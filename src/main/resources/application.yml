@@ -85,8 +85,10 @@ inspectit-eum-server:
         input: COUNTRY_CODE
       URL:
         input: u
+        null-as-empty: true
       OS:
         input: ua.plt
+        null-as-empty: true
       U_NO_QUERY:
         input: u
         replacements:

@@ -11,6 +11,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.events.RegisteredAttributesEvent;
 //import rocks.inspectit.ocelot.eum.server.metrics.percentiles.TimeWindowViewManager;
 import rocks.inspectit.ocelot.eum.server.utils.AttributeUtil;
@@ -57,6 +58,23 @@ public class InstrumentManager {
      */
     @VisibleForTesting
     Set<String> registeredExtraAttributes = Collections.emptySet();
+
+    /**
+     * Creates or updates the instruments in {@link #instruments}.
+     *
+     * @param name the metric name
+     * @param metricDefinition the configuration for the metric
+     */
+    public void updateInstruments(String name, MetricDefinitionSettings metricDefinition) {
+        if (!instruments.containsKey(name)) {
+            MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(name, Duration
+                    .ofSeconds(15)); // Default value of 15s will be overridden by configuration.
+            Object instrument = instrumentFactory.createInstrument(name, populatedMetricDefinition);
+            instruments.put(name, instrument);
+            //updateViews(name, populatedMetricDefinition);
+            populatedMetricDefinition.getViews().values().forEach(this::processAttributeKeysForView);
+        }
+    }
 
     /**
      * Records a value for the instrument.
@@ -138,22 +156,6 @@ public class InstrumentManager {
         }
     }
 
-    /**
-     * Creates or updates the instruments in {@link #instruments}.
-     *
-     * @param name the metric name
-     * @param metricDefinition the configuration for the metric
-     */
-    public void updateInstruments(String name, MetricDefinitionSettings metricDefinition) {
-        if (!instruments.containsKey(name)) {
-            MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(name, Duration
-                    .ofSeconds(15)); // Default value of 15s will be overridden by configuration.
-            Object instrument = instrumentFactory.createInstrument(name, populatedMetricDefinition);
-            instruments.put(name, instrument);
-            //updateViews(name, populatedMetricDefinition);
-        }
-    }
-
     // TODO With the ViewManager, do we need to create any views here?
 
 //    /**
@@ -211,19 +213,17 @@ public class InstrumentManager {
 //    /**
 //     * Returns all tags, which are exposed for the given metricDefinition
 //     */
-//    private List<TagKey> getAttributeKeysForView(ViewDefinitionSettings viewDefinitionSettings) {
-//        Set<String> attributes = new HashSet<>(configuration.getAttributes().getDefineAsGlobal());
-//        attributes.addAll(viewDefinitionSettings.getAttributes()
-//                .entrySet()
-//                .stream()
-//                .filter(Map.Entry::getValue)
-//                .map(Map.Entry::getKey)
-//                .collect(Collectors.toList()));
-//
-//        processRegisteredAttributes(attributes);
-//
-//        return attributes.stream().map(TagKey::create).collect(Collectors.toList());
-//    }
+    private void processAttributeKeysForView(ViewDefinitionSettings viewDefinitionSettings) {
+        Set<String> attributes = new HashSet<>(configuration.getAttributes().getDefineAsGlobal());
+        attributes.addAll(viewDefinitionSettings.getAttributes()
+                .entrySet()
+                .stream()
+                .filter(Map.Entry::getValue)
+                .map(Map.Entry::getKey)
+                .toList());
+
+        processRegisteredAttributes(attributes);
+    }
 
     /**
      * Publish all registered tags as event, if the getTagKeysForView method is called and verify the registered extra tags.
@@ -239,20 +239,21 @@ public class InstrumentManager {
 
         registeredExtraAttributes = registeredAttributes.stream()
                 .filter(configuration.getAttributes().getExtra()::containsKey)
+                .filter(configuration.getAttributes().getDefineAsGlobal()::contains)
                 .collect(Collectors.toSet());
     }
 
     /**
-     * Builds baggage with all extra attributes.
+     * Builds baggage with all global extra attributes.
      */
     public Baggage getBaggage() {
         BaggageBuilder builder = Baggage.current().toBuilder();
 
-        for (String registeredExtraTag : registeredExtraAttributes) {
-            builder.put(registeredExtraTag, configuration
+        for (String registeredExtraAttribute : registeredExtraAttributes) {
+            builder.put(registeredExtraAttribute, configuration
                     .getAttributes()
                     .getExtra()
-                    .get(registeredExtraTag));
+                    .get(registeredExtraAttribute));
         }
         return builder.build();
     }

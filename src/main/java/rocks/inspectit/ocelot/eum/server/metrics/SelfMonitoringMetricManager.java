@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.eum.server.metrics;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.context.Scope;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,6 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.M
 import rocks.inspectit.ocelot.eum.server.configuration.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 
-import jakarta.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.Map;
 
@@ -26,9 +24,10 @@ public class SelfMonitoringMetricManager {
     @Autowired
     private InstrumentManager instrumentManager;
 
-    @PostConstruct
-    @VisibleForTesting
-    void initMetrics() {
+    /**
+     * Initialize self-monitoring metrics
+     */
+    public void initMetrics() {
         SelfMonitoringSettings selfMonitoringSettings = configuration.getSelfMonitoring();
         for (Map.Entry<String, MetricDefinitionSettings> metricEntry : selfMonitoringSettings.getMetrics().entrySet()) {
             String measureName = metricEntry.getKey();
@@ -73,4 +72,3 @@ public class SelfMonitoringMetricManager {
         record(measureName, value, Collections.emptyMap());
     }
 }
-

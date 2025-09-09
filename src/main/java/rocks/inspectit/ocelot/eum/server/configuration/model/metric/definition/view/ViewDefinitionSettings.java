@@ -10,6 +10,7 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.M
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

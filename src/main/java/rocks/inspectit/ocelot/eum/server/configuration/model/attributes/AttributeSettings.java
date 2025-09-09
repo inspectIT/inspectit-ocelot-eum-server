@@ -19,14 +19,14 @@ import java.util.*;
 public class AttributeSettings {
 
     /**
-     * Settings for available attributes providers.
+     * Settings for available attributes providers
      */
     // TODO Is this even used anywhere?
     @Valid
     private AttributesProviderSettings providers;
 
     /**
-     * Map of arbitrary user defined attributes.
+     * Map of arbitrary user defined attributes
      */
     private Map<String, String> extra = new HashMap<>();
 
