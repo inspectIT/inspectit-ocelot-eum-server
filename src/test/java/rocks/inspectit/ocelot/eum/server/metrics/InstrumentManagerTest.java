@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.eum.server.metrics;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -42,46 +43,49 @@ public class InstrumentManagerTest {
 
             verify(applicationEventPublisher).publishEvent(eventArgumentCaptor.capture());
             assertThat(eventArgumentCaptor.getValue().getRegisteredAttributes()).isEmpty();
-            assertThat(manager.registeredExtraAttributes).isEmpty();
+            assertThat(manager.registeredGlobalAttributes).isEmpty();
         }
 
         @Test
         void registerSingleTag() {
             when(configuration.getAttributes().getExtra()).thenReturn(Collections.singletonMap("first", "value"));
+            when(configuration.getAttributes().getDefineAsGlobal()).thenReturn(Collections.singleton("first"));
 
             manager.processRegisteredAttributes(Collections.singleton("first"));
 
             verify(applicationEventPublisher).publishEvent(eventArgumentCaptor.capture());
             assertThat(eventArgumentCaptor.getValue().getRegisteredAttributes()).containsExactly("first");
-            assertThat(manager.registeredExtraAttributes).containsExactly("first");
+            assertThat(manager.registeredGlobalAttributes).containsExactly("first");
         }
 
         @Test
         void registerMultipleTags() {
             Map<String, String> tagMap = ImmutableMap.of("first", "value", "second", "value");
             when(configuration.getAttributes().getExtra()).thenReturn(tagMap);
+            when(configuration.getAttributes().getDefineAsGlobal()).thenReturn(ImmutableSet.of("first", "second"));
 
             manager.processRegisteredAttributes(Sets.newHashSet("first", "second"));
 
             verify(applicationEventPublisher).publishEvent(eventArgumentCaptor.capture());
             assertThat(eventArgumentCaptor.getValue().getRegisteredAttributes()).containsExactlyInAnyOrder("first", "second");
-            assertThat(manager.registeredExtraAttributes).containsExactlyInAnyOrder("first", "second");
+            assertThat(manager.registeredGlobalAttributes).containsExactlyInAnyOrder("first", "second");
         }
 
         @Test
         void registerTagsMultipleTimes() {
             Map<String, String> tagMap = ImmutableMap.of("first", "value", "second", "value");
             when(configuration.getAttributes().getExtra()).thenReturn(tagMap);
+            when(configuration.getAttributes().getDefineAsGlobal()).thenReturn(ImmutableSet.of("first", "second"));
 
             // first execution
             manager.processRegisteredAttributes(Collections.singleton("first"));
 
-            assertThat(manager.registeredExtraAttributes).containsExactly("first");
+            assertThat(manager.registeredGlobalAttributes).containsExactly("first");
 
             // second execution
             manager.processRegisteredAttributes(Collections.singleton("second"));
 
-            assertThat(manager.registeredExtraAttributes).containsExactlyInAnyOrder("first", "second");
+            assertThat(manager.registeredGlobalAttributes).containsExactlyInAnyOrder("first", "second");
             verify(applicationEventPublisher, times(2)).publishEvent(eventArgumentCaptor.capture());
             RegisteredAttributesEvent eventOne = eventArgumentCaptor.getAllValues().get(0);
             RegisteredAttributesEvent eventTwo = eventArgumentCaptor.getAllValues().get(1);

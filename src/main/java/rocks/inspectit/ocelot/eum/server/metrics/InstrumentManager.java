@@ -54,10 +54,10 @@ public class InstrumentManager {
     private final Set<String> registeredAttributes = new HashSet<>();
 
     /**
-     * Set of all registered extra attributes
+     * Set of all registered global attributes
      */
     @VisibleForTesting
-    Set<String> registeredExtraAttributes = Collections.emptySet();
+    Set<String> registeredGlobalAttributes = Collections.emptySet();
 
     /**
      * Creates or updates the instruments in {@link #instruments}.
@@ -226,9 +226,9 @@ public class InstrumentManager {
     }
 
     /**
-     * Publish all registered tags as event, if the getTagKeysForView method is called and verify the registered extra tags.
+     * Publish all registered attributes as event.
      *
-     * @param attributes the registered tags
+     * @param attributes the registered attributes
      */
     @VisibleForTesting
     void processRegisteredAttributes(Set<String> attributes) {
@@ -237,7 +237,7 @@ public class InstrumentManager {
         RegisteredAttributesEvent registeredAttributesEvent = new RegisteredAttributesEvent(this, registeredAttributes);
         applicationEventPublisher.publishEvent(registeredAttributesEvent);
 
-        registeredExtraAttributes = registeredAttributes.stream()
+        registeredGlobalAttributes = registeredAttributes.stream()
                 .filter(configuration.getAttributes().getExtra()::containsKey)
                 .filter(configuration.getAttributes().getDefineAsGlobal()::contains)
                 .collect(Collectors.toSet());
@@ -249,11 +249,11 @@ public class InstrumentManager {
     public Baggage getBaggage() {
         BaggageBuilder builder = Baggage.current().toBuilder();
 
-        for (String registeredExtraAttribute : registeredExtraAttributes) {
-            builder.put(registeredExtraAttribute, configuration
+        for (String registeredGlobalAttribute : registeredGlobalAttributes) {
+            builder.put(registeredGlobalAttribute, configuration
                     .getAttributes()
                     .getExtra()
-                    .get(registeredExtraAttribute));
+                    .get(registeredGlobalAttribute));
         }
         return builder.build();
     }
