@@ -23,8 +23,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.AggregationType;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
 
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -52,7 +50,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
     protected static final String OTLP_HTTP_METRICS_PATH = "/v1/metrics";
 
-    static final String COLLECTOR_TAG = "0.70.0"; // TODO Update tag
+    static final String COLLECTOR_TAG = "0.100.0";
 
     static final String COLLECTOR_IMAGE = "otel/opentelemetry-collector-contrib:" + COLLECTOR_TAG;
 
@@ -65,8 +63,6 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
     static final Integer COLLECTOR_PROMETHEUS_PORT = 8888;
 
     static final Integer COLLECTOR_PROMETHEUS_RECEIVER_PORT = 8889;
-
-    static final Integer COLLECTOR_INFLUX_DB1_PORT = 8086;
 
     static final int COLLECTOR_ZIPKIN_PORT = 9411;
 
@@ -82,11 +78,6 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
      */
     static GenericContainer<?> collector;
 
-    // TODO: try to re-use the collector container across test classes to speed up tests
-    static {
-
-    }
-
     @BeforeAll
     static void startCollector() {
         // start the gRPC server
@@ -99,13 +90,13 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
         collector = new GenericContainer<>(DockerImageName.parse(COLLECTOR_IMAGE)).withEnv("LOGGING_EXPORTER_LOG_LEVEL", "INFO")
                 .withEnv("OTLP_EXPORTER_ENDPOINT", "host.testcontainers.internal:" + grpcServer.httpPort())
-                .withEnv("PROMETHEUS_SCRAPE_TARGET", String.format("host.testcontainers.internlal:%s", COLLECTOR_PROMETHEUS_PORT))
+                .withEnv("PROMETHEUS_SCRAPE_TARGET", String.format("host.testcontainers.internal:%s", COLLECTOR_PROMETHEUS_PORT))
                 .withEnv("PROMETHEUS_INTEGRATION_TEST_SCRAPE_TARGET", String.format("host.testcontainers.internal:%s", COLLECTOR_PROMETHEUS_RECEIVER_PORT))
                 .withClasspathResourceMapping("otel-config.yaml", "/otel-config.yaml", BindMode.READ_ONLY)
                 .withCommand("--config", "/otel-config.yaml")
                 .withLogConsumer(outputFrame -> LOGGER.log(Level.INFO, outputFrame.getUtf8String().replace("\n", "")))
                 // expose all relevant ports
-                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_INFLUX_DB1_PORT, COLLECTOR_ZIPKIN_PORT, COLLECTOR_PROMETHEUS_RECEIVER_PORT)
+                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_ZIPKIN_PORT, COLLECTOR_PROMETHEUS_RECEIVER_PORT)
                 .waitingFor(Wait.forHttp("/").forPort(COLLECTOR_HEALTH_CHECK_PORT));
 
         //collector.withStartupTimeout(Duration.of(1, ChronoUnit.MINUTES));
