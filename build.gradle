@@ -120,6 +120,7 @@ test {
 
 dependencies {
     implementation(
+            // Spring Boot
             "org.springframework.boot:spring-boot-starter-web",
             "org.springframework.boot:spring-boot-starter-actuator",
             "org.springframework.boot:spring-boot-starter-validation",
@@ -129,8 +130,7 @@ dependencies {
             // Has to be included, but is transitive to spring
             "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
 
-            "io.grpc:grpc-context:${grpcVersion}",
-
+            // OpenTelemetry
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
@@ -141,6 +141,7 @@ dependencies {
             "io.opentelemetry.semconv:opentelemetry-semconv:${openTelemetrySemConvVersion}",
             "io.opentelemetry.proto:opentelemetry-proto:${openTelemetryProtoVersion}",
 
+            // Also OpenTelemetry related
             "com.google.protobuf:protobuf-java:${protobufVersion}",
             "com.google.protobuf:protobuf-java-util:${protobufVersion}",
 
@@ -157,13 +158,13 @@ dependencies {
 
     testImplementation(
             "org.springframework.boot:spring-boot-starter-test",
-            "org.apache.httpcomponents:httpclient:${httpClientVersion}",
+            "org.apache.httpcomponents:httpclient:${httpClientVersion}", // TODO Update to v5
 
             // ServerExtension
             "com.linecorp.armeria:armeria-junit5:${armeriaVersion}",
             "com.linecorp.armeria:armeria-grpc-protocol:${armeriaVersion}",
 
-            // for docker test containers
+            // Docker test containers
             "org.testcontainers:testcontainers:${testContainersVersion}",
             "org.testcontainers:junit-jupiter:${testContainersVersion}"
     )
@@ -174,7 +175,7 @@ dependencies {
 // Copy the jar into the docker folder without version suffix
 tasks.register('copyServerJar', Copy) {
     dependsOn bootJar
-    from(layout.buildDirectory.file("libs/inspectit- lot-eum-server-${version}.jar"))
+    from(layout.buildDirectory.file("libs/inspectit-ocelot-eum-server-${version}.jar"))
     into(layout.projectDirectory.dir("docker"))
     rename("inspectit-ocelot-eum-server-${version}\\.jar",
             "inspectit-ocelot-eum-server.jar")
