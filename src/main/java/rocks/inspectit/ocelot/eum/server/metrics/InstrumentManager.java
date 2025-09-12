@@ -9,11 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.events.RegisteredAttributesEvent;
-//import rocks.inspectit.ocelot.eum.server.metrics.percentiles.TimeWindowViewManager;
+import rocks.inspectit.ocelot.eum.server.metrics.timewindow.worker.TimeWindowRecorder;
 import rocks.inspectit.ocelot.eum.server.utils.AttributeUtil;
 
 import java.time.Duration;
@@ -21,30 +22,29 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Central component, which is responsible for writing communication with the OpenTelemetry.
+ * Central component, which is responsible for writing communication with the OpenTelemetry instruments.
+ * Note: The EUM-server cannot update metric definition during runtime.
  */
 @Component
 @Slf4j
 public class InstrumentManager {
 
-    // TODO Check out: https://github.com/inspectIT/inspectit-ocelot/tree/feature/feat-1571-opentelemetry-migration-replace-metrics
-
-    @Autowired
-    private EumServerConfiguration configuration;
-
-//    @Autowired
-//    private TimeWindowViewManager timeWindowViewManager;
-
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
+    private EumServerConfiguration configuration;
+
+    @Autowired
     private InstrumentFactory instrumentFactory;
 
+    @Autowired
+    private TimeWindowRecorder timeWindowRecorder;
+
     /**
-     * Created OpenTelemetry instruments.
+     * Created OpenTelemetry instruments referenced by their metric name.
      * Since {@code AbstractInstrument} is package-private, we store instruments as {@code Object}
-     * and cast them to proper data types during runtime.
+     * and cast them to proper data types during recording.
      */
     private final Map<String, Object> instruments = new HashMap<>();
 
@@ -60,48 +60,51 @@ public class InstrumentManager {
     Set<String> registeredGlobalAttributes = Collections.emptySet();
 
     /**
-     * Creates or updates the instruments in {@link #instruments}.
+     * Creates the instrument in {@link #instruments} if necessary.
      *
-     * @param name the metric name
+     * @param metricName the metric name
      * @param metricDefinition the configuration for the metric
      */
-    public void updateInstruments(String name, MetricDefinitionSettings metricDefinition) {
-        if (!instruments.containsKey(name)) {
-            MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(name, Duration
+    public void createInstrument(String metricName, MetricDefinitionSettings metricDefinition) {
+        if (!isInstrumentRegistered(metricName)) {
+            MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(metricName, Duration
                     .ofSeconds(15)); // Default value of 15s will be overridden by configuration.
-            Object instrument = instrumentFactory.createInstrument(name, populatedMetricDefinition);
-            instruments.put(name, instrument);
-            //updateViews(name, populatedMetricDefinition);
-            populatedMetricDefinition.getViews().values().forEach(this::processAttributeKeysForView);
+
+            if (shouldCreateInstrument(metricDefinition)) {
+                Object instrument = instrumentFactory.createInstrument(metricName, populatedMetricDefinition);
+                instruments.put(metricName, instrument);
+            }
+
+            populatedMetricDefinition.getViews()
+                    .values()
+                    .forEach(this::processAttributeKeysForView);
         }
     }
 
     /**
-     * Records a value for the instrument.
+     * Records a value for the metric via OpenTelemetry {@link Meter} or/and via {@link TimeWindowRecorder}.
      *
-     * @param instrumentName   the name of the instrument
+     * @param metricName        the name of the metric
      * @param metricDefinition the configuration of the metric, which is activated
-     * @param value            the value, which is going to be written.
+     * @param value            the value, which is going to be written
      */
-    public void recordInstrument(String instrumentName, MetricDefinitionSettings metricDefinition, Number value) {
-        if (log.isDebugEnabled()) {
-            log.debug("Recording instrument '{}' with value '{}'.", instrumentName, value);
-        }
+    public void recordMetric(String metricName, MetricDefinitionSettings metricDefinition, Number value) {
+        if (log.isDebugEnabled())
+            log.debug("Recording metric '{}' with value '{}'", metricName, value);
 
         Attributes attributes = AttributeUtil.toAttributes(Baggage.current());
 
-        switch (metricDefinition.getInstrumentType()) {
-            case COUNTER -> recordCounter(instrumentName, metricDefinition, value, attributes);
-            case UP_DOWN_COUNTER -> recordUpDownCounter(instrumentName, metricDefinition, value, attributes);
-            case GAUGE -> recordGauge(instrumentName, metricDefinition, value, attributes);
-            case HISTOGRAM -> recordHistogram(instrumentName, metricDefinition, value, attributes);
-            default -> throw new IllegalArgumentException("Tried to record unsupported instrument type:" + metricDefinition.getInstrumentType().name());
+        if (isInstrumentRegistered(metricName)) {
+            switch (metricDefinition.getInstrumentType()) {
+                case COUNTER -> recordCounter(metricName, metricDefinition, value, attributes);
+                case UP_DOWN_COUNTER -> recordUpDownCounter(metricName, metricDefinition, value, attributes);
+                case GAUGE -> recordGauge(metricName, metricDefinition, value, attributes);
+                case HISTOGRAM -> recordHistogram(metricName, metricDefinition, value, attributes);
+                default -> throw new IllegalArgumentException("Tried to record unsupported instrument type: " + metricDefinition.getInstrumentType().name());
+            }
         }
 
-        // TODO Refactor percentiles package
-
-//        timeWindowViewManager.recordMeasurement(measureName, value.doubleValue(), Tags.getTagger()
-//                .getCurrentTagContext());
+        timeWindowRecorder.recordMetric(metricName, value.doubleValue(), Baggage.current());
     }
 
     private void recordCounter(String instrumentName, MetricDefinitionSettings metricDefinition, Number value, Attributes attributes) {
@@ -156,63 +159,36 @@ public class InstrumentManager {
         }
     }
 
-    // TODO With the ViewManager, do we need to create any views here?
+    /**
+     * Checks, if we should create an instrument for the metric. We only need an instrument, if the metric definition
+     * contains a view, which uses an OpenTelemetry aggregation
+     * <b>OR</b> if there are no views specified at all. Then we will use the default OpenTelemetry Views,
+     * which OpenTelemetry handles by itself automatically.
+     * For time-window aggregations we will record metrics via {@link TimeWindowRecorder} later.
+     *
+     * @param metricDefinition the metric definition
+     *
+     * @return true, if we should create an instrument
+     */
+    private boolean shouldCreateInstrument(MetricDefinitionSettings metricDefinition) {
+        boolean useDefaultViews = CollectionUtils.isEmpty(metricDefinition.getViews());
+        return useDefaultViews || metricDefinition.getViews()
+                .values().stream()
+                .anyMatch(view -> view.getAggregation().isOpenTelemetryAggregation());
+    }
 
-//    /**
-//     * Creates a new {@link View}, if a view for the given metricDefinition was not created, yet.
-//     *
-//     * @param metricDefinition the settings of the metric definition
-//     */
-//    private void updateViews(String metricName, MetricDefinitionSettings metricDefinition) {
-//        for (Map.Entry<String, ViewDefinitionSettings> viewDefinitionSettingsEntry : metricDefinition.getViews()
-//                .entrySet()) {
-//            String viewName = viewDefinitionSettingsEntry.getKey();
-//            ViewDefinitionSettings viewDefinitionSettings = viewDefinitionSettingsEntry.getValue();
-//            if (viewManager.getAllExportedViews().stream().noneMatch(v -> v.getName().asString().equals(viewName))) {
-//                Measure measure = metrics.get(metricName);
-//
-//                boolean isRegistered = timeWindowViewManager.isViewRegistered(metricName, viewName);
-//                boolean isQuantileAggregation = viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES;
-//                boolean isSmoothedAverageAggregation = viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.SMOOTHED_AVERAGE;
-//                if (isRegistered || isQuantileAggregation || isSmoothedAverageAggregation) {
-//                    addTimeWindowView(measure, viewName, viewDefinitionSettings);
-//                } else {
-//                    registerNewView(measure, viewName, viewDefinitionSettings);
-//                }
-//            }
-//        }
-//    }
-//
-//    private void addTimeWindowView(Measure measure, String viewName, ViewDefinitionSettings def) {
-//        List<TagKey> viewTags = getAttributeKeysForView(def);
-//        Set<String> tagsAsStrings = viewTags.stream().map(TagKey::getName).collect(Collectors.toSet());
-//        if (def.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES) {
-//            boolean minEnabled = def.getQuantiles().contains(0.0);
-//            boolean maxEnabled = def.getQuantiles().contains(1.0);
-//            List<Double> percentilesFiltered = def.getQuantiles()
-//                    .stream()
-//                    .filter(p -> p > 0 && p < 1)
-//                    .collect(Collectors.toList());
-//            timeWindowViewManager.createOrUpdatePercentileView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), minEnabled, maxEnabled, percentilesFiltered, def
-//                    .getTimeWindow()
-//                    .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
-//        } else {
-//            timeWindowViewManager.createOrUpdateSmoothedAverageView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), def
-//                    .getDropUpper(), def.getDropLower(), def.getTimeWindow()
-//                    .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
-//        }
-//    }
-//
-//    private void registerNewView(Measure measure, String viewName, ViewDefinitionSettings def) {
-//        Aggregation aggregation = createAggregation(def);
-//        List<TagKey> tagKeys = getAttributeKeysForView(def);
-//        View view = View.create(View.Name.create(viewName), def.getDescription(), measure, aggregation, tagKeys);
-//        viewManager.registerView(view);
-//    }
-//
-//    /**
-//     * Returns all tags, which are exposed for the given metricDefinition
-//     */
+    /**
+     * @param metricName the name of the metric
+     *
+     * @return true, if an OpenTelemetry instrument was created for the metric
+     */
+    private boolean isInstrumentRegistered(String metricName) {
+        return instruments.containsKey(metricName);
+    }
+
+    /**
+     * Processes all attributes, which are exposed for the given view.
+     */
     private void processAttributeKeysForView(ViewDefinitionSettings viewDefinitionSettings) {
         Set<String> attributes = new HashSet<>(configuration.getAttributes().getDefineAsGlobal());
         attributes.addAll(viewDefinitionSettings.getAttributes()

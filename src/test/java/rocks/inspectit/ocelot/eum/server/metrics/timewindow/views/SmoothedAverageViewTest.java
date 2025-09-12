@@ -1,13 +1,6 @@
 //package rocks.inspectit.ocelot.eum.server.metrics.percentiles;
 //
 //import com.google.common.collect.ImmutableSet;
-//import io.opencensus.common.Timestamp;
-//import io.opencensus.metrics.LabelKey;
-//import io.opencensus.metrics.LabelValue;
-//import io.opencensus.metrics.export.Metric;
-//import io.opencensus.metrics.export.MetricDescriptor;
-//import io.opencensus.metrics.export.Value;
-//import io.opencensus.tags.*;
 //import org.junit.jupiter.api.Nested;
 //import org.junit.jupiter.api.Test;
 //

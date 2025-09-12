@@ -93,7 +93,7 @@ public class SelfMonitoringMetricManagerTest {
             selfMonitoringMetricManager.initMetrics();
 
             ArgumentCaptor<MetricDefinitionSettings> mdsCaptor = ArgumentCaptor.forClass(MetricDefinitionSettings.class);
-            verify(instrumentManager).updateInstruments(eq("inspectit-eum/self/beacons_received"), mdsCaptor.capture());
+            verify(instrumentManager).createInstrument(eq("inspectit-eum/self/beacons_received"), mdsCaptor.capture());
             verifyNoMoreInteractions(instrumentManager);
 
             assertThat(mdsCaptor.getValue().getViews().keySet()).containsExactly("inspectit-eum/self/beacons_received");

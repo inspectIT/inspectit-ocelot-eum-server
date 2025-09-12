@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.eum.server.opentelemetry;
 import io.opentelemetry.api.metrics.*;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.*;
+import io.opentelemetry.sdk.metrics.export.MetricProducer;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.resources.Resource;
 import jakarta.annotation.PostConstruct;
@@ -21,7 +22,6 @@ import java.util.Collection;
 @Component
 public class OpenTelemetryController {
 
-    public static final String INSTRUMENTATION_SCOPE_NAME = "rocks.inspectit.ocelot";
 
     @Autowired
     private EumServerConfiguration configuration;
@@ -35,6 +35,12 @@ public class OpenTelemetryController {
     @Autowired(required = false)
     private Collection<MetricReader> metricReaders;
 
+    @Autowired(required = false)
+    private Collection<MetricProducer> metricProducers;
+
+    /**
+     * The configured OpenTelemetry SDK
+     */
     private OpenTelemetrySdk openTelemetry;
 
     @PostConstruct
@@ -53,14 +59,16 @@ public class OpenTelemetryController {
         // Using buildAndRegisterGlobal() is also possible, but makes cleaning in tests more cumbersome...
     }
 
+    /**
+     * @return the Meter API to create metrics
+     */
     public Meter getMeter() {
-        Meter meter = openTelemetry.getMeter(INSTRUMENTATION_SCOPE_NAME);
+        Meter meter = openTelemetry.getMeter(OpenTelemetryInfo.INSTRUMENTATION_SCOPE_NAME);
         return meter; // For debugging
     }
 
     /**
-     * Configure the meter provider with registered metric readers, metric producers
-     * and register metric views.
+     * Configure the meter provider with registered metric readers, producers and views.
      *
      * @return the configured meter provider
      */
@@ -70,13 +78,18 @@ public class OpenTelemetryController {
 
         if(!CollectionUtils.isEmpty(metricReaders)) {
             for (MetricReader metricReader : metricReaders) {
+                log.debug("Registering OpenTelemetry MetricReader: {}", metricReader);
                 builder.registerMetricReader(metricReader);
             }
         }
-        else log.warn("OpenTelemetry has not registered any MetricReader! Thus no metrics can be recorded");
+        else log.warn("OpenTelemetry has not registered any MetricReader! Thus no metrics can be recorded. Please enable at least one metrics exporter");
 
-        // TODO Register MetricProducer for custom view (percentile, smoothed average, timewindow)
-        //builder.registerMetricProducer()
+        if(!CollectionUtils.isEmpty(metricProducers)) {
+            for (MetricProducer metricProducer : metricProducers) {
+                log.debug("Registering OpenTelemetry MetricProducer: {}", metricProducer);
+                builder.registerMetricProducer(metricProducer);
+            }
+        }
 
         viewManager.registerViews(builder);
 

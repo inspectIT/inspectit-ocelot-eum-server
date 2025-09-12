@@ -7,8 +7,6 @@ import io.opentelemetry.context.Scope;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -71,7 +69,7 @@ public class BeaconMetricManager {
             BeaconMetricDefinitionSettings metricDefinition = metricDefinitionEntry.getValue();
 
             log.debug("Registering beacon metric: {}", metricName);
-            instrumentManager.updateInstruments(metricName, metricDefinition);
+            instrumentManager.createInstrument(metricName, metricDefinition);
         }
         // Initialize self-monitoring metrics after beacon metrics
         selfMonitoringMetricManager.initMetrics();
@@ -172,7 +170,7 @@ public class BeaconMetricManager {
 
             if (value != null) {
                 try (Scope scope = getBaggageForBeacon(beacon).makeCurrent()) {
-                    instrumentManager.recordInstrument(metricName, metricDefinition, value);
+                    instrumentManager.recordMetric(metricName, metricDefinition, value);
                 }
             }
         }

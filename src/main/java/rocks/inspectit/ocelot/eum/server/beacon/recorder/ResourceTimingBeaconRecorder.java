@@ -19,7 +19,6 @@ import rocks.inspectit.ocelot.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.metrics.InstrumentManager;
 
 import jakarta.annotation.PostConstruct;
@@ -118,7 +117,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
 
         try (Scope scope = instrumentManager.getBaggage(attributes).makeCurrent()) {
             Optional<Integer> responseEnd = resourceTimingEntry.getResponseEnd();
-            instrumentManager.recordInstrument(RESOURCE_TIME_METRIC_NAME, metricDefinition, responseEnd.orElse(0));
+            instrumentManager.recordMetric(RESOURCE_TIME_METRIC_NAME, metricDefinition, responseEnd.orElse(0));
         }
     }
 

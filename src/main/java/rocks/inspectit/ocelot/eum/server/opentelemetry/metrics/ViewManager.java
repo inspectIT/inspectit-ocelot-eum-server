@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.eum.server.opentelemetry.metrics;
 
+import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.sdk.metrics.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -7,6 +8,7 @@ import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.AggregationType;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.metrics.timewindow.TimeWindowViewManager;
 
 import java.util.*;
 
@@ -19,10 +21,11 @@ public class ViewManager {
     @Autowired
     private EumServerConfiguration configuration;
 
-    private final Set<View> registeredViews = new HashSet<>();
+    @Autowired
+    private TimeWindowViewManager viewManager;
 
     /**
-     * Registers all configured views in the {@link SdkMeterProviderBuilder} and caches them in {@link #registeredViews}.
+     * Registers all configured views in the {@link SdkMeterProviderBuilder}.
      *
      * @param builder the sdk builder to register views with
      *
@@ -39,26 +42,31 @@ public class ViewManager {
                 String viewName = viewEntry.getKey();
                 ViewDefinitionSettings settings = viewEntry.getValue();
 
-                View view = createView(viewName, settings);
-                InstrumentSelector selector = createSelector(metricName);
+                if (settings.getAggregation().isTimeWindowAggregation()) {
+                    registerTimeWindowView(metricName, viewName, settings);
+                } else {
+                    View view = createView(viewName, settings);
+                    InstrumentSelector selector = createSelector(metricName);
 
-                builder.registerView(selector, view);
-                registeredViews.add(view);
+                    builder.registerView(selector, view);
+                }
             }
         }
         return builder;
     }
 
     /**
-     * Checks, if the view is already registered.
+     * Registers the view as custom time-window view, which is handled by {@link TimeWindowViewManager} instead of
+     * OpenTelemetry {@link MeterProvider}.
      *
-     * @param viewName the name to check
-     *
-     * @return true, if the view is already registered
+     * @param metricName the metric name
+     * @param viewName the view name
+     * @param settings the view settings
      */
-    public boolean isRegistered(String viewName) {
-        return registeredViews.stream()
-                .anyMatch(view -> Objects.equals(view.getName(), viewName));
+    private void registerTimeWindowView(String metricName, String viewName, ViewDefinitionSettings settings) {
+        String unit = getUnit(metricName);
+
+        viewManager.registerView(metricName, viewName, unit, settings);
     }
 
     /**
@@ -125,10 +133,11 @@ public class ViewManager {
             case LAST_VALUE -> Aggregation.lastValue();
             case HISTOGRAM -> Aggregation.explicitBucketHistogram(settings.getBucketBoundaries());
             case EXPONENTIAL_HISTOGRAM -> Aggregation.base2ExponentialBucketHistogram(settings.getMaxBuckets(), settings.getMaxScale());
-            // TODO Don't know yet what to do with custom aggregations
-            //  Drop them, because we will produce the values by ourselves?
-            case QUANTILES -> Aggregation.drop();
-            case SMOOTHED_AVERAGE -> Aggregation.drop();
+            default -> throw new IllegalArgumentException("Unexpected OpenTelemetry aggregation:" + type);
         };
+    }
+
+    private String getUnit(String metricName) {
+        return configuration.getDefinitions().get(metricName).getUnit();
     }
 }

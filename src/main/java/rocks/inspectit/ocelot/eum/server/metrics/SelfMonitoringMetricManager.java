@@ -36,7 +36,7 @@ public class SelfMonitoringMetricManager {
             String metricName = selfMonitoringSettings.getMetricPrefix() + measureName;
             log.info("Registering self-monitoring metric: {}", metricName);
 
-            instrumentManager.updateInstruments(metricName, metricDefinitionSettings);
+            instrumentManager.createInstrument(metricName, metricDefinitionSettings);
         }
     }
 
@@ -56,7 +56,7 @@ public class SelfMonitoringMetricManager {
             String metricName = selfMonitoringSettings.getMetricPrefix() + measureName;
 
             try (Scope scope = instrumentManager.getBaggage(customAttributes).makeCurrent()) {
-                instrumentManager.recordInstrument(metricName, metricDefinitionSettings, value);
+                instrumentManager.recordMetric(metricName, metricDefinitionSettings, value);
             }
         }
     }

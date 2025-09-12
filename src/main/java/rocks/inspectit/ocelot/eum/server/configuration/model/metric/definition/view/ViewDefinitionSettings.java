@@ -9,10 +9,9 @@ import jakarta.validation.constraints.*;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static io.opentelemetry.sdk.metrics.internal.aggregator.ExplicitBucketHistogramUtils.DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES;
 
@@ -73,11 +72,11 @@ public class ViewDefinitionSettings {
     private Integer maxScale = 20;
 
     /**
-     * In case the view is a quantile view, this list defines which quantiles shall be captured.
+     * In case the view is a quantile view, this list defines which percentiles shall be captured.
      * 0 corresponds to the minimum, 1 to the maximum
      */
     @Builder.Default
-    private List<@NotNull Double> quantiles = Arrays.asList(0.0, 0.5, 0.9, 0.95, 0.99, 1.0);
+    private Set<@NotNull Double> percentiles = Set.of(0.0, 0.5, 0.9, 0.95, 0.99, 1.0);
 
     /**
      * In case the view is a smoothed_average, this value (in percentage in the range (0,1)) defines,
@@ -128,6 +127,7 @@ public class ViewDefinitionSettings {
     @Singular
     private Map<@NotBlank String, @NotNull Boolean> attributes;
 
+    // TODO Why do we use this, if there is @Builder.Default?
     public ViewDefinitionSettings getCopyWithDefaultsPopulated(String measureDescription, String unit, Duration defaultTimeWindow) {
         val result = toBuilder();
         if (description == null) {
@@ -144,7 +144,7 @@ public class ViewDefinitionSettings {
 
     @AssertFalse(message = "When using QUANTILES aggregation you must specify the quantiles to use!")
     boolean isQuantilesNotSpecifiedForercentileType() {
-        return enabled && aggregation == AggregationType.QUANTILES && CollectionUtils.isEmpty(quantiles);
+        return enabled && aggregation == AggregationType.QUANTILES && CollectionUtils.isEmpty(percentiles);
     }
 
     @AssertFalse(message = "When using HISTOGRAM aggregation you must specify the bucket-boundaries!")
@@ -168,6 +168,6 @@ public class ViewDefinitionSettings {
 
     @AssertTrue(message = "The quantiles must be in the range [0,1]")
     boolean isQuantilesInRange() {
-        return !enabled || aggregation != AggregationType.QUANTILES || quantiles.stream().noneMatch(q -> q < 0 || q > 1);
+        return !enabled || aggregation != AggregationType.QUANTILES || percentiles.stream().noneMatch(q -> q < 0 || q > 1);
     }
 }

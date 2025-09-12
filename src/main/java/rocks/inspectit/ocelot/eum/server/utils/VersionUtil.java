@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.eum.server.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.ApplicationArguments;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

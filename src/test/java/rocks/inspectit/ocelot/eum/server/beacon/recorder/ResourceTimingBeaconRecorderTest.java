@@ -93,10 +93,10 @@ class ResourceTimingBeaconRecorderTest {
             recorder.record(beacon);
 
             verify(instrumentManager, atLeastOnce()).getBaggage(baggageCaptor.capture());
-            verify(instrumentManager).recordInstrument(eq("resource_time"), any(), eq(2));
-            verify(instrumentManager).recordInstrument(eq("resource_time"), any(), eq(102));
-            verify(instrumentManager).recordInstrument(eq("resource_time"), any(), eq(104));
-            verify(instrumentManager).recordInstrument(eq("resource_time"), any(), eq(129));
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(2));
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(102));
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(104));
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(129));
             verifyNoMoreInteractions(instrumentManager);
 
             assertThat(baggageCaptor.getAllValues()).hasSize(4)
@@ -134,8 +134,8 @@ class ResourceTimingBeaconRecorderTest {
             recorder.record(beacon);
 
             verify(instrumentManager, atLeastOnce()).getBaggage(baggageCaptor.capture());
-            verify(instrumentManager).recordInstrument(eq("resource_time"), any(), eq(129));
-            verify(instrumentManager).recordInstrument(eq("resource_time"), any(), eq(165));
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(129));
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(165));
             verifyNoMoreInteractions(instrumentManager);
 
             assertThat(baggageCaptor.getAllValues()).hasSize(2)
@@ -175,7 +175,7 @@ class ResourceTimingBeaconRecorderTest {
             recorder.record(beacon);
 
             verify(instrumentManager, atLeastOnce()).getBaggage(baggageCaptor.capture());
-            verify(instrumentManager).recordInstrument(eq("resource_time"), any(), eq(129));
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(129));
             verifyNoMoreInteractions(instrumentManager);
 
             assertThat(baggageCaptor.getAllValues()).hasSize(1)
@@ -197,7 +197,7 @@ class ResourceTimingBeaconRecorderTest {
             recorder.record(beacon);
 
             verify(instrumentManager, atLeastOnce()).getBaggage(baggageCaptor.capture());
-            verify(instrumentManager).recordInstrument(eq("resource_time"), any(), eq(0));
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(0));
             verifyNoMoreInteractions(instrumentManager);
 
             assertThat(baggageCaptor.getAllValues()).hasSize(1)
