@@ -23,6 +23,8 @@ import java.util.*;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static rocks.inspectit.ocelot.eum.server.metrics.timewindow.utils.TimeWindowTestUtils.assertContainsData;
+import static rocks.inspectit.ocelot.eum.server.metrics.timewindow.utils.TimeWindowTestUtils.assertTotalSeriesCount;
 
 @ExtendWith(MockitoExtension.class)
 class CachingMetricProducerTest {
@@ -36,11 +38,11 @@ class CachingMetricProducerTest {
     @InjectMocks
     TimeWindowRecorder recorder;
 
-    private final String metricName = "test";
+    static final String metricName = "test";
 
-    private final String quantileViewName = "test/quantiles";
+    static final String quantileViewName = "test/quantiles";
 
-    private final String smoothedAvgViewName = "test/smoothed/average";
+    static final String smoothedAvgViewName = "test/smoothed/average";
 
     @BeforeEach
     void createViews() {
@@ -131,9 +133,7 @@ class CachingMetricProducerTest {
         when(viewManager.getAllViews()).thenReturn(views);
         when(viewManager.getViews(metricName)).thenReturn(views);
 
-        Baggage baggage = Baggage.builder()
-                .put("key1", "foo")
-                .build();
+        Baggage baggage = Baggage.builder().put("key1", "foo").build();
 
         for (int i = 0; i < 20; i++) {
             recorder.recordMetric(metricName, 20-i, baggage);
@@ -156,9 +156,7 @@ class CachingMetricProducerTest {
         when(viewManager.getAllViews()).thenReturn(views);
         when(viewManager.getViews(metricName)).thenReturn(views);
 
-        Baggage baggage = Baggage.builder()
-                .put("key1", "foo")
-                .build();
+        Baggage baggage = Baggage.builder().put("key1", "foo").build();
 
         // fill buffer
         for (int i = 0; i < 10; i++) {
@@ -199,12 +197,12 @@ class CachingMetricProducerTest {
         assertThat(result1).isNotSameAs(result2);
     }
 
-    private TimeWindowView createQuantilesView(int bufferLimit) {
+    static TimeWindowView createQuantilesView(int bufferLimit) {
         return new QuantilesView(quantileViewName, "desc", "ms", Set.of("key1", "key2"),
                 Duration.ofMillis(200), bufferLimit, Set.of(0.5, 0.95), true, true);
     }
 
-    private TimeWindowView createSmoothedAverageView(int bufferLimit) {
+    static TimeWindowView createSmoothedAverageView(int bufferLimit) {
         return new SmoothedAverageView(smoothedAvgViewName, "desc", "ms",
                 Set.of("key1", "key2"), Duration.ofMillis(200), bufferLimit, 0.2, 0.2);
     }
@@ -212,71 +210,9 @@ class CachingMetricProducerTest {
     /**
      * Processes all metrics records until the queue is empty
      */
-    private void awaitMetricsProcessing() {
+    void awaitMetricsProcessing() {
         do {
             recorder.record();
         } while(!recorder.recordsQueue.isEmpty());
-    }
-
-    /**
-     * Checks, if the collections of metrics contains the expected series count
-     *
-     * @param metrics the collection of metrics
-     * @param expectedSeriesCount the expected series count
-     */
-    private void assertTotalSeriesCount(Collection<MetricData> metrics, long expectedSeriesCount) {
-        long count = metrics
-                .stream()
-                .mapToLong(metric -> metric.getData().getPoints().size())
-                .sum();
-        assertThat(count).isEqualTo(expectedSeriesCount);
-    }
-
-    /**
-     * Checks, if the collection of metrics contains a metric with the expected time series data (= value + attributes).
-     *
-     * @param metrics the collection of metrics
-     * @param name the metric name to check
-     * @param expectedValue the expected value for the time series
-     * @param expectedAttributes the expected attributes for the time series
-     */
-    private void assertContainsData(Collection<MetricData> metrics, String name, double expectedValue, Map<String,String> expectedAttributes) {
-        assertThat(metrics)
-                .anySatisfy(m -> assertThat(m.getName()).isEqualTo(name));
-        MetricData metric = metrics.stream()
-                .filter(m -> m.getName().equals(name))
-                .findFirst()
-                .get();
-
-        assertThat(metric.getDoubleGaugeData().getPoints())
-                .anyMatch(point -> containsExpectedTimeSeries(point, expectedValue, expectedAttributes));
-    }
-
-    /**
-     * Checks, if the expected values exists for the requested time series (== attributes)
-     *
-     * @param pointData the data point of the metric
-     * @param expectedValue the expected value
-     * @param expectedAttributes the expected attributes
-     *
-     * @return true, if the data point contains all expected attributes and value
-     */
-    private boolean containsExpectedTimeSeries(DoublePointData pointData, double expectedValue, Map<String,String> expectedAttributes) {
-        if (!(expectedValue == pointData.getValue())) return false;
-
-        if (CollectionUtils.isEmpty(expectedAttributes)) {
-            return pointData.getAttributes().isEmpty();
-        } else {
-            for (Map.Entry<String, String> keyValuePair : expectedAttributes.entrySet()) {
-                String key = keyValuePair.getKey();
-                String expectedAttributeValue = keyValuePair.getValue();
-                String value = pointData.getAttributes()
-                        .get(AttributeKey.stringKey(key));
-
-                boolean containsAttribute = expectedAttributeValue.equals(value);
-                if(!containsAttribute) return false;
-            }
-            return true;
-        }
     }
 }
