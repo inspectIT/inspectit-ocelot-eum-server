@@ -1,4 +1,4 @@
-//package rocks.inspectit.ocelot.eum.server.metrics.percentiles;
+//package rocks.inspectit.ocelot.eum.server.metrics.timewindow.views;
 //
 //import com.google.common.collect.ImmutableSet;
 //import org.junit.jupiter.api.Nested;
@@ -12,7 +12,7 @@
 //import static org.assertj.core.api.Assertions.assertThat;
 //import static org.assertj.core.api.Assertions.assertThatThrownBy;
 //
-//public class PercentileViewTest {
+//public class QuantilesViewTest {
 //
 //    @Nested
 //    class Constructor {

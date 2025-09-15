@@ -36,7 +36,7 @@ public class TimeWindowRecorder {
     /**
      * The interval for processing the {@link #recordsQueue}
      */
-    private final Duration recordingInterval = Duration.ofMillis(500);
+    private final Duration recordingInterval = Duration.ofMillis(100);
 
     private Future<?> recordingTask;
 
@@ -75,7 +75,8 @@ public class TimeWindowRecorder {
     /**
      * Asynchronous recording via {@link #recordingTask}.
      */
-    private void record() {
+    @VisibleForTesting
+    void record() {
         try {
             MetricRecord record = recordsQueue.take();
             doRecord(record.metricName, record.value, record.time, record.baggage);

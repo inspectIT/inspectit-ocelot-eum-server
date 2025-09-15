@@ -14,11 +14,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.metrics.OtlpMetricsExporterSettings;
 
 import jakarta.annotation.PreDestroy;
 import jakarta.validation.Valid;
+import rocks.inspectit.ocelot.eum.server.opentelemetry.OpenTelemetryController;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +28,11 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
+/**
+ * Is enabled, if exporters.metrics.otlp.enabled is set to {@link ExporterEnabledState#ENABLED ENBLED}
+ * or {@link ExporterEnabledState IF_CONFIGURED}.
+ * The metric reader will be registered in OpenTelemetry via {@link OpenTelemetryController}.
+ */
 @Component
 @Slf4j
 public class OtlpMetricsExporterService {

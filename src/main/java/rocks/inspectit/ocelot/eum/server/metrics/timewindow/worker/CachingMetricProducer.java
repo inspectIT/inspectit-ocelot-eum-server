@@ -4,16 +4,20 @@ import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricProducer;
 import io.opentelemetry.sdk.resources.Resource;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.TimeWindowViewManager;
+import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.TimeWindowView;
+import rocks.inspectit.ocelot.eum.server.opentelemetry.OpenTelemetryController;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 
 /**
- * A metric producer which caches time-window metrics for a specified amount of time. <br>
+ * A metric producer which caches time-window metrics for a specified amount of time.
+ * The metric producer will be registered in OpenTelemetry via {@link OpenTelemetryController}. <br>
  * Computation of percentiles can be expensive.
  * For this reason we cache computed metrics for 1 second before recomputing them.
  * Otherwise, e.g. spamming F5 on the prometheus endpoint could lead to an increased CPU usage.
@@ -32,15 +36,14 @@ public class CachingMetricProducer implements MetricProducer {
     /**
      * The timestamp when the metrics were computed the last time.
      */
-    private Instant cacheTimestamp;
+    private Instant cacheTimestamp = Instant.now();
 
-    private Collection<MetricData> cachedMetrics = null;
+    private Collection<MetricData> cachedMetrics;
 
     @Override
     public Collection<MetricData> produce(Resource resource) {
         Instant now = Instant.now();
 
-        // TODO Do these times work as intended?
         if (cachedMetrics == null || (now.toEpochMilli() - cacheTimestamp.toEpochMilli()) > cacheDuration.toMillis()) {
             cachedMetrics = computeMetrics(resource);
             cacheTimestamp = now;
@@ -51,7 +54,8 @@ public class CachingMetricProducer implements MetricProducer {
     @VisibleForTesting
     Collection<MetricData> computeMetrics(Resource resource) {
         Instant now = Instant.now();
-        return viewManager.getAllViews().stream()
+        Collection<TimeWindowView> views = viewManager.getAllViews();
+        return views.stream()
                 .flatMap(view -> view.computeMetrics(now, resource).stream())
                 .toList();
     }

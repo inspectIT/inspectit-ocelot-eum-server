@@ -13,10 +13,12 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfigurat
 
 import jakarta.annotation.PreDestroy;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExporterEnabledState;
+import rocks.inspectit.ocelot.eum.server.opentelemetry.OpenTelemetryController;
 
 /**
  * Is enabled, if exporters.metrics.prometheus.enabled is set to {@link ExporterEnabledState#ENABLED ENBLED}
  * or {@link ExporterEnabledState IF_CONFIGURED}.
+ * The metric reader will be registered in OpenTelemetry via {@link OpenTelemetryController}.
  */
 @Component
 @Slf4j

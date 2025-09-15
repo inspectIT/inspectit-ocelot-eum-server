@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 /**
  * Central component, which is responsible for writing communication with the OpenTelemetry instruments.
- * Note: The EUM-server cannot update metric definition during runtime.
+ * Note: The EUM-server cannot update metric definitions during runtime.
  */
 @Component
 @Slf4j

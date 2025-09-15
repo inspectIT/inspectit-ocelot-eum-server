@@ -5,6 +5,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.metrics.data.DoublePointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.data.MetricDataType;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableDoublePointData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableGaugeData;
 import io.opentelemetry.sdk.metrics.internal.data.ImmutableMetricData;
@@ -269,6 +270,15 @@ public abstract class TimeWindowView {
         return builder.build();
     }
 
+    /**
+     * Creates the metric data object. At the moment all time-window views only support {@link MetricDataType#DOUBLE_GAUGE}.
+     *
+     * @param resource the resource information
+     * @param metricInfo the metric information
+     * @param pointData the data points
+     *
+     * @return the created metric data
+     */
     private MetricData createMetricData(Resource resource, MetricInfo metricInfo, Collection<DoublePointData> pointData) {
         return ImmutableMetricData.createDoubleGauge(
                 resource,
@@ -305,12 +315,20 @@ public abstract class TimeWindowView {
 
         public static ResultSeriesCollector create(Collection<MetricInfo> metrics) {
             ResultSeriesCollector resultSeries = new ResultSeriesCollector();
-            if (CollectionUtils.isEmpty(metrics)) {
+            if (!CollectionUtils.isEmpty(metrics)) {
                 metrics.forEach(metric -> resultSeries.seriesMap.put(metric, new ArrayList<>()));
             }
             return resultSeries;
         }
 
+        /**
+         * Creates and adds a data point to the series
+         *
+         * @param metric the metric information
+         * @param time the time of recording the data point
+         * @param attributes the data attributes
+         * @param value the data value
+         */
         void add(MetricInfo metric, Instant time, Attributes attributes, double value) {
             Collection<DoublePointData> series = seriesMap.get(metric);
             DoublePointData pointData = createPointData(time, attributes, value);

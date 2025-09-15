@@ -15,13 +15,14 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Allows the creation of time-window views on metrics.
  * Note that these views DO NOT coexist with OpenTelemetry {@link io.opentelemetry.sdk.metrics.View}s.
  * For this reason observations must be reported via {@link TimeWindowRecorder#recordMetric(String, double, Baggage)}
  * instead of using OpenTelemetry instruments.<br>
- * Note: The EUM-server cannot update metric definition during runtime.
+ * Note: The EUM-server cannot update metric definitions during runtime.
  */
 @Slf4j
 @Component
@@ -103,8 +104,11 @@ public class TimeWindowViewManager {
         Set<Double> percentiles = settings.getPercentiles();
         boolean includeMin = percentiles.contains(0.0);
         boolean includeMax = percentiles.contains(1.0);
+        Set<Double> percentilesFiltered = percentiles.stream()
+                .filter(p -> p > 0 && p < 1)
+                .collect(Collectors.toSet());
 
-        return new QuantilesView(viewName, description, unit, attributes, timeWindow, bufferLimit, percentiles, includeMin, includeMax);
+        return new QuantilesView(viewName, description, unit, attributes, timeWindow, bufferLimit, percentilesFiltered, includeMin, includeMax);
     }
 
     /**
