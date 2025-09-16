@@ -28,22 +28,22 @@ import static org.mockito.Mockito.*;
 class ExportWorkerFactoryTest {
 
     @InjectMocks
-    private ExportWorkerFactory factory;
+    ExportWorkerFactory factory;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private EumServerConfiguration configuration;
+    EumServerConfiguration configuration;
 
     @Mock
-    private BlockingQueue<Beacon> buffer;
+    BlockingQueue<Beacon> buffer;
 
     @Mock
-    private SelfMonitoringMetricManager selfMonitoring;
+    SelfMonitoringMetricManager selfMonitoring;
 
     @Nested
-    public class Initialize {
+    class Initialize {
 
         @Test
-        public void successfulWithoutAuthentication() {
+        void successfulWithoutAuthentication() {
             when(configuration.getExporters().getBeacons().getHttp().getEndpointUrl()).thenReturn("http://target:8080");
 
             factory.initialize();
@@ -55,7 +55,7 @@ class ExportWorkerFactoryTest {
         }
 
         @Test
-        public void successfulWithAuthentication() {
+        void successfulWithAuthentication() {
             when(configuration.getExporters().getBeacons().getHttp().getEndpointUrl()).thenReturn("http://target:8080");
             when(configuration.getExporters().getBeacons().getHttp().getUsername()).thenReturn("user");
             when(configuration.getExporters().getBeacons().getHttp().getPassword()).thenReturn("passwd");
@@ -69,10 +69,10 @@ class ExportWorkerFactoryTest {
     }
 
     @Nested
-    public class GetWorker {
+    class GetWorker {
 
         @Test
-        public void successful() {
+        void successful() {
             ExportWorker worker = factory.getWorker(buffer);
 
             BlockingQueue<Beacon> workerBuffer = (BlockingQueue<Beacon>) ReflectionTestUtils.getField(worker, "buffer");
@@ -82,16 +82,16 @@ class ExportWorkerFactoryTest {
     }
 
     @Nested
-    public class ExportWorker_run {
+    class ExportWorker_run {
 
         @Mock
-        private RestTemplate restTemplate;
+        RestTemplate restTemplate;
 
         @Mock
-        private ResponseEntity<Void> response;
+        ResponseEntity<Void> response;
 
         @Test
-        public void successful() {
+        void successful() {
             when(response.getStatusCode()).thenReturn(HttpStatus.OK);
             when(restTemplate.postForEntity(any(), any(), eq(Void.class))).thenReturn(response);
             ReflectionTestUtils.setField(factory, "restTemplate", restTemplate);

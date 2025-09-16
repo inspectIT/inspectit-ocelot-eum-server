@@ -37,7 +37,7 @@ class ResourceTimingBeaconRecorderTest {
     ObjectMapper objectMapper;
 
     @BeforeEach
-    public void init() {
+    void init() {
         lenient().when(instrumentManager.getBaggage(any())).thenReturn(Baggage.empty());
 
         objectMapper = new ObjectMapper();
@@ -51,7 +51,7 @@ class ResourceTimingBeaconRecorderTest {
         ArgumentCaptor<Map<String, String>> baggageCaptor;
 
         @Test
-        public void noResourceTimingInfo() {
+        void noResourceTimingInfo() {
             Beacon beacon = Beacon.of(Collections.emptyMap());
 
             recorder.record(beacon);
@@ -60,7 +60,7 @@ class ResourceTimingBeaconRecorderTest {
         }
 
         @Test
-        public void notAJson() {
+        void notAJson() {
             Beacon beacon = Beacon.of(Collections.singletonMap("restiming", "This is not a valid json"));
 
             recorder.record(beacon);
@@ -69,7 +69,7 @@ class ResourceTimingBeaconRecorderTest {
         }
 
         @Test
-        public void badCompression() {
+        void badCompression() {
             // intentionally change the initiator
             String json = "" + "{\n" + "  \"https://www.google.de/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png\": \"!!\"\n" + "}";
             Map<String, String> fields = new HashMap<>();
@@ -83,7 +83,7 @@ class ResourceTimingBeaconRecorderTest {
         }
 
         @Test
-        public void nestedResources() {
+        void nestedResources() {
             String json = "" + "{\n" + "  \"http\": {\n" + "    \"://myhost/\": {\n" + "      \"|\": \"6,2\",\n" + "      \"boomerang/plugins/\": {\n" + "        \"r\": {\n" + "          \"t.js\": \"32o,2u,2q,25*1d67,9s,wdu*20\",\n" + "          \"estiming.js\": \"02p,2w,2p,24*1efk,9z,y2i*20\"\n" + "        }\n" + "      }\n" + "    },\n" + "    \"s://www.google.de/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png\": \"*02k,7k,1y,a2|180,3l\"\n" + "  }\n" + "}";
             Map<String, String> fields = new HashMap<>();
             fields.put("u", "http://myhost/somepage.html");
@@ -123,7 +123,7 @@ class ResourceTimingBeaconRecorderTest {
         }
 
         @Test
-        public void pipedData() {
+        void pipedData() {
             // intentionally change the initiator
             String json = "" + "{\n" + "  \"https://www.google.de/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png\": \"*02k,7k,1y,a2|180,3l|280,4l\"\n" + "}";
             Map<String, String> fields = new HashMap<>();
@@ -150,7 +150,7 @@ class ResourceTimingBeaconRecorderTest {
         }
 
         @Test
-        public void onlyAdditionalData() {
+        void onlyAdditionalData() {
             // intentionally change the initiator
             String json = "" + "{\n" + "  \"https://www.google.de/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png\": \"*02k,7k,1y,a2\"\n" + "}";
             Map<String, String> fields = new HashMap<>();
@@ -164,7 +164,7 @@ class ResourceTimingBeaconRecorderTest {
         }
 
         @Test
-        public void wrongInitiator() {
+        void wrongInitiator() {
             // intentionally change the initiator
             String json = "" + "{\n" + "  \"https://www.google.de/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png\": \"w80,3l\"\n" + "}";
             Map<String, String> fields = new HashMap<>();
@@ -186,7 +186,7 @@ class ResourceTimingBeaconRecorderTest {
         }
 
         @Test
-        public void noResponseEnd() {
+        void noResponseEnd() {
             // intentionally change the initiator
             String json = "" + "{\n" + "  \"https://www.google.de/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png\": \"180\"\n" + "}";
             Map<String, String> fields = new HashMap<>();
@@ -206,6 +206,5 @@ class ResourceTimingBeaconRecorderTest {
                             .containsEntry("initiatorType", "IMG")
                             .containsEntry("crossOrigin", "true"));
         }
-
     }
 }

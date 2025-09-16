@@ -16,13 +16,13 @@ import static org.assertj.core.api.Assertions.entry;
 class CsvKeyValueExpanderBeaconProcessorTest {
 
     @InjectMocks
-    private CsvKeyValueExpanderBeaconProcessor processor;
+    CsvKeyValueExpanderBeaconProcessor processor;
 
     @Nested
-    public class Process {
+    class Process {
 
         @Test
-        public void noTOtherAttribute() {
+        void noTOtherAttribute() {
             Beacon beacon = Beacon.of(Collections.singletonMap("key", "value"));
 
             Beacon result = processor.process(beacon);
@@ -31,7 +31,7 @@ class CsvKeyValueExpanderBeaconProcessorTest {
         }
 
         @Test
-        public void tOtherWithoutPatternAttribute() {
+        void tOtherWithoutPatternAttribute() {
             Beacon beacon = Beacon.of(Collections.singletonMap("t_other", "value"));
 
             Beacon result = processor.process(beacon);
@@ -40,7 +40,7 @@ class CsvKeyValueExpanderBeaconProcessorTest {
         }
 
         @Test
-        public void tOtherWithPatternAttribute() {
+        void tOtherWithPatternAttribute() {
             Beacon beacon = Beacon.of(Collections.singletonMap("t_other", "value|123"));
 
             Beacon result = processor.process(beacon);
@@ -51,7 +51,7 @@ class CsvKeyValueExpanderBeaconProcessorTest {
         }
 
         @Test
-        public void tOtherWithMultiplePatternAttributes() {
+        void tOtherWithMultiplePatternAttributes() {
             Beacon beacon = Beacon.of(Collections.singletonMap("t_other", "value|123,another_value|321"));
 
             Beacon result = processor.process(beacon);

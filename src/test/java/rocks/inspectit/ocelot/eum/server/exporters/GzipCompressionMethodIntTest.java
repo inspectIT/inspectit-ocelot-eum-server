@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @DirtiesContext
 @ContextConfiguration(initializers = GzipCompressionMethodIntTest.EnvInitializer.class)
-public class GzipCompressionMethodIntTest extends ExporterIntTestBaseWithOtelCollector {
+class GzipCompressionMethodIntTest extends ExporterIntTestBaseWithOtelCollector {
 
     @Autowired
     EumServerConfiguration configuration;

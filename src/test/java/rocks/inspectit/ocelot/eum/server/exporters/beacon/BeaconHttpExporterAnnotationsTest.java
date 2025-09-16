@@ -9,11 +9,11 @@ import org.springframework.test.context.TestPropertySource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-public class BeaconHttpExporterAnnotationsTest {
+class BeaconHttpExporterAnnotationsTest {
 
     @TestPropertySource(properties = {"inspectit-eum-server.exporters.beacons.http.enabled=ENABLED"})
     @Nested
-    public class Enabled {
+    class Enabled {
 
         @Autowired
         BeaconHttpExporter exporter;
@@ -22,7 +22,7 @@ public class BeaconHttpExporterAnnotationsTest {
         ExportWorkerFactory factory;
 
         @Test
-        public void testBeanWasCreated() {
+        void testBeanWasCreated() {
             assertThat(exporter).isNotNull();
             assertThat(factory).isNotNull();
         }
@@ -30,7 +30,7 @@ public class BeaconHttpExporterAnnotationsTest {
 
     @TestPropertySource(properties = {"inspectit-eum-server.exporters.beacons.http.enabled=DISABLED"})
     @Nested
-    public class Disabled {
+    class Disabled {
 
         @Autowired(required = false)
         BeaconHttpExporter exporter;
@@ -39,10 +39,9 @@ public class BeaconHttpExporterAnnotationsTest {
         ExportWorkerFactory factory;
 
         @Test
-        public void testBeanWasNotCreated() {
+        void testBeanWasNotCreated() {
             assertThat(exporter).isNull();
             assertThat(factory).isNull();
         }
     }
-
 }

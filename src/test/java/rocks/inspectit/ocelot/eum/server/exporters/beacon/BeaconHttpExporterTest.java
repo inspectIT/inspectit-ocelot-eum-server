@@ -26,18 +26,18 @@ import static org.mockito.Mockito.*;
 class BeaconHttpExporterTest {
 
     @InjectMocks
-    private BeaconHttpExporter exporter;
+    BeaconHttpExporter exporter;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private EumServerConfiguration configuration;
+    EumServerConfiguration configuration;
 
     @Mock
-    private ExportWorkerFactory workerFactory;
+    ExportWorkerFactory workerFactory;
 
-    private BeaconHttpExporterSettings exporterSettings;
+    BeaconHttpExporterSettings exporterSettings;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         exporterSettings = new BeaconHttpExporterSettings();
         exporterSettings.setEnabled(ExporterEnabledState.ENABLED);
         exporterSettings.setEndpointUrl("http//localhost:1000");
@@ -49,10 +49,10 @@ class BeaconHttpExporterTest {
     }
 
     @Nested
-    public class Initialize {
+    class Initialize {
 
         @Test
-        public void initialize() {
+        void initialize() {
             exporter.initialize();
 
             ScheduledThreadPoolExecutor executor = (ScheduledThreadPoolExecutor) ReflectionTestUtils.getField(exporter, "executor");
@@ -64,10 +64,10 @@ class BeaconHttpExporterTest {
     }
 
     @Nested
-    public class Destroy {
+    class Destroy {
 
         @Test
-        public void destroyExporter() throws InterruptedException {
+        void destroyExporter() throws InterruptedException {
             exporter.initialize();
 
             ScheduledThreadPoolExecutor executor = (ScheduledThreadPoolExecutor) ReflectionTestUtils.getField(exporter, "executor");
@@ -80,16 +80,16 @@ class BeaconHttpExporterTest {
     }
 
     @Nested
-    public class Export {
+    class Export {
 
         @Mock
-        private ScheduledExecutorService executor;
+        ScheduledExecutorService executor;
 
         @Mock
-        private Beacon beaconA, beaconB;
+        Beacon beaconA, beaconB;
 
         @Test
-        public void isDisabled() throws InterruptedException {
+        void isDisabled() {
             exporterSettings.setEnabled(ExporterEnabledState.DISABLED);
             exporter.initialize();
             ReflectionTestUtils.setField(exporter, "executor", executor);
@@ -100,7 +100,7 @@ class BeaconHttpExporterTest {
         }
 
         @Test
-        public void successfulExport() throws InterruptedException {
+        void successfulExport() {
             exporterSettings.setMaxBatchSize(3);
             exporter.initialize();
             ReflectionTestUtils.setField(exporter, "executor", executor);
@@ -126,6 +126,5 @@ class BeaconHttpExporterTest {
             assertThat(nextBeaconBuffer).isNotSameAs(beaconBuffer);
             assertThat(nextBeaconBuffer).isEmpty();
         }
-
     }
 }

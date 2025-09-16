@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 
-public class RegexReplacementBeaconProcessorTest {
+class RegexReplacementBeaconProcessorTest {
 
     @Nested
     class Process {

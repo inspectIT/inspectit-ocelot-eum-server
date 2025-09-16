@@ -25,17 +25,17 @@ import static org.mockito.Mockito.*;
 class CompositeBeaconProcessorTest {
 
     @InjectMocks
-    private CompositeBeaconProcessor processor;
+    CompositeBeaconProcessor processor;
 
     @Mock
-    private SelfMonitoringMetricManager selfMonitoring;
+    SelfMonitoringMetricManager selfMonitoring;
 
     @Spy
-    private List<BeaconProcessor> processorList = ImmutableList.of(beacon -> beacon.merge(ImmutableMap.of("key2", "value2")), beacon -> beacon
+    List<BeaconProcessor> processorList = ImmutableList.of(beacon -> beacon.merge(ImmutableMap.of("key2", "value2")), beacon -> beacon
             .merge(ImmutableMap.of("key1", "value2")));
 
     @Test
-    public void test() {
+    void test() {
         Beacon processedBeacon = processor.process(Beacon.of(ImmutableMap.of("key1", "value1")));
 
         // Ensure value got properly overwritten
@@ -52,5 +52,4 @@ class CompositeBeaconProcessorTest {
                 .toArray(Map.Entry[]::new);
         assertThat(tagCaptor.getAllValues()).flatExtracting(Map::entrySet).contains(processorTagEntries);
     }
-
 }

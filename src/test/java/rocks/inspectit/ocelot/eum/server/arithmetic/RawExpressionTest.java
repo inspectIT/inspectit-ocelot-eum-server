@@ -13,10 +13,10 @@ import static org.assertj.core.api.Assertions.*;
 class RawExpressionTest {
 
     @Nested
-    public class Constructor {
+    class Constructor {
 
         @Test
-        public void withoutFields() {
+        void withoutFields() {
             RawExpression expression = new RawExpression("2");
 
             assertThat(expression.getFields()).isEmpty();
@@ -24,7 +24,7 @@ class RawExpressionTest {
         }
 
         @Test
-        public void withReference() {
+        void withReference() {
             RawExpression expression = new RawExpression("{field}");
 
             assertThat(expression.getFields()).containsExactly("field");
@@ -32,7 +32,7 @@ class RawExpressionTest {
         }
 
         @Test
-        public void withReferences() {
+        void withReferences() {
             RawExpression expression = new RawExpression("{field} - {field.second}");
 
             assertThat(expression.getFields()).containsExactly("field", "field.second");
@@ -40,7 +40,7 @@ class RawExpressionTest {
         }
 
         @Test
-        public void withSameReferences() {
+        void withSameReferences() {
             RawExpression expression = new RawExpression("{field} - {field}");
 
             assertThat(expression.getFields()).containsExactly("field");
@@ -49,10 +49,10 @@ class RawExpressionTest {
     }
 
     @Nested
-    public class IsSolvable {
+    class IsSolvable {
 
         @Test
-        public void notSolvable() {
+        void notSolvable() {
             Beacon beacon = Beacon.of(Collections.singletonMap("field", "5"));
             RawExpression expression = new RawExpression("{field} - {field.second}");
 
@@ -62,7 +62,7 @@ class RawExpressionTest {
         }
 
         @Test
-        public void isSolvable() {
+        void isSolvable() {
             Map<String, String> map = new HashMap<>();
             map.put("field", "5");
             map.put("field.second", "10");
@@ -76,10 +76,10 @@ class RawExpressionTest {
     }
 
     @Nested
-    public class Solve {
+    class Solve {
 
         @Test
-        public void calculation() {
+        void calculation() {
             Map<String, String> map = new HashMap<>();
             map.put("field", "5");
             map.put("field.second", "10");
@@ -92,7 +92,7 @@ class RawExpressionTest {
         }
 
         @Test
-        public void directReference() {
+        void directReference() {
             Map<String, String> map = new HashMap<>();
             map.put("field", "5");
             map.put("field.second", "10");
@@ -105,7 +105,7 @@ class RawExpressionTest {
         }
 
         @Test
-        public void missingField() {
+        void missingField() {
             Map<String, String> map = new HashMap<>();
             map.put("field", "5");
             Beacon beacon = Beacon.of(map);
@@ -117,7 +117,7 @@ class RawExpressionTest {
         }
 
         @Test
-        public void invalidExpression() {
+        void invalidExpression() {
             Map<String, String> map = new HashMap<>();
             map.put("field", "5");
             Beacon beacon = Beacon.of(map);

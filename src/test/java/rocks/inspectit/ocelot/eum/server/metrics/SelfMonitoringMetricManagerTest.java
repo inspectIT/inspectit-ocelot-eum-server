@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
  * Tests {@link SelfMonitoringMetricManager}
  */
 @ExtendWith(MockitoExtension.class)
-public class SelfMonitoringMetricManagerTest {
+class SelfMonitoringMetricManagerTest {
 
     @InjectMocks
     SelfMonitoringMetricManager selfMonitoringMetricManager;
@@ -40,7 +40,7 @@ public class SelfMonitoringMetricManagerTest {
     @Nested
     class Record {
 
-        private final SelfMonitoringSettings selfMonitoringSettings = new SelfMonitoringSettings();
+        final SelfMonitoringSettings selfMonitoringSettings = new SelfMonitoringSettings();
 
         @BeforeEach
         void setupConfiguration() {

@@ -14,7 +14,7 @@ import java.util.Map;
 
 @DirtiesContext
 @ContextConfiguration(initializers = OtlpHttpMetricExporterServiceIntTest.EnvInitializer.class)
-public class OtlpHttpMetricExporterServiceIntTest extends ExporterIntTestBaseWithOtelCollector {
+class OtlpHttpMetricExporterServiceIntTest extends ExporterIntTestBaseWithOtelCollector {
 
     static class EnvInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 

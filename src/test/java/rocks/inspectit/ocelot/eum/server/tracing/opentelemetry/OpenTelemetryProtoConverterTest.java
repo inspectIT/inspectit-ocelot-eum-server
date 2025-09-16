@@ -37,32 +37,32 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OpenTelemetryProtoConverterTest {
 
-    public static final String TRACE_REQUEST_FILE_SMALL = "/ot-trace-small-v0.48.0.json";
+    static final String TRACE_REQUEST_FILE_SMALL = "/ot-trace-small-v0.48.0.json";
 
-    public static final String TRACE_REQUEST_FILE_LARGE = "/ot-trace-large-v0.48.0.json";
+    static final String TRACE_REQUEST_FILE_LARGE = "/ot-trace-large-v0.48.0.json";
 
-    public static final String TRACE_REQUEST_FILE_PROD = "/ot-trace-prod-v0.48.0.json";
+    static final String TRACE_REQUEST_FILE_PROD = "/ot-trace-prod-v0.48.0.json";
 
     @InjectMocks
-    private OpenTelemetryProtoConverter converter;
+    OpenTelemetryProtoConverter converter;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private EumServerConfiguration configuration;
+    EumServerConfiguration configuration;
 
-    private ExportTraceServiceRequest getSmallTestRequest() throws Exception {
+    private static ExportTraceServiceRequest getSmallTestRequest() throws Exception {
         return getTestRequest(TRACE_REQUEST_FILE_SMALL);
     }
 
-    private ExportTraceServiceRequest getLargeTestRequest() throws Exception {
+    private static ExportTraceServiceRequest getLargeTestRequest() throws Exception {
         return getTestRequest(TRACE_REQUEST_FILE_LARGE);
     }
 
-    private ExportTraceServiceRequest getProdTestRequest() throws Exception {
+    private static ExportTraceServiceRequest getProdTestRequest() throws Exception {
         return getTestRequest(TRACE_REQUEST_FILE_PROD);
     }
 
-    private ExportTraceServiceRequest getTestRequest(String file) throws Exception {
-        InputStream resource = this.getClass().getResourceAsStream(file);
+    private static ExportTraceServiceRequest getTestRequest(String file) throws Exception {
+        InputStream resource = OpenTelemetryProtoConverterTest.class.getResourceAsStream(file);
         String traceRequestJson = IOUtils.toString(resource, StandardCharsets.UTF_8);
 
         ExportTraceServiceRequest.Builder requestBuilder = ExportTraceServiceRequest.newBuilder();
@@ -74,7 +74,7 @@ class OpenTelemetryProtoConverterTest {
     class Convert {
 
         @Test
-        public void convertSmallRequest() throws Exception {
+        void convertSmallRequest() throws Exception {
             ExportTraceServiceRequest request = getSmallTestRequest();
 
             Collection<SpanData> result = converter.convert(request);
@@ -108,7 +108,7 @@ class OpenTelemetryProtoConverterTest {
         }
 
         @Test
-        public void convertLargeRequest() throws Exception {
+        void convertLargeRequest() throws Exception {
             ExportTraceServiceRequest request = getLargeTestRequest();
 
             Collection<SpanData> result = converter.convert(request);
@@ -171,7 +171,7 @@ class OpenTelemetryProtoConverterTest {
         }
 
         @Test
-        public void emptyIgnored() {
+        void emptyIgnored() {
             ExportTraceServiceRequest data = ExportTraceServiceRequest.newBuilder()
                     .addResourceSpans(ResourceSpans.newBuilder()
                             .setResource(Resource.newBuilder().build())
@@ -193,15 +193,15 @@ class OpenTelemetryProtoConverterTest {
     class AnonymizeIpAddress {
 
         @Mock
-        private HttpServletRequest mockRequest;
+        HttpServletRequest mockRequest;
 
         @BeforeEach
-        public void beforeEach() {
+        void beforeEach() {
             converter.requestSupplier = () -> mockRequest;
         }
 
         @Test
-        public void ipv4_singleDigit() {
+        void ipv4_singleDigit() {
             when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(true);
             when(mockRequest.getRemoteAddr()).thenReturn("127.1.1.1");
 
@@ -211,7 +211,7 @@ class OpenTelemetryProtoConverterTest {
         }
 
         @Test
-        public void ipv4_multipleDigits() {
+        void ipv4_multipleDigits() {
             when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(true);
             when(mockRequest.getRemoteAddr()).thenReturn("127.1.1.254");
 
@@ -221,7 +221,7 @@ class OpenTelemetryProtoConverterTest {
         }
 
         @Test
-        public void ipv4_noMasking() {
+        void ipv4_noMasking() {
             when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(false);
             when(mockRequest.getRemoteAddr()).thenReturn("127.1.1.1");
 
@@ -231,7 +231,7 @@ class OpenTelemetryProtoConverterTest {
         }
 
         @Test
-        public void ipv6_mask() {
+        void ipv6_mask() {
             when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(true);
             when(mockRequest.getRemoteAddr()).thenReturn("1:2:3:4:5:6:7:8");
 
@@ -241,7 +241,7 @@ class OpenTelemetryProtoConverterTest {
         }
 
         @Test
-        public void ipv6_noMasking() {
+        void ipv6_noMasking() {
             when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(false);
             when(mockRequest.getRemoteAddr()).thenReturn("1:2:3:4:5:6:7:8");
 
