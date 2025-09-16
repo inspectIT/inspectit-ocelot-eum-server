@@ -38,7 +38,7 @@ public class ViewDefinitionSettings {
      * The aggregation to use for this view
      */
     @NotNull
-    private AggregationType aggregation;
+    private AggregationType aggregation = AggregationType.LAST_VALUE;
 
     /**
      * The maximum amount of unique combinations of attributes for this view.

@@ -16,7 +16,6 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.BeaconAttributeSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.events.RegisteredAttributesEvent;
 
 import java.util.*;
 
