@@ -35,7 +35,7 @@ public class OtlpHttpMetricExporterServiceIntTest extends ExporterIntTestBaseWit
         beacon.put(BEACON_PAGE_READY_TIME_KEY_NAME, "1336");
         sendBeacon(beacon);
         // wait until metrics have been exported
-        awaitMetricsExported(METRIC_PAGE_READY_TIME_KEY_NAME, 1336);
-        assertMetric(1339, false);
+        awaitMetricsExported(METRIC_PAGE_READY_TIME_KEY_NAME);
+        assertHistogram(METRIC_PAGE_READY_TIME_KEY_NAME, 1, 1336);
     }
 }

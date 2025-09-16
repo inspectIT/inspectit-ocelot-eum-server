@@ -55,7 +55,7 @@ tasks.register('generateVersionFile') {
     doLast {
         def currentDate = new Date().toString()
         ext.versionFile.withWriter("UTF-8") { writer ->
-            writer << "$version\n$currentDate\n$boomerangVersion"
+            writer << "$version\n$currentDate\n$boomerangVersion\n$openTelemetryVersion"
         }
     }
 }
@@ -120,6 +120,7 @@ test {
 
 dependencies {
     implementation(
+            // Spring Boot
             "org.springframework.boot:spring-boot-starter-web",
             "org.springframework.boot:spring-boot-starter-actuator",
             "org.springframework.boot:spring-boot-starter-validation",
@@ -129,19 +130,18 @@ dependencies {
             // Has to be included, but is transitive to spring
             "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
 
-            "io.opencensus:opencensus-api:${openCensusVersion}",
-            "io.opencensus:opencensus-impl:${openCensusVersion}",
-
-            "io.grpc:grpc-context:${grpcVersion}",
-
+            // OpenTelemetry
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-sdk-metrics:${openTelemetryVersion}",
             "io.opentelemetry:opentelemetry-exporter-otlp:${openTelemetryVersion}",
             "io.opentelemetry:opentelemetry-exporter-prometheus:${openTelemetryAlphaVersion}",
             "io.opentelemetry.semconv:opentelemetry-semconv:${openTelemetrySemConvVersion}",
             "io.opentelemetry.proto:opentelemetry-proto:${openTelemetryProtoVersion}",
 
+            // Also OpenTelemetry related
             "com.google.protobuf:protobuf-java:${protobufVersion}",
             "com.google.protobuf:protobuf-java-util:${protobufVersion}",
 
@@ -158,14 +158,13 @@ dependencies {
 
     testImplementation(
             "org.springframework.boot:spring-boot-starter-test",
-            "io.opencensus:opencensus-impl:${openCensusVersion}",
-            "org.apache.httpcomponents:httpclient:${httpClientVersion}",
+            "org.apache.httpcomponents:httpclient:${httpClientVersion}", // TODO Update to v5
 
             // ServerExtension
             "com.linecorp.armeria:armeria-junit5:${armeriaVersion}",
             "com.linecorp.armeria:armeria-grpc-protocol:${armeriaVersion}",
 
-            // for docker test containers
+            // Docker test containers
             "org.testcontainers:testcontainers:${testContainersVersion}",
             "org.testcontainers:junit-jupiter:${testContainersVersion}"
     )

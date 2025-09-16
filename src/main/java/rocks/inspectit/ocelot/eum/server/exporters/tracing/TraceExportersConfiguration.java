@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.tracing.OtlpTraceExporterSettings;
 import rocks.inspectit.ocelot.eum.server.opentelemetry.OpenTelemetryController;
+import rocks.inspectit.ocelot.eum.server.opentelemetry.resource.ResourceManager;
 
 import java.util.Map;
 
@@ -26,7 +27,7 @@ public class TraceExportersConfiguration {
     private EumServerConfiguration configuration;
 
     @Autowired
-    private OpenTelemetryController openTelemetryController;
+    private ResourceManager resourceManager;
 
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnProperty({"inspectit-eum-server.exporters.tracing.otlp.enabled", "inspectit-eum-server.exporters.tracing.otlp.endpoint"})
@@ -71,7 +72,7 @@ public class TraceExportersConfiguration {
         log.info("Starting OTLP span exporter on {} '{}'", otlpTraceExporterSettings.getProtocol()
                 .getConfigRepresentation(), endpoint);
 
-        Attributes resourceAttributes = openTelemetryController.getResource().getAttributes();
+        Attributes resourceAttributes = resourceManager.getResource().getAttributes();
         return new DelegatingSpanExporter(spanExporter, resourceAttributes);
     }
 }

@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.eum.server.beacon.recorder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.opencensus.tags.Tags;
+import io.opentelemetry.api.baggage.Baggage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.eum.server.metrics.InstrumentManager;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ class ResourceTimingBeaconRecorderTest {
     ResourceTimingBeaconRecorder recorder;
 
     @Mock
-    MeasuresAndViewsManager measuresAndViewsManager;
+    InstrumentManager instrumentManager;
 
     @Mock
     EumServerConfiguration configuration;
@@ -38,17 +38,17 @@ class ResourceTimingBeaconRecorderTest {
 
     @BeforeEach
     public void init() {
-        lenient().when(measuresAndViewsManager.getTagContext(any())).thenReturn(Tags.getTagger().emptyBuilder());
+        lenient().when(instrumentManager.getBaggage(any())).thenReturn(Baggage.empty());
 
         objectMapper = new ObjectMapper();
-        recorder = new ResourceTimingBeaconRecorder(objectMapper, measuresAndViewsManager, configuration);
+        recorder = new ResourceTimingBeaconRecorder(objectMapper, instrumentManager, configuration);
     }
 
     @Nested
     class Record {
 
         @Captor
-        ArgumentCaptor<Map<String, String>> tagsCaptor;
+        ArgumentCaptor<Map<String, String>> baggageCaptor;
 
         @Test
         public void noResourceTimingInfo() {
@@ -56,7 +56,7 @@ class ResourceTimingBeaconRecorderTest {
 
             recorder.record(beacon);
 
-            verifyNoMoreInteractions(measuresAndViewsManager);
+            verifyNoMoreInteractions(instrumentManager);
         }
 
         @Test
@@ -65,7 +65,7 @@ class ResourceTimingBeaconRecorderTest {
 
             recorder.record(beacon);
 
-            verifyNoMoreInteractions(measuresAndViewsManager);
+            verifyNoMoreInteractions(instrumentManager);
         }
 
         @Test
@@ -79,7 +79,7 @@ class ResourceTimingBeaconRecorderTest {
 
             recorder.record(beacon);
 
-            verifyNoMoreInteractions(measuresAndViewsManager);
+            verifyNoMoreInteractions(instrumentManager);
         }
 
         @Test
@@ -92,14 +92,14 @@ class ResourceTimingBeaconRecorderTest {
 
             recorder.record(beacon);
 
-            verify(measuresAndViewsManager, atLeastOnce()).getTagContext(tagsCaptor.capture());
-            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(2));
-            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(102));
-            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(104));
-            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(129));
-            verifyNoMoreInteractions(measuresAndViewsManager);
+            verify(instrumentManager, atLeastOnce()).getBaggage(baggageCaptor.capture());
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(2));
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(102));
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(104));
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(129));
+            verifyNoMoreInteractions(instrumentManager);
 
-            assertThat(tagsCaptor.getAllValues()).hasSize(4)
+            assertThat(baggageCaptor.getAllValues()).hasSize(4)
                     // |
                     .anySatisfy(map -> assertThat(map).hasSize(3)
                             .containsEntry("initiatorType", "HTML")
@@ -133,12 +133,12 @@ class ResourceTimingBeaconRecorderTest {
 
             recorder.record(beacon);
 
-            verify(measuresAndViewsManager, atLeastOnce()).getTagContext(tagsCaptor.capture());
-            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(129));
-            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(165));
-            verifyNoMoreInteractions(measuresAndViewsManager);
+            verify(instrumentManager, atLeastOnce()).getBaggage(baggageCaptor.capture());
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(129));
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(165));
+            verifyNoMoreInteractions(instrumentManager);
 
-            assertThat(tagsCaptor.getAllValues()).hasSize(2)
+            assertThat(baggageCaptor.getAllValues()).hasSize(2)
                     // first
                     .anySatisfy(map -> assertThat(map).hasSize(2)
                             .containsEntry("initiatorType", "IMG")
@@ -160,7 +160,7 @@ class ResourceTimingBeaconRecorderTest {
 
             recorder.record(beacon);
 
-            verifyNoMoreInteractions(measuresAndViewsManager);
+            verifyNoMoreInteractions(instrumentManager);
         }
 
         @Test
@@ -174,11 +174,11 @@ class ResourceTimingBeaconRecorderTest {
 
             recorder.record(beacon);
 
-            verify(measuresAndViewsManager, atLeastOnce()).getTagContext(tagsCaptor.capture());
-            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(129));
-            verifyNoMoreInteractions(measuresAndViewsManager);
+            verify(instrumentManager, atLeastOnce()).getBaggage(baggageCaptor.capture());
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(129));
+            verifyNoMoreInteractions(instrumentManager);
 
-            assertThat(tagsCaptor.getAllValues()).hasSize(1)
+            assertThat(baggageCaptor.getAllValues()).hasSize(1)
                     // first
                     .anySatisfy(map -> assertThat(map).hasSize(2)
                             .containsEntry("initiatorType", "OTHER")
@@ -196,11 +196,11 @@ class ResourceTimingBeaconRecorderTest {
 
             recorder.record(beacon);
 
-            verify(measuresAndViewsManager, atLeastOnce()).getTagContext(tagsCaptor.capture());
-            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(0));
-            verifyNoMoreInteractions(measuresAndViewsManager);
+            verify(instrumentManager, atLeastOnce()).getBaggage(baggageCaptor.capture());
+            verify(instrumentManager).recordMetric(eq("resource_time"), any(), eq(0));
+            verifyNoMoreInteractions(instrumentManager);
 
-            assertThat(tagsCaptor.getAllValues()).hasSize(1)
+            assertThat(baggageCaptor.getAllValues()).hasSize(1)
                     // first
                     .anySatisfy(map -> assertThat(map).hasSize(2)
                             .containsEntry("initiatorType", "IMG")
@@ -208,5 +208,4 @@ class ResourceTimingBeaconRecorderTest {
         }
 
     }
-
 }

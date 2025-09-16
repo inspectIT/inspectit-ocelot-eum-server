@@ -1,9 +1,8 @@
 package rocks.inspectit.ocelot.eum.server.metrics;
 
 import com.google.common.collect.ImmutableMap;
-import io.opencensus.stats.StatsRecorder;
-import io.opencensus.stats.ViewManager;
-import io.opencensus.tags.Tags;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.sdk.metrics.InstrumentValueType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,12 +11,11 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.beacon.recorder.BeaconRecorder;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconMetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.tags.BeaconTagSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.BeaconMetricDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.AggregationType;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.BeaconAttributeSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.events.RegisteredTagsEvent;
 
 import java.util.*;
 
@@ -37,49 +35,56 @@ public class BeaconMetricManagerTest {
     EumServerConfiguration configuration;
 
     @Mock
-    MeasuresAndViewsManager measuresAndViewsManager;
-
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    StatsRecorder statsRecorder;
+    InstrumentManager instrumentManager;
 
     @Mock
-    ViewManager viewManager;
+    AttributesRegistry attributesRegistry;
+
+    BeaconRecorder recorder = mock(BeaconRecorder.class);
 
     @Spy
-    List<BeaconRecorder> beaconRecorders = new ArrayList<>(Arrays.asList(mock(BeaconRecorder.class)));
+    List<BeaconRecorder> beaconRecorders = new ArrayList<>(Collections.singletonList(recorder));
 
-    private final Set<String> registeredTags = new HashSet<>(Arrays.asList("first", "second", "third"));
+    private final Set<String> registeredAttributes = new HashSet<>(Arrays.asList("first", "second", "third"));
+
+    private final String METRIC_NAME = "Dummy metric name";
 
     @Nested
     class ProcessUsedTags {
 
+        @BeforeEach
+        void beforeEach() {
+            when(attributesRegistry.getRegisteredAttributes()).thenReturn(registeredAttributes);
+        }
+
+
         @Test
         void processOneUsedTag() {
-            Map<String, BeaconTagSettings> beaconSettings = Collections.singletonMap("first", new BeaconTagSettings());
-            when(configuration.getTags().getBeacon()).thenReturn(beaconSettings);
+            Map<String, BeaconAttributeSettings> beaconSettings = Collections.singletonMap("first", new BeaconAttributeSettings());
+            when(configuration.getAttributes().getBeacon()).thenReturn(beaconSettings);
 
-            beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
+            beaconMetricManager.registerBeaconAttributes();
 
-            assertThat(beaconMetricManager.registeredBeaconTags).containsExactly("first");
+            assertThat(beaconMetricManager.registeredBeaconAttributes).containsExactly("first");
         }
 
         @Test
         void processMultipleUsedTags() {
-            Map<String, BeaconTagSettings> beaconSettings = ImmutableMap.of("first", new BeaconTagSettings(), "third", new BeaconTagSettings());
-            when(configuration.getTags().getBeacon()).thenReturn(beaconSettings);
+            Map<String, BeaconAttributeSettings> beaconSettings = ImmutableMap.of("first", new BeaconAttributeSettings(), "third", new BeaconAttributeSettings());
+            when(configuration.getAttributes().getBeacon()).thenReturn(beaconSettings);
 
-            beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
+            beaconMetricManager.registerBeaconAttributes();
 
-            assertThat(beaconMetricManager.registeredBeaconTags).containsExactlyInAnyOrder("first", "third");
+            assertThat(beaconMetricManager.registeredBeaconAttributes).containsExactlyInAnyOrder("first", "third");
         }
 
         @Test
         void processNoTags() {
-            when(configuration.getTags().getBeacon()).thenReturn(Collections.emptyMap());
+            when(configuration.getAttributes().getBeacon()).thenReturn(Collections.emptyMap());
 
-            beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
+            beaconMetricManager.registerBeaconAttributes();
 
-            assertThat(beaconMetricManager.registeredBeaconTags).isEmpty();
+            assertThat(beaconMetricManager.registeredBeaconAttributes).isEmpty();
         }
     }
 
@@ -92,29 +97,25 @@ public class BeaconMetricManagerTest {
         void setupConfiguration() {
             ViewDefinitionSettings view = ViewDefinitionSettings.builder()
                     .bucketBoundaries(Arrays.asList(0d, 1d))
-                    .aggregation(ViewDefinitionSettings.Aggregation.HISTOGRAM)
-                    .tag("TAG_1", true)
-                    .tag("TAG_2", true)
+                    .aggregation(AggregationType.HISTOGRAM)
+                    .attribute("TAG_1", true)
+                    .attribute("TAG_2", true)
                     .build();
             Map<String, ViewDefinitionSettings> views = new HashMap<>();
-            views.put("Dummy metric name/HISTOGRAM", view);
+            views.put(METRIC_NAME + "/HISTOGRAM", view);
 
             BeaconMetricDefinitionSettings dummyMetricDefinition = BeaconMetricDefinitionSettings.beaconMetricBuilder()
                     .valueExpression("{dummy_beacon_field}")
                     .description("Dummy description")
-                    .type(MetricDefinitionSettings.MeasureType.DOUBLE)
+                    //.instrumentType()
+                    .valueType(InstrumentValueType.DOUBLE)
                     .unit("ms")
                     .enabled(true)
                     .views(views)
                     .build();
 
             definitionMap = new HashMap<>();
-            definitionMap.put("Dummy metric name", dummyMetricDefinition);
-        }
-
-        @BeforeEach
-        public void setupMocks() {
-            when(measuresAndViewsManager.getTagContext()).thenReturn(Tags.getTagger().emptyBuilder());
+            definitionMap.put(METRIC_NAME, dummyMetricDefinition);
         }
 
         @Test
@@ -124,7 +125,7 @@ public class BeaconMetricManagerTest {
 
             beaconMetricManager.processBeacon(Beacon.of(beaconMap));
 
-            verifyNoMoreInteractions(viewManager, statsRecorder);
+            verifyNoMoreInteractions(instrumentManager);
         }
 
         @Test
@@ -135,12 +136,15 @@ public class BeaconMetricManagerTest {
 
             beaconMetricManager.processBeacon(Beacon.of(beaconMap));
 
-            verifyNoMoreInteractions(viewManager, statsRecorder);
+            verifyNoMoreInteractions(instrumentManager);
         }
 
         @Test
         void beaconRecordersProcessed() {
+            when(instrumentManager.getBaggage(any())).thenReturn(Baggage.empty());
             when(configuration.getDefinitions()).thenReturn(definitionMap);
+            when(recorder.canRecord(anyString())).thenReturn(true);
+
             HashMap<String, String> beaconMap = new HashMap<>();
             beaconMap.put("fake_beacon_field", "12d");
             Beacon beacon = Beacon.of(beaconMap);
@@ -148,11 +152,11 @@ public class BeaconMetricManagerTest {
             beaconMetricManager.processBeacon(beacon);
 
             assertThat(beaconRecorders).allSatisfy(beaconRecorder -> {
+                verify(beaconRecorder).canRecord(METRIC_NAME);
                 verify(beaconRecorder).record(beacon);
                 verifyNoMoreInteractions(beaconRecorder);
             });
-            verifyNoMoreInteractions(viewManager, statsRecorder);
+            verifyNoMoreInteractions(instrumentManager);
         }
-
     }
 }

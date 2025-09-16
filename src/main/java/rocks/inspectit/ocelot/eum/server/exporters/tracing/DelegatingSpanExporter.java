@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import java.util.Collection;
 
 /**
- * Delegate class to insert additional logic to span exporters
+ * Delegate class to insert additional logic to span exporters.
  */
 @AllArgsConstructor
 public class DelegatingSpanExporter implements SpanExporter {

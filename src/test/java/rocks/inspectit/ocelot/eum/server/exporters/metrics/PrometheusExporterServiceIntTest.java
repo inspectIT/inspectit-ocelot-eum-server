@@ -95,8 +95,6 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
      * The application should expose one view, since one beacon entry maps to the default implementation.
      */
     @Test
-    @Disabled("Disabled until we record metrics via OpenTelemetry")
-    // TODO Disabled until we record metrics via OpenTelemetry
     public void expectOneView() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
         // send the beacon. use a different metric (t_load) as the different metric exporter test cases overload the metrics
@@ -109,7 +107,8 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
         await().atMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
             HttpResponse response = httpClient.execute(new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics)"));
             ResponseHandler<String> responseHandler = new BasicResponseHandler();
-            assertThat(responseHandler.handleResponse(response)).contains(metricKeyName+"{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",} 12.0");
+            String responseString = responseHandler.handleResponse(response);
+            assertThat(responseString).contains(metricKeyName+"_milliseconds_sum{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",otel_scope_name=\"rocks.inspectit.ocelot\"} 12.0");
         });
     }
 }

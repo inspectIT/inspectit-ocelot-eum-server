@@ -3,7 +3,7 @@ package rocks.inspectit.ocelot.eum.server.configuration.model.selfmonitoring;
 import lombok.Data;
 import lombok.Singular;
 import org.springframework.validation.annotation.Validated;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.MetricDefinitionSettings;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

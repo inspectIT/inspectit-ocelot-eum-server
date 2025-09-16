@@ -1,29 +1,28 @@
 package rocks.inspectit.ocelot.eum.server.metrics;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.common.Scope;
-import io.opencensus.tags.TagContextBuilder;
-import io.opencensus.tags.TagKey;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.api.baggage.BaggageBuilder;
+import io.opentelemetry.context.Scope;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.beacon.recorder.BeaconRecorder;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconRequirement;
-import rocks.inspectit.ocelot.eum.server.configuration.model.tags.BeaconTagSettings;
+import rocks.inspectit.ocelot.eum.server.beacon.recorder.ResourceTimingBeaconRecorder;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.BeaconRequirement;
+import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.BeaconAttributeSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconMetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.events.RegisteredTagsEvent;
-import rocks.inspectit.ocelot.eum.server.utils.TagUtils;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.BeaconMetricDefinitionSettings;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Central component, which is responsible for writing beacon entries as OpenCensus views.
+ * Central component, which is responsible for writing beacon entries as OpenTelemetry metrics.
  */
 @Component
 @Slf4j
@@ -33,34 +32,50 @@ public class BeaconMetricManager {
     protected EumServerConfiguration configuration;
 
     @Autowired
-    private MeasuresAndViewsManager measuresAndViewsManager;
+    private InstrumentManager instrumentManager;
 
+    @Autowired
+    private AttributesRegistry attributesRegistry;
+
+    @Autowired
+    private SelfMonitoringMetricManager selfMonitoringMetricManager;
+
+    /**
+     * Currently just {@link ResourceTimingBeaconRecorder}
+     */
     @Autowired(required = false)
     private List<BeaconRecorder> beaconRecorders;
 
     /**
-     * Set of all registered beacon tags
+     * Set of all registered beacon attributes
      */
     @VisibleForTesting
-    Set<String> registeredBeaconTags = Collections.emptySet();
+    Set<String> registeredBeaconAttributes = new HashSet<>();
 
     /**
-     * Maps metric definitions to expressions.
+     * Maps metric definitions to expressions
      */
     private final Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new HashMap<>();
 
-    @EventListener
-    public void processUsedTags(RegisteredTagsEvent registeredTagsEvent) {
-        Map<String, BeaconTagSettings> beaconTagSettings = configuration.getTags().getBeacon();
+    @PostConstruct
+    void initMetrics() {
+        Map<String, BeaconMetricDefinitionSettings> definitions = configuration.getDefinitions();
+        for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : definitions.entrySet()) {
+            String metricName = metricDefinitionEntry.getKey();
+            BeaconMetricDefinitionSettings metricDefinition = metricDefinitionEntry.getValue();
 
-        registeredBeaconTags = registeredTagsEvent.getRegisteredTags()
-                .stream()
-                .filter(beaconTagSettings::containsKey)
-                .collect(Collectors.toSet());
+            log.debug("Registering beacon metric: {}", metricName);
+            instrumentManager.createInstrument(metricName, metricDefinition);
+        }
+        // Initialize self-monitoring metrics after beacon metrics
+        selfMonitoringMetricManager.initMetrics();
+        // Register beacon attributes after all metrics are initialized
+        registerBeaconAttributes();
+        log.info("Registration of metrics completed");
     }
 
     /**
-     * Processes boomerang beacon
+     * Processes boomerang beacon.
      *
      * @param beacon The beacon containing arbitrary key-value pairs.
      *
@@ -81,19 +96,62 @@ public class BeaconMetricManager {
                     recordMetric(metricName, metricDefinition, beacon);
                     successful = true;
                 } else {
-                    log.debug("Skipping beacon because requirements are not fulfilled.");
+                    log.debug("Skipping beacon because requirements are not fulfilled");
                 }
             }
         }
 
-        // allow each beacon recorder to record stuff
+        return successful;
+    }
+
+    /**
+     * Registers all configured beacon attributes
+     */
+    @VisibleForTesting
+    void registerBeaconAttributes() {
+        Map<String, BeaconAttributeSettings> beaconAttributeSettings = configuration.getAttributes().getBeacon();
+
+        Set<String> registeredAttributes = attributesRegistry.getRegisteredAttributes()
+                .stream()
+                .filter(beaconAttributeSettings::containsKey)
+                .collect(Collectors.toSet());
+
+        registeredBeaconAttributes.addAll(registeredAttributes);
+    }
+
+    /**
+     * Records the metric via {@link BeaconRecorder} or directly.
+     *
+     * @param metricName the current metric name
+     * @param metricDefinition the current metric definition
+     * @param beacon the entire beacon
+     */
+    private void recordMetric(String metricName, BeaconMetricDefinitionSettings metricDefinition, Beacon beacon) {
+        boolean recorded = recordWithBeaconRecorder(metricName, beacon);
+
+        if(!recorded) recordBeaconMetric(metricName, metricDefinition, beacon);
+    }
+
+    /**
+     * Tries to record the metric with a {@link BeaconRecorder}. Return true, if a fitting recorder was found.
+     *
+     * @param metricName the current metric name
+     * @param beacon the entire beacon
+     *
+     * @return true, if the metric was recorder via {@link BeaconRecorder}
+     */
+    private boolean recordWithBeaconRecorder(String metricName, Beacon beacon) {
         if (!CollectionUtils.isEmpty(beaconRecorders)) {
-            try (Scope scope = getTagContextForBeacon(beacon).buildScoped()) {
-                beaconRecorders.forEach(beaconRecorder -> beaconRecorder.record(beacon));
+            for (BeaconRecorder recorder : beaconRecorders) {
+                if (recorder.canRecord(metricName)) {
+                    try (Scope scope = getBaggageForBeacon(beacon).makeCurrent()) {
+                        recorder.record(beacon);
+                        return true;
+                    }
+                }
             }
         }
-
-        return successful;
+        return false;
     }
 
     /**
@@ -105,7 +163,7 @@ public class BeaconMetricManager {
      * @param metricDefinition the metric's definition
      * @param beacon           the current beacon
      */
-    private void recordMetric(String metricName, BeaconMetricDefinitionSettings metricDefinition, Beacon beacon) {
+    private void recordBeaconMetric(String metricName, BeaconMetricDefinitionSettings metricDefinition, Beacon beacon) {
         RawExpression expression = expressionCache.computeIfAbsent(metricDefinition, definition -> new RawExpression(definition
                 .getValueExpression()));
 
@@ -113,26 +171,28 @@ public class BeaconMetricManager {
             Number value = expression.solve(beacon);
 
             if (value != null) {
-                measuresAndViewsManager.updateMetrics(metricName, metricDefinition);
-                try (Scope scope = getTagContextForBeacon(beacon).buildScoped()) {
-                    measuresAndViewsManager.recordMeasure(metricName, metricDefinition, value);
+                try (Scope scope = getBaggageForBeacon(beacon).makeCurrent()) {
+                    instrumentManager.recordMetric(metricName, metricDefinition, value);
                 }
             }
         }
     }
 
     /**
-     * Builds TagContext for a given beacon.
+     * Builds baggage for a given beacon.
      *
-     * @param beacon Used to resolve tag values, which refer to a beacon entry
+     * @param beacon Used to resolve baggage values, which refer to a beacon entry
+     *
+     * @return the baggage for the provided beacon
      */
-    private TagContextBuilder getTagContextForBeacon(Beacon beacon) {
-        TagContextBuilder tagContextBuilder = measuresAndViewsManager.getTagContext();
-        for (String key : registeredBeaconTags) {
+    private Baggage getBaggageForBeacon(Beacon beacon) {
+        Map<String, String> attributes = new HashMap<>();
+        for (String key : registeredBeaconAttributes) {
             if (beacon.contains(key)) {
-                tagContextBuilder.putLocal(TagKey.create(key), TagUtils.createTagValue(key, beacon.get(key)));
+                attributes.put(key, beacon.get(key));
             }
         }
-        return tagContextBuilder;
+        Baggage baggage = instrumentManager.getBaggage(attributes);
+        return baggage;
     }
 }

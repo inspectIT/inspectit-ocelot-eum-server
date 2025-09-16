@@ -34,8 +34,6 @@ public class ExporterIntMockMvcTestBase {
 
     public static final String SERVICE_NAME = "E2E-test";
 
-    final static String DEFAULT_TRACE_ID = "497d4e959f574a77d0d3abf05523ec5c";
-
     static String URL_KEY = "u";
 
     static String SUT_URL = "http://test.com/login";
@@ -54,9 +52,9 @@ public class ExporterIntMockMvcTestBase {
     protected static String BEACON_LOAD_TIME_KEY_NAME = "t_done";
 
     // Metric key names are in OTEL format (i.e., using '/')
-    protected static String METRIC_PAGE_READY_TIME_KEY_NAME = "page_ready_time/SUM";
+    protected static String METRIC_PAGE_READY_TIME_KEY_NAME = "page_ready_time";
 
-    protected static String METRIC_LOAD_TIME_KEY_NAME = "load_time/SUM";
+    protected static String METRIC_LOAD_TIME_KEY_NAME = "load_time";
 
     protected static String METRIC_END_TIMESTAMP_KEY_NAME ="end_timestamp";
 
@@ -79,13 +77,6 @@ public class ExporterIntMockMvcTestBase {
         Map<String, String> beacon = new HashMap<>();
         beacon.put(URL_KEY, SUT_URL);
         return beacon;
-    }
-
-    /**
-     * Posts a {@code Span} to {@link TraceController#spans(String)} using {@link #postSpan(String)} using the {@link #DEFAULT_TRACE_ID}
-     */
-    void postSpan() throws Exception {
-        postSpan(DEFAULT_TRACE_ID);
     }
 
     /**

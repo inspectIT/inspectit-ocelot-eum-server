@@ -5,8 +5,8 @@ import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.ServiceRequestContext;
 import com.linecorp.armeria.server.grpc.protocol.AbstractUnaryGrpcService;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
-import io.opencensus.trace.TraceId;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.TraceId;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
@@ -23,7 +23,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
 
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -40,8 +39,10 @@ import static org.awaitility.Awaitility.await;
 import static org.testcontainers.Testcontainers.exposeHostPorts;
 
 /**
- * Base class for exporter integration tests. Verifies integration with the OpenTelemetry Collector. The Collector can be configured to accept the required data over gRPC or HTTP and exports the data over gRPC to a server running in process, allowing assertions to be made against the data.
- * This class is based on the {@link io.opentelemetry.integrationtest.OtlpExporterIntegrationTest}
+ * Base class for exporter integration tests. Verifies integration with the OpenTelemetry Collector.
+ * The Collector can be configured to accept the required data over gRPC or HTTP and exports the data over gRPC
+ * to a server running in process, allowing assertions to be made against the data.
+ * This class is based on the {@link io.opentelemetry.integrationtest.OtlpExporterIntegrationTest}.
  */
 @Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest
@@ -49,7 +50,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
     protected static final String OTLP_HTTP_METRICS_PATH = "/v1/metrics";
 
-    static final String COLLECTOR_TAG = "0.70.0";
+    static final String COLLECTOR_TAG = "0.100.0";
 
     static final String COLLECTOR_IMAGE = "otel/opentelemetry-collector-contrib:" + COLLECTOR_TAG;
 
@@ -63,11 +64,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
     static final Integer COLLECTOR_PROMETHEUS_RECEIVER_PORT = 8889;
 
-    static final Integer COLLECTOR_INFLUX_DB1_PORT = 8086;
-
     static final int COLLECTOR_ZIPKIN_PORT = 9411;
-
-    static final int COLLECTOR_TRACE_QUERY_PORT = 16686;
 
     private static final Logger LOGGER = Logger.getLogger(ExporterIntTestBaseWithOtelCollector.class.getName());
 
@@ -81,11 +78,6 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
      */
     static GenericContainer<?> collector;
 
-    // TODO: try to re-use the collector container across test classes to speed up tests
-    static {
-
-    }
-
     @BeforeAll
     static void startCollector() {
         // start the gRPC server
@@ -98,13 +90,13 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
         collector = new GenericContainer<>(DockerImageName.parse(COLLECTOR_IMAGE)).withEnv("LOGGING_EXPORTER_LOG_LEVEL", "INFO")
                 .withEnv("OTLP_EXPORTER_ENDPOINT", "host.testcontainers.internal:" + grpcServer.httpPort())
-                .withEnv("PROMETHEUS_SCRAPE_TARGET", String.format("host.testcontainers.internlal:%s", COLLECTOR_PROMETHEUS_PORT))
+                .withEnv("PROMETHEUS_SCRAPE_TARGET", String.format("host.testcontainers.internal:%s", COLLECTOR_PROMETHEUS_PORT))
                 .withEnv("PROMETHEUS_INTEGRATION_TEST_SCRAPE_TARGET", String.format("host.testcontainers.internal:%s", COLLECTOR_PROMETHEUS_RECEIVER_PORT))
                 .withClasspathResourceMapping("otel-config.yaml", "/otel-config.yaml", BindMode.READ_ONLY)
                 .withCommand("--config", "/otel-config.yaml")
                 .withLogConsumer(outputFrame -> LOGGER.log(Level.INFO, outputFrame.getUtf8String().replace("\n", "")))
                 // expose all relevant ports
-                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_INFLUX_DB1_PORT, COLLECTOR_ZIPKIN_PORT, COLLECTOR_PROMETHEUS_RECEIVER_PORT)
+                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_ZIPKIN_PORT, COLLECTOR_PROMETHEUS_RECEIVER_PORT)
                 .waitingFor(Wait.forHttp("/").forPort(COLLECTOR_HEALTH_CHECK_PORT));
 
         //collector.withStartupTimeout(Duration.of(1, ChronoUnit.MINUTES));
@@ -167,63 +159,39 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
             assertThat(spansLis.anyMatch(s -> s.stream()
                     .anyMatch(span -> TraceId.fromBytes(span.getTraceId().toByteArray())
-                            .toLowerBase16()
                             .equals(expectedTraceId)))).isTrue();
-
         });
-
     }
 
     /**
      * Verifies that the metric has been exported to and received by the {@link #grpcServer}
      *
      * @param metricName
-     * @param value
      */
-    protected void awaitMetricsExported(String metricName, double value) {
-        awaitMetricsExported(metricName, value, ViewDefinitionSettings.Aggregation.SUM);
-    }
-
-    /**
-     * Verifies that the metric has been exported to and received by the {@link #grpcServer}
-     *
-     * @param metricName
-     * @param value
-     * @param aggregation
-     */
-    protected void awaitMetricsExported(String metricName, double value, ViewDefinitionSettings.Aggregation aggregation) {
+    protected void awaitMetricsExported(String metricName) {
         await().atMost(30, TimeUnit.SECONDS)
                 .pollInterval(500, TimeUnit.MILLISECONDS)
-                .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream()).anyMatch(mReq -> mReq.getResourceMetricsList()
-                        .stream()
-                        .anyMatch(rm ->
+                .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream())
+                        .anyMatch(mReq -> mReq.getResourceMetricsList()
+                            .stream()
+                            .anyMatch(rm ->
                                 // check for the given metrics
                                 rm.getScopeMetrics(0)
                                         .getMetricsList()
                                         .stream()
-                                        .filter(metric -> metric.getName().equalsIgnoreCase(metricName))
-                                        .anyMatch(metric -> (aggregation == ViewDefinitionSettings.Aggregation.LAST_VALUE ? metric.getGauge()
-                                                .getDataPointsList() : metric.getSum()
-                                                .getDataPointsList()).stream().anyMatch(d -> d.getAsDouble() == value)))));
+                                        .anyMatch(metric -> metric.getName().equalsIgnoreCase(metricName))
+                            )
+                        )
+                );
     }
 
     /**
-     * Checks if a metric with the given value has been recorded or not
+     * Checks if a histogram with the given count and sum has been recorded
      *
-     * @param value    the value
-     * @param expected whether the value is expected or not
+     * @param count the expected data point count
+     * @param sum the expected data point sum
      */
-    protected void assertMetric(double value, boolean expected) {
-        assertMetric(value, expected, ViewDefinitionSettings.Aggregation.SUM);
-    }
-
-    /**
-     * Checks if a metric with the given value has been recorded or not
-     *
-     * @param value    the value
-     * @param expected whether the value is expected or not
-     */
-    protected void assertMetric(double value, boolean expected, ViewDefinitionSettings.Aggregation aggregation) {
+    protected void assertHistogram(String metricName, int count, double sum) {
         assertThat(grpcServer.metricRequests.stream()
                 .anyMatch(mReq -> mReq.getResourceMetricsList()
                         .stream()
@@ -231,11 +199,41 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                                 .stream()
                                 .anyMatch(iml -> iml.getMetricsList()
                                         .stream()
-                                        .anyMatch(metric -> (aggregation == ViewDefinitionSettings.Aggregation.LAST_VALUE ?
-                                                metric.getGauge().getDataPointsList() : metric.getSum().getDataPointsList())
+                                        .anyMatch(metric -> metric.getName().equalsIgnoreCase(metricName)
+                                                && metric.getHistogram().getDataPointsList()
                                                 .stream()
-                                                .anyMatch(d ->  expected ? d.getAsDouble() == value : d.getAsDouble() != value
-                                                )))))).isTrue();
+                                                .anyMatch(dataPoint ->
+                                                        dataPoint.getCount() == count && dataPoint.getSum() == sum
+                                                )
+                                        )
+                                )
+                        )
+                )
+        ).isTrue();
+    }
+
+    /**
+     * Checks if a gauge with the given count and sum has been recorded
+     *
+     * @param value the expected value
+     */
+    protected void assertGauge(String metricName, int value) {
+        assertThat(grpcServer.metricRequests.stream()
+                .anyMatch(mReq -> mReq.getResourceMetricsList()
+                        .stream()
+                        .anyMatch(rm -> rm.getScopeMetricsList()
+                                .stream()
+                                .anyMatch(iml -> iml.getMetricsList()
+                                        .stream()
+                                        .anyMatch(metric -> metric.getName().equalsIgnoreCase(metricName) &&
+                                                metric.getGauge().getDataPointsList()
+                                                        .stream()
+                                                .anyMatch(dataPoint -> dataPoint.getAsInt() == value)
+                                        )
+                                )
+                        )
+                )
+        ).isTrue();
     }
 
     /**
@@ -261,7 +259,8 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                 @Override
                 protected CompletionStage<byte[]> handleMessage(ServiceRequestContext ctx, byte[] message) {
                     try {
-                        traceRequests.add(ExportTraceServiceRequest.parseFrom(message));
+                        ExportTraceServiceRequest request = ExportTraceServiceRequest.parseFrom(message);
+                        traceRequests.add(request);
                     } catch (InvalidProtocolBufferException e) {
                         throw new UncheckedIOException(e);
                     }
@@ -272,7 +271,8 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                 @Override
                 protected CompletionStage<byte[]> handleMessage(ServiceRequestContext ctx, byte[] message) {
                     try {
-                        metricRequests.add(ExportMetricsServiceRequest.parseFrom(message));
+                        ExportMetricsServiceRequest request = ExportMetricsServiceRequest.parseFrom(message);
+                        metricRequests.add(request);
                     } catch (InvalidProtocolBufferException e) {
                         throw new UncheckedIOException(e);
                     }
@@ -283,7 +283,8 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
                 @Override
                 protected CompletionStage<byte[]> handleMessage(ServiceRequestContext ctx, byte[] message) {
                     try {
-                        logRequests.add(ExportLogsServiceRequest.parseFrom(message));
+                        ExportLogsServiceRequest request = ExportLogsServiceRequest.parseFrom(message);
+                        logRequests.add(request);
                     } catch (InvalidProtocolBufferException e) {
                         throw new UncheckedIOException(e);
                     }

@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.eum.server.beacon.recorder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.opencensus.common.Scope;
+import io.opentelemetry.context.Scope;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -15,11 +15,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import rocks.inspectit.ocelot.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.MetricDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.metrics.InstrumentManager;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
@@ -30,15 +30,15 @@ import java.util.stream.Stream;
 /**
  * This {@link BeaconRecorder} processes plain resource timing entry from the {@link Beacon} and exposes metric that:
  * <ul>
- *     <li>reports number of resources loaded sliced by type, cross-origin and cached tags</li>
+ *     <li>reports number of resources loaded sliced by type, cross-origin and cached attributes</li>
  * </ul>
  * <p>
  * The impl depends heavily on the Boomerang compression of the resource timing entries in the beacon. Please read
- * <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.plugins.ResourceTiming.html">ResourceTiming</a>
+ * <a href="https://akamai.github.io/boomerang/akamai/BOOMR.plugins.ResourceTiming.html">ResourceTiming</a>
  * Boomerang documentation first.
  */
 @Component
-@ConditionalOnProperty(value = "inspectit-eum-server.resource-timing.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "inspectit-eum-server.definitions.resource_time.enabled", havingValue = "true")
 @RequiredArgsConstructor
 @Slf4j
 public class ResourceTimingBeaconRecorder implements BeaconRecorder {
@@ -50,10 +50,10 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
     private final ObjectMapper objectMapper;
 
     /**
-     * {@link MeasuresAndViewsManager} for exposing metrics.
+     * {@link InstrumentManager} for exposing metrics
      */
     @Autowired
-    private final MeasuresAndViewsManager measuresAndViewsManager;
+    private final InstrumentManager instrumentManager;
 
     @Autowired
     private final EumServerConfiguration configuration;
@@ -64,38 +64,17 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
     public final String RESOURCE_TIME_METRIC_NAME = "resource_time";
 
     /**
-     * Metric definition for the resource timing metric.
+     * The raw expression to extract resource timing data from the beacon.
+     * Default: {@code {restiming}}
      */
-    private MetricDefinitionSettings RESOURCE_TIME;
+    private RawExpression resourceTimeExpression = new RawExpression("{restiming}");
 
-    /**
-     * Init metric(s).
-     */
     @PostConstruct
-    public void initMetric() {
-        Map<String, Boolean> tags = new HashMap<>();
-        if (configuration.getResourceTiming().getTags() != null) {
-            tags.putAll(configuration.getResourceTiming().getTags());
-        }
-        tags.put("initiatorType", true);
-        tags.put("cached", true);
-        tags.put("crossOrigin", true);
-
-        RESOURCE_TIME = MetricDefinitionSettings.builder()
-                .type(MetricDefinitionSettings.MeasureType.DOUBLE)
-                .description("Response end time of the resource loading")
-                .unit("ms")
-                .view(RESOURCE_TIME_METRIC_NAME + "/SUM", ViewDefinitionSettings.builder()
-                        .tags(tags)
-                        .aggregation(ViewDefinitionSettings.Aggregation.SUM)
-                        .build())
-                .view(RESOURCE_TIME_METRIC_NAME + "/COUNT", ViewDefinitionSettings.builder()
-                        .tags(tags)
-                        .aggregation(ViewDefinitionSettings.Aggregation.COUNT)
-                        .build())
-                .build();
-
-        measuresAndViewsManager.updateMetrics(RESOURCE_TIME_METRIC_NAME, RESOURCE_TIME);
+    void setUp() {
+        String expression = configuration.getDefinitions()
+                .get(RESOURCE_TIME_METRIC_NAME)
+                .getValueExpression();
+        resourceTimeExpression = new RawExpression(expression);
     }
 
     /**
@@ -109,10 +88,15 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         // this is the URL where the resources have been loaded
         String url = beacon.get("u");
 
-        String resourceTimings = beacon.get("restiming");
+        String resourceTimings = beacon.get(resourceTimeExpression.getFields().getFirst());
         if (resourceTimings != null) {
             decodeResourceTimings(resourceTimings).forEach(rs -> this.record(rs, url));
         }
+    }
+
+    @Override
+    public boolean canRecord(String metricName) {
+        return RESOURCE_TIME_METRIC_NAME.equals(metricName);
     }
 
     /**
@@ -122,17 +106,18 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      * @param url                 URL of the page where the resource has been loaded from.
      */
     private void record(ResourceTimingEntry resourceTimingEntry, String url) {
-        Map<String, String> extra = new HashMap<>();
+        MetricDefinitionSettings metricDefinition = configuration.getDefinitions().get(RESOURCE_TIME_METRIC_NAME);
+        Map<String, String> attributes = new HashMap<>();
         boolean sameOrigin = isSameOrigin(url, resourceTimingEntry.url);
-        extra.put("crossOrigin", String.valueOf(!sameOrigin));
-        extra.put("initiatorType", resourceTimingEntry.getInitiatorType().toString());
+        attributes.put("crossOrigin", String.valueOf(!sameOrigin));
+        attributes.put("initiatorType", resourceTimingEntry.getInitiatorType().toString());
         if (sameOrigin) {
-            extra.put("cached", String.valueOf(resourceTimingEntry.isCached(true)));
+            attributes.put("cached", String.valueOf(resourceTimingEntry.isCached(true)));
         }
 
-        try (Scope scope = measuresAndViewsManager.getTagContext(extra).buildScoped()) {
+        try (Scope scope = instrumentManager.getBaggage(attributes).makeCurrent()) {
             Optional<Integer> responseEnd = resourceTimingEntry.getResponseEnd();
-            measuresAndViewsManager.recordMeasure("resource_time", RESOURCE_TIME, responseEnd.orElse(0));
+            instrumentManager.recordMetric(RESOURCE_TIME_METRIC_NAME, metricDefinition, responseEnd.orElse(0));
         }
     }
 
@@ -148,7 +133,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         try {
             rootNode = objectMapper.readTree(resourceTiming);
         } catch (IOException e) {
-            log.error("Error converting resource timing json to tree.", e);
+            log.error("Error converting resource timing json to tree", e);
             return Stream.empty();
         }
 

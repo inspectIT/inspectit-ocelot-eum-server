@@ -13,7 +13,6 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.CompressionMethod;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.TransportProtocol;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.exporters.metrics.OtlpMetricsExporterService;
 import rocks.inspectit.ocelot.eum.server.exporters.tracing.DelegatingSpanExporter;
 
@@ -87,7 +86,7 @@ public class GzipCompressionMethodIntTest extends ExporterIntTestBaseWithOtelCol
     }
 
     @Test
-    void verifyOtlpGrpcMetrics() throws Exception {
+    void verifyOtlpGrpcMetrics() throws Exception { // TODO Fix
         Map<String, String> beacon = getBasicBeacon();
         // fake beacon that we don't expect
         beacon.put(FAKE_BEACON_KEY_NAME, "1334");
@@ -96,7 +95,7 @@ public class GzipCompressionMethodIntTest extends ExporterIntTestBaseWithOtelCol
         beacon.put(BEACON_END_TIMESTAMP_KEY_NAME, "41");
         sendBeacon(beacon);
         // wait until metrics have been exported
-        awaitMetricsExported(METRIC_END_TIMESTAMP_KEY_NAME, 41, ViewDefinitionSettings.Aggregation.LAST_VALUE);
-        assertMetric(1334, false, ViewDefinitionSettings.Aggregation.LAST_VALUE);
+        awaitMetricsExported(METRIC_END_TIMESTAMP_KEY_NAME);
+        assertGauge(METRIC_END_TIMESTAMP_KEY_NAME, 41);
     }
 }

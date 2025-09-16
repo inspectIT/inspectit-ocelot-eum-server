@@ -1,17 +1,18 @@
 package rocks.inspectit.ocelot.eum.server.metrics;
 
-import io.opencensus.stats.*;
+import io.opentelemetry.sdk.metrics.InstrumentType;
+import io.opentelemetry.sdk.metrics.InstrumentValueType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.MetricDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.AggregationType;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 
@@ -34,34 +35,26 @@ public class SelfMonitoringMetricManagerTest {
     EumServerConfiguration configuration;
 
     @Mock
-    MeasuresAndViewsManager measuresAndViewsManager;
-
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    StatsRecorder statsRecorder;
-
-    @Mock
-    ViewManager viewManager;
-
-    @Mock
-    MeasureMap measureMap;
+    InstrumentManager instrumentManager;
 
     @Nested
     class Record {
 
-        private SelfMonitoringSettings selfMonitoringSettings = new SelfMonitoringSettings();
+        private final SelfMonitoringSettings selfMonitoringSettings = new SelfMonitoringSettings();
 
         @BeforeEach
         void setupConfiguration() {
             ViewDefinitionSettings view = ViewDefinitionSettings.builder()
-                    .aggregation(ViewDefinitionSettings.Aggregation.COUNT)
-                    .tag("TAG_1", true)
+                    .aggregation(AggregationType.SUM)
+                    .attribute("TAG_1", true)
                     .build();
             Map<String, ViewDefinitionSettings> views = new HashMap<>();
-            views.put("inspectit-eum/self/beacons_received/COUNT", view);
+            views.put("inspectit-eum/self/beacons_received", view);
 
             MetricDefinitionSettings dummyMetricDefinition = MetricDefinitionSettings.builder()
                     .description("Dummy description")
-                    .type(MetricDefinitionSettings.MeasureType.DOUBLE)
+                    .instrumentType(InstrumentType.COUNTER)
+                    .valueType(InstrumentValueType.DOUBLE)
                     .unit("number")
                     .enabled(true)
                     .views(views)
@@ -81,7 +74,7 @@ public class SelfMonitoringMetricManagerTest {
 
             selfMonitoringMetricManager.record("beacons_received", 1);
 
-            verifyNoMoreInteractions(viewManager, statsRecorder);
+            verifyNoMoreInteractions(instrumentManager);
         }
 
         @Test
@@ -90,7 +83,7 @@ public class SelfMonitoringMetricManagerTest {
 
             selfMonitoringMetricManager.record("apples_received", 1);
 
-            verifyNoMoreInteractions(viewManager, statsRecorder);
+            verifyNoMoreInteractions(instrumentManager);
         }
 
         @Test
@@ -100,10 +93,10 @@ public class SelfMonitoringMetricManagerTest {
             selfMonitoringMetricManager.initMetrics();
 
             ArgumentCaptor<MetricDefinitionSettings> mdsCaptor = ArgumentCaptor.forClass(MetricDefinitionSettings.class);
-            verify(measuresAndViewsManager).updateMetrics(eq("inspectit-eum/self/beacons_received"), mdsCaptor.capture());
-            verifyNoMoreInteractions(viewManager, statsRecorder, measureMap);
+            verify(instrumentManager).createInstrument(eq("inspectit-eum/self/beacons_received"), mdsCaptor.capture());
+            verifyNoMoreInteractions(instrumentManager);
 
-            assertThat(mdsCaptor.getValue().getViews().keySet()).containsExactly("inspectit-eum/self/beacons_received/COUNT");
+            assertThat(mdsCaptor.getValue().getViews().keySet()).containsExactly("inspectit-eum/self/beacons_received");
         }
     }
 }
