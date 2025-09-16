@@ -71,7 +71,7 @@ class InstrumentManagerTest {
     void shouldReturnBaggageWithCustomAndGlobalAttributes() {
         Map<String, String> customAttributes = Map.of("key1", "value1", "key2", "value2");
         when(configuration.getAttributes().getExtra()).thenReturn(Map.of("key3", "value3"));
-        when(registry.getRegisteredGlobalAttributes()).thenReturn(Set.of("key3"));
+        when(registry.getRegisteredExtraAttributes()).thenReturn(Set.of("key3"));
 
         Baggage baggage = manager.getBaggage(customAttributes);
 
@@ -83,7 +83,7 @@ class InstrumentManagerTest {
     @Test
     void shouldReturnBaggageWithOnlyCustomAttributes() {
         Map<String, String> customAttributes = Map.of("key1", "value1", "key2", "value2");
-        when(registry.getRegisteredGlobalAttributes()).thenReturn(Set.of("key3"));
+        when(registry.getRegisteredExtraAttributes()).thenReturn(Set.of("key3"));
 
         Baggage baggage = manager.getBaggage(customAttributes);
 

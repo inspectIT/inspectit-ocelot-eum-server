@@ -11,6 +11,7 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.TimeWindowViewManager;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Stores all user-specified metric views.
@@ -98,11 +99,36 @@ public class ViewManager {
                 .setAggregation(aggregation)
                 .setCardinalityLimit(settings.getCardinalityLimit());
 
-        if(!CollectionUtils.isEmpty(settings.getAttributes())) {
-           builder.setAttributeFilter(attribute -> settings.getAttributes().getOrDefault(attribute, false));
+        if (!CollectionUtils.isEmpty(settings.getAttributes())) {
+            builder.setAttributeFilter((attribute) -> filterAttribute(settings, attribute));
+        }
+        else {
+            builder.setAttributeFilter(this::isDefinedAsGlobal);
         }
 
         return builder.build();
+    }
+
+    /**
+     * Checks, if the view includes the provided attribute key or if the key is defined globally
+     *
+     * @param settings the view settings
+     * @param attribute the current attribute key
+     *
+     * @return true, if this attribute key should be used for the provided view
+     */
+    private boolean filterAttribute(ViewDefinitionSettings settings, String attribute) {
+        return settings.getAttributes().getOrDefault(attribute, false) ||
+                isDefinedAsGlobal(attribute);
+    }
+
+    /**
+     * @param attribute the current attribute key
+     *
+     * @return true, if the attribute key is defined globally
+     */
+    private boolean isDefinedAsGlobal(String attribute) {
+        return configuration.getAttributes().getDefineAsGlobal().contains(attribute);
     }
 
     /**

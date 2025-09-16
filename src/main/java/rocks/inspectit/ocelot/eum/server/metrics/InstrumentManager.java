@@ -12,12 +12,14 @@ import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.worker.TimeWindowRecorder;
+import rocks.inspectit.ocelot.eum.server.opentelemetry.metrics.ViewManager;
 import rocks.inspectit.ocelot.eum.server.utils.AttributeUtil;
 
 import java.util.*;
 
 /**
  * Central component, which is responsible for writing communication with the OpenTelemetry instruments.
+ * Views will be registered via {@link ViewManager}.
  * Note: The EUM-server cannot update metric definitions during runtime.
  */
 @Component
@@ -68,7 +70,7 @@ public class InstrumentManager {
     /**
      * Records a value for the metric via OpenTelemetry {@link Meter} or/and via {@link TimeWindowRecorder}.
      *
-     * @param metricName        the name of the metric
+     * @param metricName       the name of the metric
      * @param metricDefinition the configuration of the metric, which is activated
      * @param value            the value, which is going to be written
      */
@@ -76,7 +78,8 @@ public class InstrumentManager {
         if (log.isDebugEnabled())
             log.debug("Recording metric '{}' with value '{}'", metricName, value);
 
-        Attributes attributes = AttributeUtil.toAttributes(Baggage.current());
+        Baggage baggage = Baggage.current();
+        Attributes attributes = AttributeUtil.toAttributes(baggage);
 
         if (isInstrumentRegistered(metricName)) {
             switch (metricDefinition.getInstrumentType()) {
@@ -88,7 +91,7 @@ public class InstrumentManager {
             }
         }
 
-        timeWindowRecorder.recordMetric(metricName, value.doubleValue(), Baggage.current());
+        timeWindowRecorder.recordMetric(metricName, value.doubleValue(), baggage);
     }
 
     private void recordCounter(String instrumentName, MetricDefinitionSettings metricDefinition, Number value, Attributes attributes) {
@@ -120,12 +123,12 @@ public class InstrumentManager {
     private void recordGauge(String instrumentName, MetricDefinitionSettings metricDefinition, Number value, Attributes attributes) {
         switch (metricDefinition.getValueType()) {
             case LONG -> {
-                LongGauge counter = (LongGauge) instruments.get(instrumentName);
-                counter.set(value.longValue(), attributes);
+                LongGauge gauge = (LongGauge) instruments.get(instrumentName);
+                gauge.set(value.longValue(), attributes);
             }
             case DOUBLE -> {
-                DoubleGauge counter = (DoubleGauge) instruments.get(instrumentName);
-                counter.set(value.doubleValue(), attributes);
+                DoubleGauge gauge = (DoubleGauge) instruments.get(instrumentName);
+                gauge.set(value.doubleValue(), attributes);
             }
         }
     }
@@ -133,12 +136,12 @@ public class InstrumentManager {
     private void recordHistogram(String instrumentName, MetricDefinitionSettings metricDefinition, Number value, Attributes attributes) {
         switch (metricDefinition.getValueType()) {
             case LONG -> {
-                LongHistogram counter = (LongHistogram) instruments.get(instrumentName);
-                counter.record(value.longValue(), attributes);
+                LongHistogram histogram = (LongHistogram) instruments.get(instrumentName);
+                histogram.record(value.longValue(), attributes);
             }
             case DOUBLE -> {
-                DoubleHistogram counter = (DoubleHistogram) instruments.get(instrumentName);
-                counter.record(value.doubleValue(), attributes);
+                DoubleHistogram histogram = (DoubleHistogram) instruments.get(instrumentName);
+                histogram.record(value.doubleValue(), attributes);
             }
         }
     }
@@ -171,27 +174,11 @@ public class InstrumentManager {
     }
 
     /**
-     * Builds baggage with all global extra attributes.
-     */
-    public Baggage getBaggage() {
-        BaggageBuilder builder = Baggage.current().toBuilder();
-        Set<String> registeredGlobalAttributes = attributesRegistry.getRegisteredGlobalAttributes();
-
-        for (String registeredGlobalAttribute : registeredGlobalAttributes) {
-            builder.put(registeredGlobalAttribute, configuration
-                    .getAttributes()
-                    .getExtra()
-                    .get(registeredGlobalAttribute));
-        }
-        return builder.build();
-    }
-
-    /**
      * Builds baggage with all custom attributes.
      *
      * @param customAttributes Map containing the custom attributes.
      *
-     * @return {@link Baggage} which contains the custom and global (extra) attributes
+     * @return {@link Baggage} which contains the custom and extra attributes
      */
     public Baggage getBaggage(Map<String, String> customAttributes) {
         BaggageBuilder builder = getBaggage().toBuilder();
@@ -200,6 +187,22 @@ public class InstrumentManager {
             builder.put(customAttribute.getKey(), customAttribute.getValue());
         }
 
+        return builder.build();
+    }
+
+    /**
+     * Builds baggage with extra attributes.
+     */
+    public Baggage getBaggage() {
+        BaggageBuilder builder = Baggage.current().toBuilder();
+        Set<String> registeredExtraAttributes = attributesRegistry.getRegisteredExtraAttributes();
+
+        for (String registeredExtraAttribute : registeredExtraAttributes) {
+            builder.put(registeredExtraAttribute, configuration
+                    .getAttributes()
+                    .getExtra()
+                    .get(registeredExtraAttribute));
+        }
         return builder.build();
     }
 }

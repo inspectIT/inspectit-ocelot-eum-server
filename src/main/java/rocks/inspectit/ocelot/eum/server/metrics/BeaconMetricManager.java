@@ -50,7 +50,7 @@ public class BeaconMetricManager {
      * Set of all registered beacon attributes
      */
     @VisibleForTesting
-    Set<String> registeredBeaconAttributes = Collections.emptySet();
+    Set<String> registeredBeaconAttributes = new HashSet<>();
 
     /**
      * Maps metric definitions to expressions
@@ -111,10 +111,12 @@ public class BeaconMetricManager {
     void registerBeaconAttributes() {
         Map<String, BeaconAttributeSettings> beaconAttributeSettings = configuration.getAttributes().getBeacon();
 
-        registeredBeaconAttributes = attributesRegistry.getRegisteredAttributes()
+        Set<String> registeredAttributes = attributesRegistry.getRegisteredAttributes()
                 .stream()
                 .filter(beaconAttributeSettings::containsKey)
                 .collect(Collectors.toSet());
+
+        registeredBeaconAttributes.addAll(registeredAttributes);
     }
 
     /**
@@ -184,12 +186,13 @@ public class BeaconMetricManager {
      * @return the baggage for the provided beacon
      */
     private Baggage getBaggageForBeacon(Beacon beacon) {
-        BaggageBuilder builder = instrumentManager.getBaggage().toBuilder();
+        Map<String, String> attributes = new HashMap<>();
         for (String key : registeredBeaconAttributes) {
             if (beacon.contains(key)) {
-                builder.put(key, beacon.get(key));
+                attributes.put(key, beacon.get(key));
             }
         }
-        return builder.build();
+        Baggage baggage = instrumentManager.getBaggage(attributes);
+        return baggage;
     }
 }

@@ -29,11 +29,10 @@ public class PrometheusExporterService {
     @Autowired
     private EumServerConfiguration configuration;
 
-    // TODO I'm not happy with this style
     @Bean
     @ConditionalOnProperty({"inspectit-eum-server.exporters.metrics.prometheus.enabled"})
     @ConditionalOnExpression("(NOT new String('${inspectit-eum-server.exporters.metrics.prometheus.enabled}').toUpperCase().equals(T(rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExporterEnabledState).DISABLED.toString()))")
-    MetricReader prometheusService() {
+    public MetricReader prometheusService() {
         val config = configuration.getExporters().getMetrics().getPrometheus();
         try {
             String host = config.getHost();

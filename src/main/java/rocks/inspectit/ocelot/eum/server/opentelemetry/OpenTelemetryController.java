@@ -82,7 +82,8 @@ public class OpenTelemetryController {
                 builder.registerMetricReader(metricReader);
             }
         }
-        else log.warn("OpenTelemetry has not registered any MetricReader! Thus no metrics can be recorded. Please enable at least one metrics exporter");
+        else log.info("OpenTelemetry has not registered any MetricReader! " +
+                "Thus no metrics can be recorded. Enable at least one metrics exporter to record metrics");
 
         if(!CollectionUtils.isEmpty(metricProducers)) {
             for (MetricProducer metricProducer : metricProducers) {

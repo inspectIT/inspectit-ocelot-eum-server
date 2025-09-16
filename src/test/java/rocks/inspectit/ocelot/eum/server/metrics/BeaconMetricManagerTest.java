@@ -141,7 +141,7 @@ public class BeaconMetricManagerTest {
 
         @Test
         void beaconRecordersProcessed() {
-            when(instrumentManager.getBaggage()).thenReturn(Baggage.empty());
+            when(instrumentManager.getBaggage(any())).thenReturn(Baggage.empty());
             when(configuration.getDefinitions()).thenReturn(definitionMap);
             when(recorder.canRecord(anyString())).thenReturn(true);
 

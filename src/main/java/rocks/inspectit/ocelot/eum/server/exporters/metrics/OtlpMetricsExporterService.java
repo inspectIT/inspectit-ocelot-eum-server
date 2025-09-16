@@ -54,11 +54,10 @@ public class OtlpMetricsExporterService {
     @Getter
     private boolean enabled;
 
-    // TODO I'm not happy with this style
     @Bean
     @ConditionalOnProperty({"inspectit-eum-server.exporters.metrics.otlp.enabled", "inspectit-eum-server.exporters.metrics.otlp.endpoint"})
     @ConditionalOnExpression("(NOT new String('${inspectit-eum-server.exporters.metrics.otlp.enabled}').toUpperCase().equals(T(rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExporterEnabledState).DISABLED.toString())) AND (new String('${inspectit-eum-server.exporters.metrics.otlp.endpoint}').length() > 0)")
-    MetricReader otlpService() {
+    public MetricReader otlpService() {
         checkProtocol();
         enabled = true;
         otlpMetricsExporterSettings = configuration.getExporters().getMetrics().getOtlp();

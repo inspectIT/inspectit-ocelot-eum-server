@@ -39,7 +39,6 @@ public class AttributesRegistryTest {
     void registerViewAttribute() {
         when(configuration.getAttributes().getExtra()).thenReturn(Collections.singletonMap("first", "value"));
         when(configuration.getAttributes().getDefineAsGlobal()).thenReturn(Collections.singleton("first"));
-        registry.setGlobalAttributes();
 
         ViewDefinitionSettings view = new ViewDefinitionSettings();
         view.setAttributes(Map.of("first", true));
@@ -54,21 +53,17 @@ public class AttributesRegistryTest {
         Map<String, String> extraAttributes = Map.of("first", "value1", "second", "value2");
         when(configuration.getAttributes().getExtra()).thenReturn(extraAttributes);
         when(configuration.getAttributes().getDefineAsGlobal()).thenReturn(Set.of("first", "second"));
-        registry.setGlobalAttributes();
 
         ViewDefinitionSettings view = new ViewDefinitionSettings();
         view.setAttributes(Collections.emptyMap());
 
         registry.processAttributeKeysForView(view);
 
-        assertThat(registry.getRegisteredGlobalAttributes()).containsExactlyInAnyOrder("first", "second");
+        assertThat(registry.getRegisteredExtraAttributes()).containsExactlyInAnyOrder("first", "second");
     }
 
     @Test
     void registerAttributesMultipleTimes() {
-        when(configuration.getAttributes().getDefineAsGlobal()).thenReturn(Set.of("first", "second"));
-        registry.setGlobalAttributes();
-
         ViewDefinitionSettings view1 = new ViewDefinitionSettings();
         view1.setAttributes(Map.of("first", true));
         ViewDefinitionSettings view2 = new ViewDefinitionSettings();
@@ -77,13 +72,11 @@ public class AttributesRegistryTest {
         // first execution
         registry.processAttributeKeysForView(view1);
 
-        assertThat(registry.getRegisteredGlobalAttributes()).containsExactly("first");
         assertThat(registry.getRegisteredAttributes()).containsExactly("first");
 
         // second execution
         registry.processAttributeKeysForView(view2);
 
-        assertThat(registry.getRegisteredGlobalAttributes()).containsExactlyInAnyOrder("first", "second");
         assertThat(registry.getRegisteredAttributes()).containsExactlyInAnyOrder("first", "second");
     }
 }
