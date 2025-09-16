@@ -34,14 +34,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext
-public class GeolocationResolverIntTest {
+class GeolocationResolverIntTest {
 
-    private static String URL_KEY = "u";
-    private static String SUT_URL = "http://test.com/login";
-    private static String BEACON_KEY_NAME = "t_page";
+    static final String URL_KEY = "u";
+    static final String SUT_URL = "http://test.com/login";
+    static final String BEACON_KEY_NAME = "t_page";
 
     @Autowired
-    protected MockMvc mockMvc;
+    MockMvc mockMvc;
 
     @SpyBean
     BeaconMetricManager beaconMetricManager;
@@ -51,16 +51,13 @@ public class GeolocationResolverIntTest {
 
     /**
      * Sends beacon to mocked endpoint /beacon
-     *
-     * @param beacon
-     * @throws Exception
      */
     private void sendBeacon(Map<String, String> beacon, String requesterIP) throws Exception {
         List<NameValuePair> params = beacon.entrySet().stream().map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue())).collect(Collectors.toList());
         mockMvc.perform(post("/beacon").header("X-Forwarded-For", requesterIP).contentType(MediaType.APPLICATION_FORM_URLENCODED).content(EntityUtils.toString(new UrlEncodedFormEntity(params)))).andExpect(status().isOk());
     }
 
-    private Map<String, String> getBasicBeacon() {
+    private static Map<String, String> getBasicBeacon() {
         Map<String, String> beacon = new HashMap<>();
         beacon.put(URL_KEY, SUT_URL);
         return beacon;
@@ -68,11 +65,9 @@ public class GeolocationResolverIntTest {
 
     /**
      * The application should process a beacon, where the tag COUNTRY_CODE is set to DE
-     *
-     * @throws Exception
      */
     @Test
-    public void expectCountryCodeToBeSet() throws Exception {
+    void expectCountryCodeToBeSet() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
         beacon.put(BEACON_KEY_NAME, "12");
 
@@ -84,11 +79,9 @@ public class GeolocationResolverIntTest {
 
     /**
      * The application should process a beacon, where the tag COUNTRY_CODE is not set
-     *
-     * @throws Exception
      */
     @Test
-    public void expectCountryCodeToBeNotSetNotResolvableIP() throws Exception {
+    void expectCountryCodeToBeNotSetNotResolvableIP() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
         beacon.put(BEACON_KEY_NAME, "12");
 
@@ -100,11 +93,9 @@ public class GeolocationResolverIntTest {
 
     /**
      * The application should process a beacon, where the tag COUNTRY_CODE is not set
-     *
-     * @throws Exception
      */
     @Test
-    public void expectCountryCodeToBeNotSetWrongFormattedIP() throws Exception {
+    void expectCountryCodeToBeNotSetWrongFormattedIP() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
         beacon.put(BEACON_KEY_NAME, "12");
 

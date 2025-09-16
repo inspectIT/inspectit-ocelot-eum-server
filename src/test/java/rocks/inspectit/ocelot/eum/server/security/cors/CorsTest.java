@@ -16,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = CorsTest.Initializer.class)
 @DirtiesContext
-public class CorsTest {
+class CorsTest {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    TestRestTemplate restTemplate;
 
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -32,7 +32,7 @@ public class CorsTest {
     }
 
     @Test
-    public void successfulCorsForGetBeacons() {
+    void successfulCorsForGetBeacons() {
         String endpoint = "/beacon";
 
         HttpHeaders headers = new HttpHeaders();
@@ -46,7 +46,7 @@ public class CorsTest {
     }
 
     @Test
-    public void successfulCorsForPostBeacons() {
+    void successfulCorsForPostBeacons() {
         String endpoint = "/beacon";
 
         HttpHeaders headers = new HttpHeaders();
@@ -60,7 +60,7 @@ public class CorsTest {
     }
 
     @Test
-    public void successfulCorsForSpans() {
+    void successfulCorsForSpans() {
         String endpoint = "/spans";
 
         HttpHeaders headers = new HttpHeaders();

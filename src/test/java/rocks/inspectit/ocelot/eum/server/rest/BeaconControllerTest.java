@@ -27,25 +27,25 @@ import static org.mockito.Mockito.*;
 class BeaconControllerTest {
 
     @InjectMocks
-    private BeaconController controller;
+    BeaconController controller;
 
     @Mock
-    private BeaconMetricManager beaconMetricManager;
+    BeaconMetricManager beaconMetricManager;
 
     @Mock
-    private CompositeBeaconProcessor beaconProcessor;
+    CompositeBeaconProcessor beaconProcessor;
 
     @Mock
-    private SelfMonitoringMetricManager selfMonitoringService;
+    SelfMonitoringMetricManager selfMonitoringService;
 
     @Mock
-    private BeaconHttpExporter beaconHttpExporter;
+    BeaconHttpExporter beaconHttpExporter;
 
     @Nested
-    public class BeaconPost {
+    class BeaconPost {
 
         @Test
-        public void successful() {
+        void successful() {
             when(beaconProcessor.process(any())).then(i -> i.getArguments()[0]);
             when(beaconMetricManager.processBeacon(any())).thenReturn(true);
 
@@ -65,7 +65,7 @@ class BeaconControllerTest {
         }
 
         @Test
-        public void notSuccessful() {
+        void notSuccessful() {
             when(beaconProcessor.process(any())).then(i -> i.getArguments()[0]);
             when(beaconMetricManager.processBeacon(any())).thenReturn(false);
 
@@ -84,10 +84,10 @@ class BeaconControllerTest {
     }
 
     @Nested
-    public class BeaconGet {
+    class BeaconGet {
 
         @Test
-        public void successful() {
+        void successful() {
             when(beaconProcessor.process(any())).then(i -> i.getArguments()[0]);
             when(beaconMetricManager.processBeacon(any())).thenReturn(true);
 
@@ -107,7 +107,7 @@ class BeaconControllerTest {
         }
 
         @Test
-        public void notSuccessful() {
+        void notSuccessful() {
             when(beaconProcessor.process(any())).then(i -> i.getArguments()[0]);
             when(beaconMetricManager.processBeacon(any())).thenReturn(false);
 
@@ -122,6 +122,5 @@ class BeaconControllerTest {
 
             assertThat(result).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
         }
-
     }
 }

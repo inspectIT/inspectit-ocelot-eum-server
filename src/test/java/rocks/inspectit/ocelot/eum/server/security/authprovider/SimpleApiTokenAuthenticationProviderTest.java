@@ -23,15 +23,15 @@ import static org.mockito.Mockito.when;
 class SimpleApiTokenAuthenticationProviderTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private EumServerConfiguration configuration;
+    EumServerConfiguration configuration;
 
     @Mock
-    private ScheduledExecutorService executorService;
+    ScheduledExecutorService executorService;
 
     @InjectMocks
-    private SimpleApiTokenAuthenticationProvider authenticationProvider;
+    SimpleApiTokenAuthenticationProvider authenticationProvider;
 
-    private HashMap<String, Object> defaultTokens() {
+    private static HashMap<String, Object> defaultTokens() {
         HashMap<String, Object> tokens = new HashMap<>();
         tokens.put("dummy1", new SimpleApiTokenAuthenticationProvider.TokenPrincipal("dummy1 app", "dummy1"));
         tokens.put("dummy2", new SimpleApiTokenAuthenticationProvider.TokenPrincipal("dummy2 app", "dummy2"));
@@ -51,7 +51,7 @@ class SimpleApiTokenAuthenticationProviderTest {
     class Authentication {
 
         @Test
-        public void authenticationSuccess() {
+        void authenticationSuccess() {
             configurationReturnsDefaultTokensDirectory();
             authenticationProvider.init();
 
@@ -64,7 +64,7 @@ class SimpleApiTokenAuthenticationProviderTest {
         }
 
         @Test
-        public void authenticationFailure() {
+        void authenticationFailure() {
             configurationReturnsDefaultTokensDirectory();
             authenticationProvider.init();
 
@@ -81,7 +81,7 @@ class SimpleApiTokenAuthenticationProviderTest {
     class LoadTokens {
 
         @Test
-        public void loadExistingTokens() {
+        void loadExistingTokens() {
             configurationReturnsDefaultTokensDirectory();
 
             authenticationProvider.init();
@@ -91,7 +91,7 @@ class SimpleApiTokenAuthenticationProviderTest {
         }
 
         @Test
-        public void createTokenDirectoryAndCreateInitialToken(@TempDir File tempTokenDir) {
+        void createTokenDirectoryAndCreateInitialToken(@TempDir File tempTokenDir) {
             String tokenDir = tempTokenDir.getAbsolutePath() + File.separator + "tokens";
             when(configuration.getSecurity().getAuthProvider().getSimple().getTokenDirectory()).thenReturn(tokenDir);
 
@@ -107,8 +107,5 @@ class SimpleApiTokenAuthenticationProviderTest {
             assertThat(new File(expectedFile).exists()).isEqualTo(true);
 
         }
-
     }
-
 }
-

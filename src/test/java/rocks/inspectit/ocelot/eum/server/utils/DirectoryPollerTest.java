@@ -100,5 +100,4 @@ class DirectoryPollerTest {
 
         verify(changeCallbackMock, times(1)).run();
     }
-
 }

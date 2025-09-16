@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
  * Tests {@link BeaconMetricManager}
  */
 @ExtendWith(MockitoExtension.class)
-public class BeaconMetricManagerTest {
+class BeaconMetricManagerTest {
 
     @InjectMocks
     BeaconMetricManager beaconMetricManager;
@@ -45,9 +45,9 @@ public class BeaconMetricManagerTest {
     @Spy
     List<BeaconRecorder> beaconRecorders = new ArrayList<>(Collections.singletonList(recorder));
 
-    private final Set<String> registeredAttributes = new HashSet<>(Arrays.asList("first", "second", "third"));
+    final Set<String> registeredAttributes = new HashSet<>(Arrays.asList("first", "second", "third"));
 
-    private final String METRIC_NAME = "Dummy metric name";
+    final String METRIC_NAME = "Dummy metric name";
 
     @Nested
     class ProcessUsedTags {

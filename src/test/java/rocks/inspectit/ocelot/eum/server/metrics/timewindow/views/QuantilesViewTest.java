@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static rocks.inspectit.ocelot.eum.server.metrics.timewindow.utils.TimeWindowTestUtils.assertContainsData;
 
-public class QuantilesViewTest {
+class QuantilesViewTest {
 
     final String name = "name";
 

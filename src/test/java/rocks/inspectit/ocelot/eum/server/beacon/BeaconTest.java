@@ -12,12 +12,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BeaconTest {
 
     @Nested
-    public class Contains {
+    class Contains {
 
-        private Beacon beacon;
+        Beacon beacon;
 
         @BeforeEach
-        private void before() {
+        void before() {
             HashMap<String, String> map = new HashMap<>();
             map.put("first", "1");
             map.put("second", "2");
@@ -25,14 +25,14 @@ class BeaconTest {
         }
 
         @Test
-        public void containsField() {
+        void containsField() {
             boolean result = beacon.contains("first");
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void merge() {
+        void merge() {
             HashMap<String, String> map = new HashMap<>();
             map.put("first", "3");
             map.put("third", "4");
@@ -43,35 +43,35 @@ class BeaconTest {
         }
 
         @Test
-        public void containsFields() {
+        void containsFields() {
             boolean result = beacon.contains("first", "second");
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void doesNotContainField() {
+        void doesNotContainField() {
             boolean result = beacon.contains("third");
 
             assertThat(result).isFalse();
         }
 
         @Test
-        public void doesNotContainFields() {
+        void doesNotContainFields() {
             boolean result = beacon.contains("first", "third");
 
             assertThat(result).isFalse();
         }
 
         @Test
-        public void containsFieldsAsList() {
+        void containsFieldsAsList() {
             boolean result = beacon.contains(Arrays.asList("first", "second"));
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void doesNotContainFieldsAsList() {
+        void doesNotContainFieldsAsList() {
             boolean result = beacon.contains(Arrays.asList("first", "third"));
 
             assertThat(result).isFalse();

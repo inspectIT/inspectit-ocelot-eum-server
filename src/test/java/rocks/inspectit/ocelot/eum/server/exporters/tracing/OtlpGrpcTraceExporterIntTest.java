@@ -12,7 +12,7 @@ import rocks.inspectit.ocelot.eum.server.exporters.ExporterIntTestBaseWithOtelCo
 
 @DirtiesContext
 @ContextConfiguration(initializers = OtlpGrpcTraceExporterIntTest.EnvInitializer.class)
-public class OtlpGrpcTraceExporterIntTest extends ExporterIntTestBaseWithOtelCollector {
+class OtlpGrpcTraceExporterIntTest extends ExporterIntTestBaseWithOtelCollector {
 
     static class EnvInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 

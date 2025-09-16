@@ -4,15 +4,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ArithmeticExpressionTest {
 
     @Nested
-    public class Eval {
+    class Eval {
 
         @Test
-        public void evaluateMinus() {
+        void evaluateMinus() {
             ArithmeticExpression expression = new ArithmeticExpression("1565601241723 - 1565601241693");
 
             double result = expression.eval();
@@ -21,7 +21,7 @@ class ArithmeticExpressionTest {
         }
 
         @Test
-        public void evuluatePlus() {
+        void evaluatePlus() {
             ArithmeticExpression expression = new ArithmeticExpression("10 + 20");
 
             double result = expression.eval();
@@ -30,7 +30,7 @@ class ArithmeticExpressionTest {
         }
 
         @Test
-        public void evaluateParentheses() {
+        void evaluateParentheses() {
             ArithmeticExpression expression = new ArithmeticExpression("(1+1)*5");
 
             double result = expression.eval();
@@ -39,7 +39,7 @@ class ArithmeticExpressionTest {
         }
 
         @Test
-        public void invalidExpression() {
+        void invalidExpression() {
             ArithmeticExpression expression = new ArithmeticExpression("(1+*5");
 
             assertThatExceptionOfType(RuntimeException.class)

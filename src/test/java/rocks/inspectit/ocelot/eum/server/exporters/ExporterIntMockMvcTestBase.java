@@ -29,8 +29,10 @@ public class ExporterIntMockMvcTestBase {
     @Autowired
     protected MockMvc mockMvc;
 
+    // resource span created by OpenTelemetry.js SDK
+    // last version tested: 0.48.0
     @Value("classpath:ot-trace-prod-v0.48.0.json")
-    private Resource prodSpans;
+    Resource prodSpans;
 
     public static final String SERVICE_NAME = "E2E-test";
 

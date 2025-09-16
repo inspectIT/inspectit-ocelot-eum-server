@@ -13,43 +13,43 @@ import static org.assertj.core.api.Assertions.assertThat;
  * i.e. whether the Bean only gets created when 'otlp.enabled' is not set to DISABLED and 'otlp.endpoint' is not empty.
  */
 @SpringBootTest
-public class TraceExportersConfigurationOtlpTest {
+class TraceExportersConfigurationOtlpTest {
 
     @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.otlp.endpoint=", "inspectit-eum-server.exporters.tracing.otlp.enabled=ENABLED"})
     @Nested
-    public class OtlpEndpointTest {
+    class OtlpEndpointTest {
 
         @Autowired(required = false)
         DelegatingSpanExporter exporter;
 
         @Test
-        public void testBeanWasNotCreated() {
+        void testBeanWasNotCreated() {
             assertThat(exporter).isNull();
         }
     }
 
     @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.otlp.endpoint=localhost:1234", "inspectit-eum-server.exporters.tracing.otlp.enabled=DISABLED", "inspectit-eum-server.exporters.tracing.otlp.protocol=grpc"})
     @Nested
-    public class DisabledTest {
+    class DisabledTest {
 
         @Autowired(required = false)
         DelegatingSpanExporter exporter;
 
         @Test
-        public void testBeanWasNotCreated() {
+        void testBeanWasNotCreated() {
             assertThat(exporter).isNull();
         }
     }
 
     @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.otlp.endpoint=localhost:1234", "inspectit-eum-server.exporters.tracing.otlp.enabled=ENABLED", "inspectit-eum-server.exporters.tracing.otlp.protocol=grpc"})
     @Nested
-    public class BothAvailableTest {
+    class BothAvailableTest {
 
         @Autowired
         DelegatingSpanExporter exporter;
 
         @Test
-        public void testBeanWasCreated() {
+        void testBeanWasCreated() {
             assertThat(exporter).isNotNull();
         }
     }

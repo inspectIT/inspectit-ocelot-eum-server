@@ -66,7 +66,7 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
 
     static final int COLLECTOR_ZIPKIN_PORT = 9411;
 
-    private static final Logger LOGGER = Logger.getLogger(ExporterIntTestBaseWithOtelCollector.class.getName());
+    static final Logger LOGGER = Logger.getLogger(ExporterIntTestBaseWithOtelCollector.class.getName());
 
     /**
      * The {@link OtlpGrpcServer} used as an exporter endpoint for the OpenTelemetry Collector
@@ -294,5 +294,4 @@ public class ExporterIntTestBaseWithOtelCollector extends ExporterIntMockMvcTest
             sb.http(0);
         }
     }
-
 }

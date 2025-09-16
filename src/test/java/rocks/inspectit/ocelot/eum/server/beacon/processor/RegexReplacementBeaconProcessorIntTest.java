@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RegexReplacementBeaconProcessorIntTest {
 
     @Autowired
-    private RegexReplacementBeaconProcessor processor;
+    RegexReplacementBeaconProcessor processor;
 
     @Test
     void testRemoveQueryParameters() {
@@ -49,6 +49,4 @@ class RegexReplacementBeaconProcessorIntTest {
         assertThat(b.get("PGU_HOST")).isNull();
         assertThat(b.get("PGU_PORT")).isNull();
     }
-
-
 }

@@ -15,10 +15,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AttributeSettingsTest {
 
     @Nested
-    public class IsGlobalAttributeMissing {
+    class IsGlobalAttributeMissing {
 
         @Test
-        public void emptySettings() {
+        void emptySettings() {
             AttributeSettings settings = new AttributeSettings();
 
             boolean result = settings.isGlobalAttributeMissing();
@@ -27,7 +27,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void tagMissing() {
+        void tagMissing() {
             AttributeSettings settings = new AttributeSettings();
             settings.getDefineAsGlobal().add("missing-tag");
 
@@ -37,7 +37,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void hasBeaconTag() {
+        void hasBeaconTag() {
             AttributeSettings settings = new AttributeSettings();
             settings.getDefineAsGlobal().add("beacon-tag");
             settings.getBeacon().put("beacon-tag", BeaconAttributeSettings.builder().input("beacon-field").build());
@@ -48,7 +48,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void hasExtraTag() {
+        void hasExtraTag() {
             AttributeSettings settings = new AttributeSettings();
             settings.getDefineAsGlobal().add("extra-attribute");
             settings.getExtra().put("extra-attribute", "constant-value");
@@ -60,10 +60,10 @@ class AttributeSettingsTest {
     }
 
     @Nested
-    public class IsCheckUniquenessOfAttributes {
+    class IsCheckUniquenessOfAttributes {
 
         @Test
-        public void emptySettings() {
+        void emptySettings() {
             AttributeSettings settings = new AttributeSettings();
 
             boolean result = settings.isCheckUniquenessOfAttributes();
@@ -72,7 +72,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void noDuplicateTags() {
+        void noDuplicateTags() {
             AttributeSettings settings = new AttributeSettings();
             settings.getExtra().put("tag_a", "");
             settings.getBeacon().put("tag_b", BeaconAttributeSettings.builder().build());
@@ -83,7 +83,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void hasDuplicateTags() {
+        void hasDuplicateTags() {
             AttributeSettings settings = new AttributeSettings();
             settings.getExtra().put("tag_a", "");
             settings.getBeacon().put("tag_a", BeaconAttributeSettings.builder().build());
@@ -95,10 +95,10 @@ class AttributeSettingsTest {
     }
 
     @Nested
-    public class IsCheckIPsRangesDoNotOverlap {
+    class IsCheckIPsRangesDoNotOverlap {
 
         @Test
-        public void emptyCustomMapping() {
+        void emptyCustomMapping() {
             AttributeSettings settings = new AttributeSettings();
 
             boolean result = settings.isCheckIpRangesDoNotOverlap();
@@ -107,7 +107,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void ipsAreEqual() {
+        void ipsAreEqual() {
             AttributeSettings settings = new AttributeSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"127.127.127.127"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"127.127.127.127"}));
@@ -118,7 +118,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void ipsAreNotEqual() {
+        void ipsAreNotEqual() {
             AttributeSettings settings = new AttributeSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"127.127.127.127"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"127.127.127.128"}));
@@ -129,7 +129,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void cidrsAreEqual() {
+        void cidrsAreEqual() {
             AttributeSettings settings = new AttributeSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"10.0.0.0/16"}));
@@ -140,7 +140,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void cidrsOverlap() {
+        void cidrsOverlap() {
             AttributeSettings settings = new AttributeSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"10.0.0.0/17"}));
@@ -151,7 +151,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void cidrsDoNotOverlap() {
+        void cidrsDoNotOverlap() {
             AttributeSettings settings = new AttributeSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"10.1.0.0/16"}));
@@ -162,7 +162,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void cidrContainsIp() {
+        void cidrContainsIp() {
             AttributeSettings settings = new AttributeSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"10.0.0.1"}));
@@ -173,7 +173,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void cidrDoesNotContainIp() {
+        void cidrDoesNotContainIp() {
             AttributeSettings settings = new AttributeSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"11.0.0.1"}));
@@ -184,7 +184,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void cidrsOfSameLabelAreOverlapping() {
+        void cidrsOfSameLabelAreOverlapping() {
             AttributeSettings settings = new AttributeSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16", "10.0.0.0/17"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"11.0.0.1"}));
@@ -195,7 +195,7 @@ class AttributeSettingsTest {
         }
 
         @Test
-        public void cidrAndIpOfSameLabelAreOverlapping() {
+        void cidrAndIpOfSameLabelAreOverlapping() {
             AttributeSettings settings = new AttributeSettings();
             settings.getCustomIPMapping().put("GER", Arrays.asList(new String[]{"10.0.0.0/16", "10.0.0.1"}));
             settings.getCustomIPMapping().put("FR", Arrays.asList(new String[]{"11.0.0.1"}));

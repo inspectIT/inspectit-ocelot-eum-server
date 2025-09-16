@@ -32,7 +32,7 @@ import static org.awaitility.Awaitility.await;
 @SpringBootTest
 @ContextConfiguration(initializers = PrometheusExporterServiceIntTest.EnvInitializer.class)
 @DirtiesContext
-public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase {
+class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase {
 
     private static int PROMETHEUS_PORT;
 
@@ -49,22 +49,22 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
         }
     }
 
-    private static CloseableHttpClient httpClient;
+    static CloseableHttpClient httpClient;
 
     @BeforeEach
-    public void initClient() {
+    void initClient() {
         GlobalOpenTelemetry.resetForTest();
         HttpClientBuilder builder = HttpClientBuilder.create();
         httpClient = builder.build();
     }
 
     @AfterEach
-    public void closeClient() throws Exception {
+    void closeClient() throws Exception {
         httpClient.close();
     }
 
     @Test
-    public void testDefaultSettings() throws Exception {
+    void testDefaultSettings() throws Exception {
         HttpGet httpGet = new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics");
         int statusCode = httpClient.execute(httpGet).getStatusLine().getStatusCode();
 
@@ -73,11 +73,9 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
 
     /**
      * The application should expose no view, since no beacon entry maps to the default implementation.
-     *
-     * @throws Exception
      */
     @Test
-    public void expectNoViews() throws Exception {
+    void expectNoViews() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
         beacon.put(FAKE_BEACON_KEY_NAME, "Fake Value");
 
@@ -95,7 +93,7 @@ public class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase
      * The application should expose one view, since one beacon entry maps to the default implementation.
      */
     @Test
-    public void expectOneView() throws Exception {
+    void expectOneView() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
         // send the beacon. use a different metric (t_load) as the different metric exporter test cases overload the metrics
         beacon.put(BEACON_LOAD_TIME_KEY_NAME, "12");

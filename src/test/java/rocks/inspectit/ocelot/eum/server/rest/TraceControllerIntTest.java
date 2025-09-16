@@ -28,16 +28,16 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
-public class TraceControllerIntTest {
+class TraceControllerIntTest {
 
     @Autowired
     TestRestTemplate restTemplate;
 
     @Value("classpath:ot-trace-large-v0.48.0.json")
-    private Resource resourceSpan;
+    Resource resourceSpan;
 
     @Value("classpath:ot-trace-prod-v0.48.0.json")
-    private Resource prodResourceSpans;
+    Resource prodResourceSpans;
 
     @MockBean
     DelegatingSpanExporter spanExporter;
@@ -46,21 +46,21 @@ public class TraceControllerIntTest {
     ArgumentCaptor<Collection<SpanData>> spanCaptor;
 
     @Test
-    public void empty() {
+    void empty() {
         ResponseEntity<Void> result = restTemplate.postForEntity("/spans", null, Void.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
-    public void badData() {
+    void badData() {
         ResponseEntity<Void> result = restTemplate.postForEntity("/spans", "{\"bad\": \"data'\"}", Void.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
-    public void verifyLargeTrace() throws Exception {
+    void verifyLargeTrace() throws Exception {
         try (Reader reader = new InputStreamReader(resourceSpan.getInputStream())) {
             String json = CharStreams.toString(reader);
 
@@ -87,7 +87,7 @@ public class TraceControllerIntTest {
     }
 
     @Test
-    public void verifyTraceWithMultipleResourceSpans() throws Exception {
+    void verifyTraceWithMultipleResourceSpans() throws Exception {
         try (Reader reader = new InputStreamReader(prodResourceSpans.getInputStream())) {
             String json = CharStreams.toString(reader);
 

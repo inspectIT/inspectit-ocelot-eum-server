@@ -19,16 +19,16 @@ class BmrBeaconProcessorTest {
     private BmrBeaconProcessor processor;
 
     @Nested
-    public class Process {
+    class Process {
 
-        private final String[] keyNames = Arrays.stream(BmrBeaconProcessor.VALUE_NAMES)
+        final String[] keyNames = Arrays.stream(BmrBeaconProcessor.VALUE_NAMES)
                 .map(valueName -> BmrBeaconProcessor.ATTRIBUTE_KEY + "." + valueName)
                 .toArray(String[]::new);
 
-        private final int maxExpectedSize = keyNames.length + 1;
+        final int maxExpectedSize = keyNames.length + 1;
 
         @Test
-        public void noRtBmrAttribute() {
+        void noRtBmrAttribute() {
             Beacon beacon = Beacon.of(Collections.singletonMap("key", ""));
 
             Beacon result = processor.process(beacon);
@@ -37,7 +37,7 @@ class BmrBeaconProcessorTest {
         }
 
         @Test
-        public void rtBmrWithoutValues() {
+        void rtBmrWithoutValues() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", ""));
 
             Beacon result = processor.process(beacon);
@@ -46,7 +46,7 @@ class BmrBeaconProcessorTest {
         }
 
         @Test
-        public void rtBmrWithOneValue() {
+        void rtBmrWithOneValue() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "123"));
 
             Beacon result = processor.process(beacon);
@@ -57,7 +57,7 @@ class BmrBeaconProcessorTest {
         }
 
         @Test
-        public void rtBmrWithInvalidValue() {
+        void rtBmrWithInvalidValue() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "foo"));
 
             Beacon result = processor.process(beacon);
@@ -68,7 +68,7 @@ class BmrBeaconProcessorTest {
         }
 
         @Test
-        public void rtBmrWithZeroValue() {
+        void rtBmrWithZeroValue() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "0"));
 
             Beacon result = processor.process(beacon);
@@ -79,7 +79,7 @@ class BmrBeaconProcessorTest {
         }
 
         @Test
-        public void rtBmrWithZeroSum() {
+        void rtBmrWithZeroSum() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "0,0"));
 
             Beacon result = processor.process(beacon);
@@ -90,7 +90,7 @@ class BmrBeaconProcessorTest {
         }
 
         @Test
-        public void rtBmrWithMultipleValues() {
+        void rtBmrWithMultipleValues() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "123,321"));
 
             Beacon result = processor.process(beacon);
@@ -101,7 +101,7 @@ class BmrBeaconProcessorTest {
         }
 
         @Test
-        public void rtBmrMultipleValuesWithOneEmptyValue() {
+        void rtBmrMultipleValuesWithOneEmptyValue() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "123,,321"));
 
             Beacon result = processor.process(beacon);
@@ -112,7 +112,7 @@ class BmrBeaconProcessorTest {
         }
 
         @Test
-        public void rtBmrMultipleValuesWithOneInvalidValue() {
+        void rtBmrMultipleValuesWithOneInvalidValue() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "123,bar,321"));
 
             Beacon result = processor.process(beacon);
@@ -123,7 +123,7 @@ class BmrBeaconProcessorTest {
         }
 
         @Test
-        public void rtBmrMultipleValuesWithTwoInvalidValues() {
+        void rtBmrMultipleValuesWithTwoInvalidValues() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "123,bar,321,foo"));
 
             Beacon result = processor.process(beacon);
@@ -134,7 +134,7 @@ class BmrBeaconProcessorTest {
         }
 
         @Test
-        public void rtBmrAllValues() {
+        void rtBmrAllValues() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "123,120,,,,1,,,7,,,"));
 
             Beacon result = processor.process(beacon);

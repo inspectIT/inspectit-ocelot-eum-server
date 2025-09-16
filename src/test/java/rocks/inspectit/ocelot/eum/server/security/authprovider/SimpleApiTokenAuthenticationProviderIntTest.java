@@ -20,10 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = SimpleApiTokenAuthenticationProviderIntTest.Initializer.class)
 @DirtiesContext
-public class SimpleApiTokenAuthenticationProviderIntTest {
+class SimpleApiTokenAuthenticationProviderIntTest {
 
     @Autowired
-    private TestRestTemplate rest;
+    TestRestTemplate rest;
 
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -36,7 +36,7 @@ public class SimpleApiTokenAuthenticationProviderIntTest {
     }
 
     @Nested
-    public class Authorized {
+    class Authorized {
 
         @Test
         void authorizedRequest() {
@@ -52,7 +52,7 @@ public class SimpleApiTokenAuthenticationProviderIntTest {
     }
 
     @Nested
-    public class Forbidden {
+    class Forbidden {
 
         @Test
         void forbiddenRequest() {
@@ -66,6 +66,4 @@ public class SimpleApiTokenAuthenticationProviderIntTest {
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         }
     }
-
 }
-

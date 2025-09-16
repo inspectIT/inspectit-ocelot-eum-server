@@ -18,14 +18,14 @@ import static org.assertj.core.api.Assertions.entry;
 class ClientHeaderBeaconProcessorTest {
 
     @InjectMocks
-    private ClientHeaderBeaconProcessor processor;
+    ClientHeaderBeaconProcessor processor;
 
-    private final String HEADER_PREFIX = "client.header.";
+    final String HEADER_PREFIX = "client.header.";
 
     @Nested
-    public class Process {
+    class Process {
 
-        private final MockHttpServletRequest request = new MockHttpServletRequest();
+        final MockHttpServletRequest request = new MockHttpServletRequest();
 
         @BeforeEach
         void getCurrentRequest() {
@@ -35,7 +35,7 @@ class ClientHeaderBeaconProcessorTest {
         }
 
         @Test
-        public void singleClientHeader() {
+        void singleClientHeader() {
             request.addHeader("Accept-Encoding", "gzip, deflate");
 
             Beacon beacon = Beacon.of(Collections.singletonMap("key", "value"));
@@ -46,7 +46,7 @@ class ClientHeaderBeaconProcessorTest {
         }
 
         @Test
-        public void differentClientHeader() {
+        void differentClientHeader() {
             request.addHeader("Accept-Encoding", "gzip,deflate");
             request.addHeader("Connection", "keep-alive");
 
@@ -58,7 +58,7 @@ class ClientHeaderBeaconProcessorTest {
         }
 
         @Test
-        public void multipleClientHeader() {
+        void multipleClientHeader() {
             request.addHeader("Accept-Encoding", "gzip");
             request.addHeader("Accept-Encoding", "deflate");
 
@@ -68,6 +68,5 @@ class ClientHeaderBeaconProcessorTest {
             assertThat(result.toMap()).hasSize(2)
                     .contains(entry("key", "value"), entry(HEADER_PREFIX + "Accept-Encoding", "gzip,deflate"));
         }
-        
     }
 }
