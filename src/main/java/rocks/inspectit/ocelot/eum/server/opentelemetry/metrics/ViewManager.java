@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.AggregationType;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.AggregationType;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.TimeWindowViewManager;
 
 import java.util.*;

@@ -18,7 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import rocks.inspectit.ocelot.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.metrics.InstrumentManager;
 
 import jakarta.annotation.PostConstruct;

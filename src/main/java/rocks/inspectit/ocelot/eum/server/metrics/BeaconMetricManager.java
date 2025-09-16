@@ -15,10 +15,10 @@ import rocks.inspectit.ocelot.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.eum.server.beacon.recorder.BeaconRecorder;
 import rocks.inspectit.ocelot.eum.server.beacon.recorder.ResourceTimingBeaconRecorder;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconRequirement;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.BeaconRequirement;
 import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.BeaconAttributeSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconMetricDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.BeaconMetricDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.events.RegisteredAttributesEvent;
 
 import java.util.*;

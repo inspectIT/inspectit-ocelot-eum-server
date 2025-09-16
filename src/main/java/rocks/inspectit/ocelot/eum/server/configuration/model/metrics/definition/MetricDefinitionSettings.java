@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition;
+package rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition;
 
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.InstrumentValueType;
@@ -7,7 +7,8 @@ import lombok.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
+import org.springframework.util.CollectionUtils;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
 
 import java.time.Duration;
 import java.util.Map;
@@ -48,37 +49,26 @@ public class MetricDefinitionSettings {
 
     /**
      * Maps view names to their definitions for the metric defined by this {@link MetricDefinitionSettings}.
-     * If this is null, a default view is created which simply exposes the last value of the metric.
+     * If this map is null, OpenTelemetry will create a default view automatically.
      */
-    // TODO Since OTel works with default-views, this map can be null or empty.
-    //      Check, if this is actually working
     @Singular
     private Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views;
 
     /**
      * Copies the settings of this object but applies the defaults, like creating a default view if no views were defined.
-     * Does not provide a default time window for windowed views.
      *
-     * @param metricName the name of the metric
+     * @param metricName        the name of the metric
      *
      * @return a copy of this view definition with the default populated
      */
     public MetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName) {
-        return getCopyWithDefaultsPopulated(metricName, null);
-    }
-
-    /**
-     * Copies the settings of this object but applies the defaults, like creating a default view if no views were defined.
-     *
-     * @param metricName        the name of the metric
-     * @param defaultTimeWindow the size of the time window to use as default for windowed metrics (e.g. quantiles)
-     *
-     * @return a copy of this view definition with the default populated
-     */
-    public MetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName, Duration defaultTimeWindow) {
         val resultDescription = description == null ? metricName : description;
         val result = toBuilder().description(resultDescription).clearViews();
-        views.forEach((name, def) -> result.view(name, def.getCopyWithDefaultsPopulated(resultDescription, unit, defaultTimeWindow)));
+
+        if(!CollectionUtils.isEmpty(views)) {
+            views.forEach((name, def) -> result.view(name, def.getCopyWithDefaultsPopulated(resultDescription, unit)));
+        }
+
         return result.build();
     }
 }

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconRequirement;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.BeaconRequirement;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.beacon.InitiatorType;
 
 import java.util.Arrays;

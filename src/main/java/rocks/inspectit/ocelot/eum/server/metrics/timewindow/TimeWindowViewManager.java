@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.QuantilesView;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.SmoothedAverageView;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.TimeWindowView;

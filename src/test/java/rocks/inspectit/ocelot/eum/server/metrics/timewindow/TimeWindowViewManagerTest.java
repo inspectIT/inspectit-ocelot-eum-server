@@ -8,8 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.AttributeSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.AggregationType;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.AggregationType;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.TimeWindowView;
 
 import java.time.Duration;

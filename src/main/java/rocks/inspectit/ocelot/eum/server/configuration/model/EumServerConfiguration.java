@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExportersSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.BeaconMetricDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.BeaconMetricDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.security.SecuritySettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.AttributeSettings;

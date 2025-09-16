@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view;
+package rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition;
+package rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

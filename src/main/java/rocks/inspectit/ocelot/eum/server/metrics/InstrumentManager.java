@@ -11,8 +11,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.MetricDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.events.RegisteredAttributesEvent;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.worker.TimeWindowRecorder;
 import rocks.inspectit.ocelot.eum.server.utils.AttributeUtil;
@@ -67,8 +67,7 @@ public class InstrumentManager {
      */
     public void createInstrument(String metricName, MetricDefinitionSettings metricDefinition) {
         if (!isInstrumentRegistered(metricName)) {
-            MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(metricName, Duration
-                    .ofSeconds(15)); // Default value of 15s will be overridden by configuration.
+            MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(metricName);
 
             if (shouldCreateInstrument(metricDefinition)) {
                 Object instrument = instrumentFactory.createInstrument(metricName, populatedMetricDefinition);
@@ -161,8 +160,8 @@ public class InstrumentManager {
 
     /**
      * Checks, if we should create an instrument for the metric. We only need an instrument, if the metric definition
-     * contains a view, which uses an OpenTelemetry aggregation
-     * <b>OR</b> if there are no views specified at all. Then we will use the default OpenTelemetry Views,
+     * contains a view, which uses an OpenTelemetry aggregation <b>OR</b>
+     * if there are no views specified at all. Then we will use the default OpenTelemetry views,
      * which OpenTelemetry handles by itself automatically.
      * For time-window aggregations we will record metrics via {@link TimeWindowRecorder} later.
      *
@@ -171,8 +170,8 @@ public class InstrumentManager {
      * @return true, if we should create an instrument
      */
     private boolean shouldCreateInstrument(MetricDefinitionSettings metricDefinition) {
-        boolean useDefaultViews = CollectionUtils.isEmpty(metricDefinition.getViews());
-        return useDefaultViews || metricDefinition.getViews()
+        boolean useDefaultView = CollectionUtils.isEmpty(metricDefinition.getViews());
+        return useDefaultView || metricDefinition.getViews()
                 .values().stream()
                 .anyMatch(view -> view.getAggregation().isOpenTelemetryAggregation());
     }

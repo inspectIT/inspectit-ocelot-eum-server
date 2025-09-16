@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition;
+package rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition;
 
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.InstrumentValueType;
@@ -12,7 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import rocks.inspectit.ocelot.eum.server.arithmetic.ArithmeticExpression;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
 
 import java.util.List;
 import java.util.Map;

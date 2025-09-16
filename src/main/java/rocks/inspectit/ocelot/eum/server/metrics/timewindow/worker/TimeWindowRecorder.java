@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * Records time-window metrics asynchronously.
  * Recording observation takes amortized O(1) time.
  * However, the worst-case time of a recording is O(n), which is why we decouple the recording from the application threads.
- * This worker maintains a fixed-size queue of observations which are then added via {@link #record)}.
+ * This worker maintains a fixed-size queue of observations which are then added via {@link #record}.
  */
 @Slf4j
 @Component
@@ -36,7 +36,7 @@ public class TimeWindowRecorder {
     /**
      * The interval for processing the {@link #recordsQueue}
      */
-    private final Duration recordingInterval = Duration.ofMillis(100);
+    private final Duration recordingInterval = Duration.ofMillis(50);
 
     private Future<?> recordingTask;
 

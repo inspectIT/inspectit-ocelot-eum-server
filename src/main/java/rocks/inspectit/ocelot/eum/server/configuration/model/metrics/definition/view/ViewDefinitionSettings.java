@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.view;
+package rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view;
 
 import io.opentelemetry.sdk.metrics.internal.view.Base2ExponentialHistogramAggregation;
 import lombok.*;
@@ -6,7 +6,7 @@ import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.util.CollectionUtils;
 
 import jakarta.validation.constraints.*;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metric.definition.MetricDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.MetricDefinitionSettings;
 
 import java.time.Duration;
 import java.util.List;
@@ -102,7 +102,8 @@ public class ViewDefinitionSettings {
      * is used.
      */
     @DurationMin(millis = 1L)
-    private Duration timeWindow;
+    @Builder.Default
+    private Duration timeWindow = Duration.ofSeconds(15);
 
     /**
      * The maximum number of points to be buffered by this View.
@@ -127,17 +128,10 @@ public class ViewDefinitionSettings {
     @Singular
     private Map<@NotBlank String, @NotNull Boolean> attributes;
 
-    // TODO Why do we use this, if there is @Builder.Default?
-    public ViewDefinitionSettings getCopyWithDefaultsPopulated(String measureDescription, String unit, Duration defaultTimeWindow) {
+    public ViewDefinitionSettings getCopyWithDefaultsPopulated(String metricDescription, String unit) {
         val result = toBuilder();
         if (description == null) {
-            result.description(aggregation.getReadableName() + " of " + measureDescription + " [" + unit + "]");
-        }
-        if (timeWindow == null) {
-            if (defaultTimeWindow == null && aggregation == AggregationType.QUANTILES) {
-                throw new IllegalArgumentException("A default time window must be provided for quantile views");
-            }
-            result.timeWindow(defaultTimeWindow);
+            result.description(aggregation.getReadableName() + " of " + metricDescription + " [" + unit + "]");
         }
         return result.build();
     }
