@@ -7,8 +7,6 @@ import io.opentelemetry.context.Scope;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationStartedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.eum.server.arithmetic.RawExpression;
@@ -19,7 +17,6 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.
 import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.BeaconAttributeSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.BeaconMetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.events.RegisteredAttributesEvent;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,6 +33,9 @@ public class BeaconMetricManager {
 
     @Autowired
     private InstrumentManager instrumentManager;
+
+    @Autowired
+    private AttributesRegistry attributesRegistry;
 
     @Autowired
     private SelfMonitoringMetricManager selfMonitoringMetricManager;
@@ -57,11 +57,7 @@ public class BeaconMetricManager {
      */
     private final Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new HashMap<>();
 
-    /**
-     * We listen to the {@link ApplicationStartedEvent}, because {@link PostConstruct} is too early to receive
-     * {@link RegisteredAttributesEvent}s
-     */
-    @EventListener(ApplicationStartedEvent.class)
+    @PostConstruct
     void initMetrics() {
         Map<String, BeaconMetricDefinitionSettings> definitions = configuration.getDefinitions();
         for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : definitions.entrySet()) {
@@ -73,18 +69,9 @@ public class BeaconMetricManager {
         }
         // Initialize self-monitoring metrics after beacon metrics
         selfMonitoringMetricManager.initMetrics();
+        // Register beacon attributes after all metrics are initialized
+        registerBeaconAttributes();
         log.info("Registration of metrics completed");
-    }
-
-    // TODO Refactor this
-    @EventListener
-    void processUsedAttributes(RegisteredAttributesEvent registeredAttributesEvent) {
-        Map<String, BeaconAttributeSettings> beaconAttributeSettings = configuration.getAttributes().getBeacon();
-
-        registeredBeaconAttributes = registeredAttributesEvent.getRegisteredAttributes()
-                .stream()
-                .filter(beaconAttributeSettings::containsKey)
-                .collect(Collectors.toSet());
     }
 
     /**
@@ -115,6 +102,19 @@ public class BeaconMetricManager {
         }
 
         return successful;
+    }
+
+    /**
+     * Registers all configured beacon attributes
+     */
+    @VisibleForTesting
+    void registerBeaconAttributes() {
+        Map<String, BeaconAttributeSettings> beaconAttributeSettings = configuration.getAttributes().getBeacon();
+
+        registeredBeaconAttributes = attributesRegistry.getRegisteredAttributes()
+                .stream()
+                .filter(beaconAttributeSettings::containsKey)
+                .collect(Collectors.toSet());
     }
 
     /**

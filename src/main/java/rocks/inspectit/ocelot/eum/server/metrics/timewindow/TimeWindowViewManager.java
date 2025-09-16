@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.metrics.AttributesRegistry;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.QuantilesView;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.SmoothedAverageView;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.TimeWindowView;
@@ -30,6 +31,9 @@ public class TimeWindowViewManager {
 
     @Autowired
     private EumServerConfiguration configuration;
+
+    @Autowired
+    private AttributesRegistry attributesRegistry;
 
     /**
      * Maps the name of measures to registered percentile views.
@@ -112,18 +116,9 @@ public class TimeWindowViewManager {
     }
 
     /**
-     * Processes all attributes which are exposed for the given view
+     * @return the attributes which are exposed for the given view
      */
-    // TODO This method also exists in InstrumentManager
-    private Set<String> getAttributeKeysForView(ViewDefinitionSettings viewDefinitionSettings) {
-        Set<String> attributeKeys = new HashSet<>(configuration.getAttributes().getDefineAsGlobal());
-        attributeKeys.addAll(viewDefinitionSettings.getAttributes()
-                .entrySet()
-                .stream()
-                .filter(Map.Entry::getValue)
-                .map(Map.Entry::getKey)
-                .toList());
-
-        return attributeKeys;
+    private Set<String> getAttributeKeysForView(ViewDefinitionSettings settings) {
+        return attributesRegistry.getAttributeKeysForView(settings);
     }
 }

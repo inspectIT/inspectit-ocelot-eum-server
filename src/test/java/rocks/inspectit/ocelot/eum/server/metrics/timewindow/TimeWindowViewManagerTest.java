@@ -10,6 +10,7 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfigurat
 import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.AttributeSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.AggregationType;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.metrics.AttributesRegistry;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.TimeWindowView;
 
 import java.time.Duration;
@@ -27,6 +28,9 @@ class TimeWindowViewManagerTest {
 
     @Mock
     EumServerConfiguration configuration;
+
+    @Mock
+    AttributesRegistry attributesRegistry;
 
     @BeforeEach
     void beforeEach() {

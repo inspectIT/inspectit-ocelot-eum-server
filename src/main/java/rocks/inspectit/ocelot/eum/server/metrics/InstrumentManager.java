@@ -1,25 +1,20 @@
 package rocks.inspectit.ocelot.eum.server.metrics;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.baggage.BaggageBuilder;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.*;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
-import rocks.inspectit.ocelot.eum.server.events.RegisteredAttributesEvent;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.worker.TimeWindowRecorder;
 import rocks.inspectit.ocelot.eum.server.utils.AttributeUtil;
 
-import java.time.Duration;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Central component, which is responsible for writing communication with the OpenTelemetry instruments.
@@ -30,13 +25,13 @@ import java.util.stream.Collectors;
 public class InstrumentManager {
 
     @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
-
-    @Autowired
     private EumServerConfiguration configuration;
 
     @Autowired
     private InstrumentFactory instrumentFactory;
+
+    @Autowired
+    private AttributesRegistry attributesRegistry;
 
     @Autowired
     private TimeWindowRecorder timeWindowRecorder;
@@ -47,17 +42,6 @@ public class InstrumentManager {
      * and cast them to proper data types during recording.
      */
     private final Map<String, Object> instruments = new HashMap<>();
-
-    /**
-     * Set of all registered attributes
-     */
-    private final Set<String> registeredAttributes = new HashSet<>();
-
-    /**
-     * Set of all registered global attributes
-     */
-    @VisibleForTesting
-    Set<String> registeredGlobalAttributes = Collections.emptySet();
 
     /**
      * Creates the instrument in {@link #instruments} if necessary.
@@ -74,9 +58,10 @@ public class InstrumentManager {
                 instruments.put(metricName, instrument);
             }
 
-            populatedMetricDefinition.getViews()
-                    .values()
-                    .forEach(this::processAttributeKeysForView);
+            val views = populatedMetricDefinition.getViews();
+            if(!CollectionUtils.isEmpty(views)) {
+                views.values().forEach(view -> attributesRegistry.processAttributeKeysForView(view));
+            }
         }
     }
 
@@ -186,43 +171,11 @@ public class InstrumentManager {
     }
 
     /**
-     * Processes all attributes, which are exposed for the given view.
-     */
-    private void processAttributeKeysForView(ViewDefinitionSettings viewDefinitionSettings) {
-        Set<String> attributes = new HashSet<>(configuration.getAttributes().getDefineAsGlobal());
-        attributes.addAll(viewDefinitionSettings.getAttributes()
-                .entrySet()
-                .stream()
-                .filter(Map.Entry::getValue)
-                .map(Map.Entry::getKey)
-                .toList());
-
-        processRegisteredAttributes(attributes);
-    }
-
-    /**
-     * Publish all registered attributes as event.
-     *
-     * @param attributes the registered attributes
-     */
-    @VisibleForTesting
-    void processRegisteredAttributes(Set<String> attributes) {
-        registeredAttributes.addAll(attributes);
-
-        RegisteredAttributesEvent registeredAttributesEvent = new RegisteredAttributesEvent(this, registeredAttributes);
-        applicationEventPublisher.publishEvent(registeredAttributesEvent);
-
-        registeredGlobalAttributes = registeredAttributes.stream()
-                .filter(configuration.getAttributes().getExtra()::containsKey)
-                .filter(configuration.getAttributes().getDefineAsGlobal()::contains)
-                .collect(Collectors.toSet());
-    }
-
-    /**
      * Builds baggage with all global extra attributes.
      */
     public Baggage getBaggage() {
         BaggageBuilder builder = Baggage.current().toBuilder();
+        Set<String> registeredGlobalAttributes = attributesRegistry.getRegisteredGlobalAttributes();
 
         for (String registeredGlobalAttribute : registeredGlobalAttributes) {
             builder.put(registeredGlobalAttribute, configuration

@@ -38,6 +38,9 @@ public class BeaconMetricManagerTest {
     @Mock
     InstrumentManager instrumentManager;
 
+    @Mock
+    AttributesRegistry attributesRegistry;
+
     BeaconRecorder recorder = mock(BeaconRecorder.class);
 
     @Spy
@@ -50,12 +53,18 @@ public class BeaconMetricManagerTest {
     @Nested
     class ProcessUsedTags {
 
+        @BeforeEach
+        void beforeEach() {
+            when(attributesRegistry.getRegisteredAttributes()).thenReturn(registeredAttributes);
+        }
+
+
         @Test
         void processOneUsedTag() {
             Map<String, BeaconAttributeSettings> beaconSettings = Collections.singletonMap("first", new BeaconAttributeSettings());
             when(configuration.getAttributes().getBeacon()).thenReturn(beaconSettings);
 
-            beaconMetricManager.processUsedAttributes(new RegisteredAttributesEvent(this, registeredAttributes));
+            beaconMetricManager.registerBeaconAttributes();
 
             assertThat(beaconMetricManager.registeredBeaconAttributes).containsExactly("first");
         }
@@ -65,7 +74,7 @@ public class BeaconMetricManagerTest {
             Map<String, BeaconAttributeSettings> beaconSettings = ImmutableMap.of("first", new BeaconAttributeSettings(), "third", new BeaconAttributeSettings());
             when(configuration.getAttributes().getBeacon()).thenReturn(beaconSettings);
 
-            beaconMetricManager.processUsedAttributes(new RegisteredAttributesEvent(this, registeredAttributes));
+            beaconMetricManager.registerBeaconAttributes();
 
             assertThat(beaconMetricManager.registeredBeaconAttributes).containsExactlyInAnyOrder("first", "third");
         }
@@ -74,7 +83,7 @@ public class BeaconMetricManagerTest {
         void processNoTags() {
             when(configuration.getAttributes().getBeacon()).thenReturn(Collections.emptyMap());
 
-            beaconMetricManager.processUsedAttributes(new RegisteredAttributesEvent(this, registeredAttributes));
+            beaconMetricManager.registerBeaconAttributes();
 
             assertThat(beaconMetricManager.registeredBeaconAttributes).isEmpty();
         }
