@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress>
+      <notes><![CDATA[
+        False positive in opentelemetry-exporter-prometheus.jar due to the prometheus name
+      ]]></notes>
+    <cve>CVE-2019-3826</cve>
+    </suppress>
+    <suppress>
+      <notes><![CDATA[
+        No Spring Boot update available for spring-security-core-6.5.2.jar (September 2025)
+      ]]></notes>
+    <cve>CVE-2018-1258</cve>
+    </suppress>
+    <suppress>
+      <notes><![CDATA[
+        No Spring Boot update available for tomcat-embed-core-10.1.43.jar (September 2025)
+      ]]></notes>
+    <cve>CVE-2025-48989</cve>
+    </suppress>
+</suppressions>
