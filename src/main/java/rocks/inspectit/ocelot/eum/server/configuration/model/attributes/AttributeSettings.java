@@ -2,10 +2,8 @@ package rocks.inspectit.ocelot.eum.server.configuration.model.attributes;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import rocks.inspectit.ocelot.eum.server.configuration.model.attributes.providers.AttributesProviderSettings;
 import rocks.inspectit.ocelot.eum.server.utils.IPUtils;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Pattern;
@@ -17,13 +15,6 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 public class AttributeSettings {
-
-    /**
-     * Settings for available attributes providers
-     */
-    // TODO Is this even used anywhere?
-    @Valid
-    private AttributesProviderSettings providers;
 
     /**
      * Map of arbitrary user defined attributes
