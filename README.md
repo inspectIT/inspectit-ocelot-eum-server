@@ -184,7 +184,7 @@ A metric is defined through the following properties:
 A view is defined through the following properties:
 
 * `name`: Defines the name of the view.
-* `aggregation`: There OTel aggregations (`SUM`, `LAST_VALUE`, `HISTORGRAM`; `EXPONENTIAL_HISTOGRAM`) as well as custom aggregations (`QUANTILES`, `SMOOTHED_AVERAGE`).
+* `aggregation`: There are OTel aggregations (`SUM`, `LAST_VALUE`, `HISTORGRAM`; `EXPONENTIAL_HISTOGRAM`) as well as custom aggregations (`QUANTILES`, `SMOOTHED_AVERAGE`).
 * `attributes`: Defines a list of attribute keys, which are exposed with the current metric.
 * `bucket-boundaries`: Used for the `HISTOGRAM` aggregation, defines the bucket boundaries as list of doubles.
 * `cardinality-limit`: Defines the maximum amount of unique combinations of attributes for this view.
