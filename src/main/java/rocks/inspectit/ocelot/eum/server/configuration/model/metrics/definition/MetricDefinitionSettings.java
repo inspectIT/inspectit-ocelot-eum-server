@@ -14,7 +14,7 @@ import java.time.Duration;
 import java.util.Map;
 
 /**
- * Defines an OpenTelemetry instrument in combination with one or multiple views
+ * Defines an OpenTelemetry metric in combination with one or multiple views
  */
 @Data
 @NoArgsConstructor

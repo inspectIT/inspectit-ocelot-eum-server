@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 /**
- * Stores all user-specified metric views.
+ * Registers all user-specified metric views.
  */
 @Component
 public class ViewManager {
@@ -26,13 +26,11 @@ public class ViewManager {
     private TimeWindowViewManager viewManager;
 
     /**
-     * Registers all configured views in the {@link SdkMeterProviderBuilder}.
+     * Registers all configured views in the provided {@link SdkMeterProviderBuilder}.
      *
      * @param builder the sdk builder to register views with
-     *
-     * @return the extended builder
      */
-    public SdkMeterProviderBuilder registerViews(SdkMeterProviderBuilder builder) {
+    public void registerViews(SdkMeterProviderBuilder builder) {
         Map<String, Map<String, ViewDefinitionSettings>> metricViews = getAllViewsForMetrics();
 
         for (Map.Entry<String, Map<String, ViewDefinitionSettings>> metricEntry : metricViews.entrySet()) {
@@ -53,7 +51,6 @@ public class ViewManager {
                 }
             }
         }
-        return builder;
     }
 
     /**
@@ -75,9 +72,13 @@ public class ViewManager {
      */
     private Map<String, Map<String, ViewDefinitionSettings>> getAllViewsForMetrics() {
         Map<String, Map<String, ViewDefinitionSettings>> metricViews = new HashMap<>();
-        configuration.getDefinitions()
+        configuration.getDefinitions().entrySet().stream()
+                .filter(e -> e.getValue().isEnabled())
                 .forEach((metricName, metricDefinition) -> metricViews.put(metricName, metricDefinition.getViews()));
+
         configuration.getSelfMonitoring().getMetrics()
+                .entrySet().stream()
+                .filter(e -> e.getValue().isEnabled())
                 .forEach((metricName, metricDefinition) -> metricViews.put(metricName, metricDefinition.getViews()));
 
         return metricViews;

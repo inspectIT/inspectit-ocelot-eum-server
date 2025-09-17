@@ -16,7 +16,7 @@ import java.util.Set;
 import static io.opentelemetry.sdk.metrics.internal.aggregator.ExplicitBucketHistogramUtils.DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES;
 
 /**
- * Defines a single OpenTelemetry view for a instrument.
+ * Defines a single OpenTelemetry view for a metric.
  * The name of the view is defined through the key in the map {@link MetricDefinitionSettings#getViews()}.
  */
 @Data
@@ -98,7 +98,7 @@ public class ViewDefinitionSettings {
 
     /**
      * The time window to use for windowed metrics.
-     * Can be null, in this case the default provided via {@link #getCopyWithDefaultsPopulated(String, String, Duration)}
+     * Can be null, in this case the default provided via {@link #getCopyWithDefaultsPopulated(String, String)}
      * is used.
      */
     @DurationMin(millis = 1L)

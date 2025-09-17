@@ -158,10 +158,13 @@ public class InstrumentManager {
      * @return true, if we should create an instrument
      */
     private boolean shouldCreateInstrument(MetricDefinitionSettings metricDefinition) {
-        boolean useDefaultView = CollectionUtils.isEmpty(metricDefinition.getViews());
-        return useDefaultView || metricDefinition.getViews()
-                .values().stream()
-                .anyMatch(view -> view.getAggregation().isOpenTelemetryAggregation());
+        if (metricDefinition.isEnabled()) {
+            boolean useDefaultView = CollectionUtils.isEmpty(metricDefinition.getViews());
+            return useDefaultView || metricDefinition.getViews()
+                    .values().stream()
+                    .anyMatch(view -> view.getAggregation().isOpenTelemetryAggregation());
+        }
+       return false;
     }
 
     /**
