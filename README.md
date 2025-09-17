@@ -259,12 +259,23 @@ The following properties are nested properties below the `inspectit-eum-server.e
 Since version 3.0.0 the InspectIT Ocelot EUM-Server does no longer support the InfluxDB exporter.
 Please use the OTLP Exporter instead.
 
+## Traces
+
+The inspectIT Ocelot EUM-server also offers a backend for JavaScript monitoring with the [OpenTelemetry-Boomerang-Plugin](https://github.com/inspectIT/boomerang-opentelemetry-plugin). 
+The self-made plugin allows to record traces via Boomerang and send them to the EUM-server. 
+You can include the plugin as any other boomerang plugin.
+
+If enabled, the server exposes the traces via [trace exporters](#trace-exporters).
+
 ### Trace Exporters
 
-Tracing exporters are responsible for passing the recorded tracing data to a corresponding storage.
+Trace exporters are responsible for passing the recorded tracing data to a corresponding storage.
 The inspectIT Ocelot EUM Server currently supports the following trace exporters:
 
 * [OTLP (Traces)](#otlp-exporter-traces) [[Homepage](https://opentelemetry.io/docs/languages/java/sdk/#otlp-exporters)]
+
+Furthermore, you can configure all exporters to mask IP addresses within attributes by setting
+`inspectit-eum-server.exporters.tracing.mask-span-ip-addresses` to `true`.
 
 ##### OTLP Exporter (Traces)
 
