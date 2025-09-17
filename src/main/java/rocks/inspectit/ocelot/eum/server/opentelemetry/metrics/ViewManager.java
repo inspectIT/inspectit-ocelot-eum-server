@@ -74,12 +74,12 @@ public class ViewManager {
         Map<String, Map<String, ViewDefinitionSettings>> metricViews = new HashMap<>();
         configuration.getDefinitions().entrySet().stream()
                 .filter(e -> e.getValue().isEnabled())
-                .forEach((metricName, metricDefinition) -> metricViews.put(metricName, metricDefinition.getViews()));
+                .forEach(e -> metricViews.put(e.getKey(), e.getValue().getViews()));
 
         configuration.getSelfMonitoring().getMetrics()
                 .entrySet().stream()
                 .filter(e -> e.getValue().isEnabled())
-                .forEach((metricName, metricDefinition) -> metricViews.put(metricName, metricDefinition.getViews()));
+                .forEach((e) -> metricViews.put(e.getKey(), e.getValue().getViews()));
 
         return metricViews;
     }
