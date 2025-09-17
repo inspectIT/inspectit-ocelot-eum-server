@@ -7,4 +7,10 @@
         <sha1>e5bc2949679b6214e8d9a1e5b707f2b42bb3fa13</sha1>
         <cve>CVE-2019-3826</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+        We do not use Spring Framework 5.0.5.RELEASE, but version 6+
+      ]]></notes>
+        <cve>CVE-2018-1258</cve>
+    </suppress>
 </suppressions>
