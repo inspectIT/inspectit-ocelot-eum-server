@@ -7,15 +7,9 @@
     <cve>CVE-2019-3826</cve>
     </suppress>
     <suppress>
-      <notes><![CDATA[
-        No Spring Boot update available for spring-security-core-6.5.2.jar (September 2025)
-      ]]></notes>
-    <cve>CVE-2018-1258</cve>
-    </suppress>
-    <suppress>
-      <notes><![CDATA[
-        No Spring Boot update available for tomcat-embed-core-10.1.43.jar (September 2025)
-      ]]></notes>
-    <cve>CVE-2025-48989</cve>
+        <notes><![CDATA[
+            We do not use Spring Framework 5.0.5.RELEASE, but version 6+
+        ]]></notes>
+        <cve>CVE-2018-1258</cve>
     </suppress>
 </suppressions>
