@@ -14,12 +14,12 @@ import java.util.*;
 /**
  * For the data within this window, percentiles and min / max values can be computed.
  */
-public class QuantilesView extends TimeWindowView {
+public class PercentilesView extends TimeWindowView {
 
     /**
      * The tag to use for the percentile or "min","max" respectively.
      */
-    private static final String PERCENTILE_TAG_KEY = "quantile";
+    private static final String PERCENTILE_TAG_KEY = "percentile";
 
     /**
      * The tag value to use for {@link #PERCENTILE_TAG_KEY} for the "minimum" series.
@@ -68,8 +68,8 @@ public class QuantilesView extends TimeWindowView {
      * @param includeMax  true, if the maximum value should be exposed as metric
      * @param includeMin  true, if the minimum value should be exposed as metric
      */
-    public QuantilesView(String viewName, String description, String unit, Set<String> attributes, Duration timeWindow, int bufferLimit,
-                         Set<Double> percentiles, boolean includeMax, boolean includeMin) {
+    public PercentilesView(String viewName, String description, String unit, Set<String> attributes, Duration timeWindow, int bufferLimit,
+                           Set<Double> percentiles, boolean includeMax, boolean includeMin) {
         super(viewName, description, unit, attributes, timeWindow, bufferLimit);
         validateConfiguration(includeMin, includeMax, percentiles);
 

@@ -12,7 +12,7 @@ public enum AggregationType {
     EXPONENTIAL_HISTOGRAM("exponential histogram"),
 
     // Calculate percentiles
-    QUANTILES("quantiles"),
+    PERCENTILES("percentiles"),
     // Dropping lower or higher values for average
     SMOOTHED_AVERAGE("smoothed average");
 
@@ -30,6 +30,6 @@ public enum AggregationType {
      * @return true, if this is a custom time-window aggregation
      */
     public boolean isTimeWindowAggregation() {
-        return this.equals(QUANTILES) || this.equals(SMOOTHED_AVERAGE);
+        return this.equals(PERCENTILES) || this.equals(SMOOTHED_AVERAGE);
     }
 }

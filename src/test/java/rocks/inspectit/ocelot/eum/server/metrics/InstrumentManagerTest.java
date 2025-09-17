@@ -58,7 +58,7 @@ class InstrumentManagerTest {
     void shouldNotCreateInstrumentAndProcessAttributesWhenTimeWindowView() {
         MetricDefinitionSettings metric = new MetricDefinitionSettings();
         ViewDefinitionSettings view = new ViewDefinitionSettings();
-        view.setAggregation(AggregationType.QUANTILES);
+        view.setAggregation(AggregationType.PERCENTILES);
         metric.setViews(Map.of("my-view", view));
 
         manager.createInstrument(metricName, metric);

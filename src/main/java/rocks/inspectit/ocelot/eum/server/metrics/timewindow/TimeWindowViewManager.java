@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.metrics.AttributesRegistry;
-import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.QuantilesView;
+import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.PercentilesView;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.SmoothedAverageView;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.TimeWindowView;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.worker.TimeWindowRecorder;
@@ -82,7 +82,7 @@ public class TimeWindowViewManager {
 
         TimeWindowView view = switch (settings.getAggregation()) {
             case SMOOTHED_AVERAGE -> registerSmoothedAverageView(viewName, unit, settings);
-            case QUANTILES -> registerQuantilesView(viewName, unit, settings);
+            case PERCENTILES -> registerPercentilesView(viewName, unit, settings);
             default -> throw new IllegalArgumentException("Unknow time-window aggregation:" + settings.getAggregation());
         };
 
@@ -100,7 +100,7 @@ public class TimeWindowViewManager {
         return new SmoothedAverageView(viewName, description, unit, attributes, timeWindow, bufferLimit, dropUpper, dropLower);
     }
 
-    private TimeWindowView registerQuantilesView(String viewName, String unit, ViewDefinitionSettings settings) {
+    private TimeWindowView registerPercentilesView(String viewName, String unit, ViewDefinitionSettings settings) {
         String description = settings.getDescription();
         Set<String> attributes = getAttributeKeysForView(settings);
         Duration timeWindow = settings.getTimeWindow();
@@ -112,7 +112,7 @@ public class TimeWindowViewManager {
                 .filter(p -> p > 0 && p < 1)
                 .collect(Collectors.toSet());
 
-        return new QuantilesView(viewName, description, unit, attributes, timeWindow, bufferLimit, percentilesFiltered, includeMin, includeMax);
+        return new PercentilesView(viewName, description, unit, attributes, timeWindow, bufferLimit, percentilesFiltered, includeMin, includeMax);
     }
 
     /**

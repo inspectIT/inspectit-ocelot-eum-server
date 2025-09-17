@@ -184,17 +184,17 @@ A metric is defined through the following properties:
 A view is defined through the following properties:
 
 * `name`: Defines the name of the view.
-* `aggregation`: There are OTel aggregations (`SUM`, `LAST_VALUE`, `HISTORGRAM`; `EXPONENTIAL_HISTOGRAM`) as well as custom aggregations (`QUANTILES`, `SMOOTHED_AVERAGE`).
+* `aggregation`: There are OTel aggregations (`SUM`, `LAST_VALUE`, `HISTORGRAM`; `EXPONENTIAL_HISTOGRAM`) as well as custom aggregations (`PERCENTILES`, `SMOOTHED_AVERAGE`).
 * `attributes`: Defines a list of attribute keys, which are exposed with the current metric.
 * `bucket-boundaries`: Used for the `HISTOGRAM` aggregation, defines the bucket boundaries as list of doubles.
 * `cardinality-limit`: Defines the maximum amount of unique combinations of attributes for this view.
 * `max-buckets`: Used for `EXPONENTIAL_HISTOGRAM`, defines the max number of positive buckets and negative buckets
 * `max-scale`: Used for `EXPONENTIAL_HISTOGRAM`, defines the maximum and initial scale.
-* `percentiles`: Used for `QUANTILES`, defines which percentiles shall be captured as list of doubles.
+* `percentiles`: Used for `PERCENTILES`, defines which percentiles shall be captured as list of doubles.
 * `drop-upper`: Used for `SMOOTHED_AVERAGE`, how many metrics in the upper range shall be dropped (0-1)
 * `drop-lower`: Used for `SMOOTHED_AVERAGE`, how many metrics in the lower range shall be dropped (0-1)
-* `time-window`: Used for `QUANTILES` & `SMOOTHED_AVERAGE` to group by metrics.
-* `max-buffered-points`: Used for `QUANTILES` & `SMOOTHED_AVERAGE`, to set a maximum amount of metrics per time-window.
+* `time-window`: Used for `PERCENTILES` & `SMOOTHED_AVERAGE` to group by metrics.
+* `max-buffered-points`: Used for `PERCENTILES` & `SMOOTHED_AVERAGE`, to set a maximum amount of metrics per time-window.
 * `description`: Defines an additional description of the exposed view (optional).
 
 #### Attributes Definition

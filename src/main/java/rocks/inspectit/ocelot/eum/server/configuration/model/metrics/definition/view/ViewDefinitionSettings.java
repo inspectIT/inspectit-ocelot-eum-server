@@ -72,7 +72,7 @@ public class ViewDefinitionSettings {
     private Integer maxScale = 20;
 
     /**
-     * In case the view is a quantile view, this list defines which percentiles shall be captured.
+     * In case the view is a percentile view, this list defines which percentiles shall be captured.
      * 0 corresponds to the minimum, 1 to the maximum
      */
     @Builder.Default
@@ -107,7 +107,7 @@ public class ViewDefinitionSettings {
 
     /**
      * The maximum number of points to be buffered by this View.
-     * Currently only relevant if the aggregation is QUANTILES or SMOOTHED_AVERAGE.
+     * Currently only relevant if the aggregation is PERCENTILES or SMOOTHED_AVERAGE.
      * <p>
      * If this number is exceeded, a warning will be printed and points will be rejected until space is free again.
      */
@@ -136,9 +136,9 @@ public class ViewDefinitionSettings {
         return result.build();
     }
 
-    @AssertFalse(message = "When using QUANTILES aggregation you must specify the quantiles to use!")
-    boolean isQuantilesNotSpecifiedForercentileType() {
-        return enabled && aggregation == AggregationType.QUANTILES && CollectionUtils.isEmpty(percentiles);
+    @AssertFalse(message = "When using PERCENTILES aggregation you must specify the percentiles to use!")
+    boolean isPercentilesNotSpecifiedForercentileType() {
+        return enabled && aggregation == AggregationType.PERCENTILES && CollectionUtils.isEmpty(percentiles);
     }
 
     @AssertFalse(message = "When using HISTOGRAM aggregation you must specify the bucket-boundaries!")
@@ -160,8 +160,8 @@ public class ViewDefinitionSettings {
         return true;
     }
 
-    @AssertTrue(message = "The quantiles must be in the range [0,1]")
-    boolean isQuantilesInRange() {
-        return !enabled || aggregation != AggregationType.QUANTILES || percentiles.stream().noneMatch(q -> q < 0 || q > 1);
+    @AssertTrue(message = "The percentiles must be in the range [0,1]")
+    boolean isPercentilesInRange() {
+        return !enabled || aggregation != AggregationType.PERCENTILES || percentiles.stream().noneMatch(q -> q < 0 || q > 1);
     }
 }

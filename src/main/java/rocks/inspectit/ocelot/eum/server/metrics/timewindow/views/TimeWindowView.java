@@ -158,7 +158,7 @@ public abstract class TimeWindowView {
             } else {
                 if (!overflowWarningPrinted) {
                     overflowWarningPrinted = true;
-                    log.warn("Dropping points for Percentiles-View '{}' because the buffer limit has been reached!" + " Quantiles/Min/Max will be meaningless." + " This warning will not be shown for future drops!", viewName);
+                    log.warn("Dropping points for Percentiles-View '{}' because the buffer limit has been reached!" + " Percentiles/Min/Max will be meaningless." + " This warning will not be shown for future drops!", viewName);
                 }
                 return false;
             }
