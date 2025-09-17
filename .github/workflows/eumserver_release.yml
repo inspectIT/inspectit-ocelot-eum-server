@@ -21,7 +21,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build project
-        run: ./gradlew assemble bootJar -PbuildVersion=${{ github.ref_name }}
+        run: ./gradlew assemble -PbuildVersion=${{ github.ref_name }}
         # copy jar into Docker folder
       - name: Prepare Docker artifact
         run: ./gradlew copyServerJar
@@ -35,9 +35,9 @@ jobs:
       - name: Add artifacts
         run: |
           mkdir artifacts
-          cp build/libs/*.jar ./artifacts
-          cp build/reports/bom.json ./artifacts
-          cp build/reports/bom.xml ./artifacts
+          cp ./build/libs/inspectit-ocelot-eum-server-${{ github.ref_name }}.jar ./artifacts
+          cp ./build/reports/bom.json ./artifacts
+          cp ./build/reports/bom.xml ./artifacts
       - name: Generate Release Hashes
         run: |
           cd ./artifacts
