@@ -2,8 +2,8 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 plugins {
     id "org.springframework.boot" version "${springBootVersion}"
-    id "org.cyclonedx.bom" version "${cyclonedxBomVersion}"
     id "io.spring.dependency-management" version "${springDependencyManangementVersion}"
+    id "org.cyclonedx.bom" version "${cyclonedxBomVersion}"
     id "org.owasp.dependencycheck" version "${owaspDependencyCheckVersion}"
     id "com.github.ben-manes.versions" version "${versionsPlugin}"
 }
@@ -13,7 +13,6 @@ repositories {
 }
 
 apply plugin: "java"
-apply plugin: "jacoco"
 
 group = "rocks.inspectit.ocelot"
 
@@ -120,17 +119,17 @@ test {
 
 dependencies {
     implementation(
-            // Spring Boot
+            // spring boot
             "org.springframework.boot:spring-boot-starter-web",
             "org.springframework.boot:spring-boot-starter-actuator",
             "org.springframework.boot:spring-boot-starter-validation",
             "org.springframework.boot:spring-boot-starter-security",
 
             "org.yaml:snakeyaml:${snakeYamlVersion}",
-            // Has to be included, but is transitive to spring
+            // has to be included, but is transitive to spring
             "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
 
-            // OpenTelemetry
+            // opentelemetry
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
@@ -141,10 +140,11 @@ dependencies {
             "io.opentelemetry.semconv:opentelemetry-semconv:${openTelemetrySemConvVersion}",
             "io.opentelemetry.proto:opentelemetry-proto:${openTelemetryProtoVersion}",
 
-            // Also OpenTelemetry related
+            // also opentelemetry related
             "com.google.protobuf:protobuf-java:${protobufVersion}",
             "com.google.protobuf:protobuf-java-util:${protobufVersion}",
 
+            // utils
             "com.google.guava:guava:${guavaVersion}",
             "com.maxmind.geoip2:geoip2:${geoip2Version}",
             "commons-net:commons-net:${commonsNetVersion}",
@@ -158,13 +158,13 @@ dependencies {
 
     testImplementation(
             "org.springframework.boot:spring-boot-starter-test",
-            "org.apache.httpcomponents:httpclient:${httpClientVersion}", // TODO Update to v5
+            "org.apache.httpcomponents.client5:httpclient5:${httpClientVersion}",
 
-            // ServerExtension
+            // server-extension
             "com.linecorp.armeria:armeria-junit5:${armeriaVersion}",
             "com.linecorp.armeria:armeria-grpc-protocol:${armeriaVersion}",
 
-            // Docker test containers
+            // docker test containers
             "org.testcontainers:testcontainers:${testContainersVersion}",
             "org.testcontainers:junit-jupiter:${testContainersVersion}"
     )

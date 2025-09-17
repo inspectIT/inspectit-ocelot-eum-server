@@ -86,7 +86,7 @@ class GzipCompressionMethodIntTest extends ExporterIntTestBaseWithOtelCollector 
     }
 
     @Test
-    void verifyOtlpGrpcMetrics() throws Exception { // TODO Fix
+    void verifyOtlpGrpcMetrics() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
         // fake beacon that we don't expect
         beacon.put(FAKE_BEACON_KEY_NAME, "1334");

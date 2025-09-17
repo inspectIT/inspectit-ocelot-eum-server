@@ -1,15 +1,14 @@
 package rocks.inspectit.ocelot.eum.server.exporters.metrics;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -66,7 +65,7 @@ class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase {
     @Test
     void testDefaultSettings() throws Exception {
         HttpGet httpGet = new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics");
-        int statusCode = httpClient.execute(httpGet).getStatusLine().getStatusCode();
+        int statusCode = httpClient.execute(httpGet).getCode();
 
         assertThat(statusCode).isEqualTo(200);
     }
@@ -82,9 +81,9 @@ class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase {
         sendBeacon(beacon);
 
         await().atMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
-            HttpResponse response = httpClient.execute(new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics)"));
-            ResponseHandler<String> responseHandler = new BasicResponseHandler();
-            assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+            ClassicHttpResponse response = httpClient.execute(new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics)"));
+            HttpClientResponseHandler<String> responseHandler = new BasicHttpClientResponseHandler();
+            assertThat(response.getCode()).isEqualTo(200);
             assertThat(responseHandler.handleResponse(response)).doesNotContain("Fake Value");
         });
     }
@@ -103,8 +102,8 @@ class PrometheusExporterServiceIntTest extends ExporterIntMockMvcTestBase {
         String metricKeyName = METRIC_LOAD_TIME_KEY_NAME.replaceAll("/","_");
 
         await().atMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
-            HttpResponse response = httpClient.execute(new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics)"));
-            ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            ClassicHttpResponse response = httpClient.execute(new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics)"));
+            HttpClientResponseHandler<String> responseHandler = new BasicHttpClientResponseHandler();
             String responseString = responseHandler.handleResponse(response);
             assertThat(responseString).contains(metricKeyName+"_milliseconds_sum{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",otel_scope_name=\"rocks.inspectit.ocelot\"} 12.0");
         });
