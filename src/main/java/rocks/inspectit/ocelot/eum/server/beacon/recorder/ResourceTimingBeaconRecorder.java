@@ -103,7 +103,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      * Records one {@link ResourceTimingEntry} to the exposed metric(s).
      *
      * @param resourceTimingEntry entry
-     * @param url                 URL of the page where the resource has been loaded from.
+     * @param url                 URL of the page where the resource has been loaded from
      */
     private void record(ResourceTimingEntry resourceTimingEntry, String url) {
         MetricDefinitionSettings metricDefinition = configuration.getDefinitions().get(RESOURCE_TIME_METRIC_NAME);

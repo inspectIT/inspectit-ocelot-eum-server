@@ -194,7 +194,7 @@ public class InstrumentManager {
     }
 
     /**
-     * Builds baggage with extra attributes.
+     * Builds baggage with extra attributes in case the view needs them.
      */
     public Baggage getBaggage() {
         BaggageBuilder builder = Baggage.current().toBuilder();

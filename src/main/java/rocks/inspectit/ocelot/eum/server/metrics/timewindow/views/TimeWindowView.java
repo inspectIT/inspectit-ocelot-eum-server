@@ -49,7 +49,7 @@ public abstract class TimeWindowView {
     private final AtomicLong lastCleanupTimeMs = new AtomicLong(0);
 
     /**
-     * Defines the attributes which are used for the view.
+     * Defines the attributes which are used for the view. Only these attributes can be recorded for the view!
      * E.g. if the attribute "http_path" is used, quantiles will be computed for each http_path individually.
      * <p>
      * The attribute values are stored in a fixed order in the keys of {@link #seriesValues} for each series.
@@ -207,8 +207,10 @@ public abstract class TimeWindowView {
         String[] orderedValues = new String[attributeIndices.size()];
 
         baggage.forEach((key, value) -> {
-            int idx = attributeIndices.get(key);
-            orderedValues[idx] = value.getValue();
+            if (attributeIndices.containsKey(key)) { // Only care about baggage which is configured for the view
+                int idx = attributeIndices.get(key);
+                orderedValues[idx] = value.getValue();
+            }
         });
 
         return Arrays.asList(orderedValues);
@@ -336,9 +338,10 @@ public abstract class TimeWindowView {
         }
 
         private DoublePointData createPointData(Instant time, Attributes attributes, double value) {
+            long timestamp = time.toEpochMilli() * 1_000_000 + time.getNano();
             return ImmutableDoublePointData.create(
-                    time.getNano(),
-                    time.getNano(),
+                    timestamp,
+                    timestamp,
                     attributes,
                     value
             );

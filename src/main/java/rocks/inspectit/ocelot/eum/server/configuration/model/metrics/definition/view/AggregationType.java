@@ -6,15 +6,15 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AggregationType {
 
-    LAST_VALUE("last value"),
-    SUM("sum"),
-    HISTOGRAM("explicit histogram"),
-    EXPONENTIAL_HISTOGRAM("exponential histogram"),
+    LAST_VALUE("Last value"),
+    SUM("Sum"),
+    HISTOGRAM("Explicit histogram"),
+    EXPONENTIAL_HISTOGRAM("Exponential histogram"),
 
     // Calculate percentiles with raw values
-    QUANTILES("quantiles"),
+    QUANTILES("Quantiles"),
     // Dropping lower or higher values for average
-    SMOOTHED_AVERAGE("smoothed average");
+    SMOOTHED_AVERAGE("Smoothed average");
 
     @Getter
     private final String readableName;

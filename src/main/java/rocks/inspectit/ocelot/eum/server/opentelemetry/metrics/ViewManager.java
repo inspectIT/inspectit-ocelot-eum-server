@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.AggregationType;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.TimeWindowViewManager;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 /**
  * Registers all user-specified metric views.
@@ -74,7 +74,11 @@ public class ViewManager {
         Map<String, Map<String, ViewDefinitionSettings>> metricViews = new HashMap<>();
         configuration.getDefinitions().entrySet().stream()
                 .filter(e -> e.getValue().isEnabled())
-                .forEach(e -> metricViews.put(e.getKey(), e.getValue().getViews()));
+                .forEach(e -> {
+                    String metricName = e.getKey();
+                    MetricDefinitionSettings metricDefinition = e.getValue().getCopyWithDefaultsPopulated(metricName);
+                    metricViews.put(metricName, metricDefinition.getViews());
+                });
 
         configuration.getSelfMonitoring().getMetrics()
                 .entrySet().stream()
