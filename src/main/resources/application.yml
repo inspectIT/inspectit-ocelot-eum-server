@@ -226,7 +226,7 @@ inspectit-eum-server:
     enabled: true
 
     # the prefix used for the self-monitoring metrics
-    metricPrefix: "inspectit-eum/self/"
+    metricPrefix: "inspectit_eum_self_"
 
     # definitions of the self-monitoring metrics
     metrics:
@@ -236,7 +236,7 @@ inspectit-eum-server:
         value-type: LONG
         unit: amount
         views:
-          '[inspectit-eum/self/beacons_received]':
+          inspectit_eum_self_beacons_received:
             aggregation: SUM
             attributes:
               is_error: true
@@ -246,7 +246,7 @@ inspectit-eum-server:
         value-type: LONG
         unit: amount
         views:
-          '[inspectit-eum/self/beacons_export]':
+          inspectit_eum_self_beacons_export:
             aggregation: HISTOGRAM
             attributes:
               exporter: true
@@ -258,7 +258,7 @@ inspectit-eum-server:
         unit: amount
         views:
           # the amount of elements in a single export execution
-          '[inspectit-eum/self/beacons_export/batch]':
+          inspectit_eum_self_beacons_export_batch:
             aggregation: SUM
             attributes:
               exporter: true
@@ -269,7 +269,7 @@ inspectit-eum-server:
         value-type: LONG
         unit: amount
         views:
-          '[inspectit-eum/self/beacons_processor]':
+          inspectit_eum_self_beacons_processor:
             aggregation: HISTOGRAM
             attributes:
               beacon_processor: true
@@ -280,7 +280,7 @@ inspectit-eum-server:
         value-type: LONG
         unit: amount
         views:
-          '[inspectit-eum/self/traces_received]':
+          inspectit_eum_self_traces_received:
             aggregation: HISTOGRAM
             attributes:
               is_error: true
@@ -290,7 +290,7 @@ inspectit-eum-server:
         value-type: LONG
         unit: amount
         views:
-          '[inspectit-eum/self/traces_span_size]':
+          inspectit_eum_self_traces_span_size:
             aggregation: SUM
             attributes:
               is_error: true
