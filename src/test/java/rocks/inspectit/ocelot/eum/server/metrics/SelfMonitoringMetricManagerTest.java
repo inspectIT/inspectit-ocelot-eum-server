@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.eum.server.metrics;
 
+import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.InstrumentValueType;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +50,7 @@ class SelfMonitoringMetricManagerTest {
                     .attribute("TAG_1", true)
                     .build();
             Map<String, ViewDefinitionSettings> views = new HashMap<>();
-            views.put("inspectit-eum/self/beacons_received", view);
+            views.put("beacons_received", view);
 
             MetricDefinitionSettings dummyMetricDefinition = MetricDefinitionSettings.builder()
                     .description("Dummy description")
@@ -64,7 +65,7 @@ class SelfMonitoringMetricManagerTest {
             definitionMap.put("beacons_received", dummyMetricDefinition);
             selfMonitoringSettings.setEnabled(true);
             selfMonitoringSettings.setMetrics(definitionMap);
-            selfMonitoringSettings.setMetricPrefix("inspectit-eum/self/");
+            selfMonitoringSettings.setMetricPrefix("inspectit_eum_self_");
         }
 
         @Test
@@ -93,10 +94,24 @@ class SelfMonitoringMetricManagerTest {
             selfMonitoringMetricManager.initMetrics();
 
             ArgumentCaptor<MetricDefinitionSettings> mdsCaptor = ArgumentCaptor.forClass(MetricDefinitionSettings.class);
-            verify(instrumentManager).createInstrument(eq("inspectit-eum/self/beacons_received"), mdsCaptor.capture());
+            verify(instrumentManager).createInstrument(eq("inspectit_eum_self_beacons_received"), mdsCaptor.capture());
             verifyNoMoreInteractions(instrumentManager);
 
-            assertThat(mdsCaptor.getValue().getViews().keySet()).containsExactly("inspectit-eum/self/beacons_received");
+            assertThat(mdsCaptor.getValue().getViews().keySet()).containsExactly("inspectit_eum_self_beacons_received");
+        }
+
+        @Test
+        void verifyViewIsRecorded() {
+            when(configuration.getSelfMonitoring()).thenReturn(selfMonitoringSettings);
+            when(instrumentManager.getBaggage(any())).thenReturn(Baggage.empty());
+
+            selfMonitoringMetricManager.record("beacons_received", 1);
+
+            ArgumentCaptor<MetricDefinitionSettings> mdsCaptor = ArgumentCaptor.forClass(MetricDefinitionSettings.class);
+            verify(instrumentManager).recordMetric(eq("inspectit_eum_self_beacons_received"), mdsCaptor.capture(), any(Number.class));
+            verifyNoMoreInteractions(instrumentManager);
+
+            assertThat(mdsCaptor.getValue().getViews().keySet()).containsExactly("inspectit_eum_self_beacons_received");
         }
     }
 }

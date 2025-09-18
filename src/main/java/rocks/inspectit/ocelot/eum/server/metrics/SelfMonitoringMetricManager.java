@@ -29,34 +29,34 @@ public class SelfMonitoringMetricManager {
      */
     public void initMetrics() {
         SelfMonitoringSettings selfMonitoringSettings = configuration.getSelfMonitoring();
-        for (Map.Entry<String, MetricDefinitionSettings> metricEntry : selfMonitoringSettings.getMetrics().entrySet()) {
-            String measureName = metricEntry.getKey();
+        for (Map.Entry<String, MetricDefinitionSettings> metricEntry : selfMonitoringSettings.getMetricsWithPrefixedViews().entrySet()) {
+            String metricName = metricEntry.getKey();
             MetricDefinitionSettings metricDefinitionSettings = metricEntry.getValue();
 
-            String metricName = selfMonitoringSettings.getMetricPrefix() + measureName;
+            String fullMetricName = selfMonitoringSettings.getMetricPrefix() + metricName;
             log.info("Registering self-monitoring metric: {}", metricName);
 
-            instrumentManager.createInstrument(metricName, metricDefinitionSettings);
+            instrumentManager.createInstrument(fullMetricName, metricDefinitionSettings);
         }
     }
 
     /**
-     * Records a self-monitoring measurement with the common attributes.
-     * Only records a measurement if self monitoring is enabled.
+     * Records a self-monitoring metric with the common attributes.
+     * Only records a metric if self monitoring is enabled.
      *
-     * @param measureName the name of the measure, excluding the metrics prefix
-     * @param value       the actual value
-     * @param customAttributes  custom attributes
+     * @param metricName        the name of the metric, excluding the metrics prefix
+     * @param value             the value to record
+     * @param customAttributes  the custom attributes for the metric
      */
-    public void record(String measureName, Number value, Map<String, String> customAttributes) {
+    public void record(String metricName, Number value, Map<String, String> customAttributes) {
         SelfMonitoringSettings selfMonitoringSettings = configuration.getSelfMonitoring();
-        if (selfMonitoringSettings.isEnabled() && selfMonitoringSettings.getMetrics().containsKey(measureName)) {
-            MetricDefinitionSettings metricDefinitionSettings = selfMonitoringSettings.getMetrics().get(measureName);
+        if (selfMonitoringSettings.isEnabled() && selfMonitoringSettings.getMetrics().containsKey(metricName)) {
+            MetricDefinitionSettings metricDefinition = selfMonitoringSettings.getMetricsWithPrefixedViews().get(metricName);
 
-            String metricName = selfMonitoringSettings.getMetricPrefix() + measureName;
+            String fullMetricName = selfMonitoringSettings.getMetricPrefix() + metricName;
 
             try (Scope scope = instrumentManager.getBaggage(customAttributes).makeCurrent()) {
-                instrumentManager.recordMetric(metricName, metricDefinitionSettings, value);
+                instrumentManager.recordMetric(fullMetricName, metricDefinition, value);
             }
         }
     }
