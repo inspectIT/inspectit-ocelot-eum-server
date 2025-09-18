@@ -38,6 +38,7 @@ public class ViewDefinitionSettings {
      * The aggregation to use for this view
      */
     @NotNull
+    @Builder.Default
     private AggregationType aggregation = AggregationType.LAST_VALUE;
 
     /**
