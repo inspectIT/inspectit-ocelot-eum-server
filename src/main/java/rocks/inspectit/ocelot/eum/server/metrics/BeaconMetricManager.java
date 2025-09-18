@@ -19,6 +19,7 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfigurat
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.BeaconMetricDefinitionSettings;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -55,7 +56,7 @@ public class BeaconMetricManager {
     /**
      * Maps metric definitions to expressions
      */
-    private final Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new HashMap<>();
+    private final Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new ConcurrentHashMap<>();
 
     @PostConstruct
     void initMetrics() {
