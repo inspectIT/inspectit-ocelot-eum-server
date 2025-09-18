@@ -30,7 +30,7 @@ public class SmoothedAverageView extends TimeWindowView {
      * @param description      the description of this view
      * @param unit             the unit of the metric
      * @param attributes       the attribute keys to use for this view
-     * @param timeWindow       the time rang to use for computing minimum / maximum and percentile values
+     * @param timeWindow       the time rang to use for computing smoothed average values
      * @param bufferLimit      the maximum number of data-points to be buffered by this view
      * @param dropUpper        value in percentage in the range (0,1) which indicates how many metrics in the upper range shall be dropped
      * @param dropLower        value in percentage in the range (0,1) which indicates how many metrics in the lower range shall be dropped

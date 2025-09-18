@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.metrics.AttributesRegistry;
-import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.PercentilesView;
+import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.QuantilesView;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.SmoothedAverageView;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.TimeWindowView;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.worker.TimeWindowRecorder;
@@ -36,7 +36,7 @@ public class TimeWindowViewManager {
     private AttributesRegistry attributesRegistry;
 
     /**
-     * Maps the name of measures to registered percentile views.
+     * Maps the name of measures to registered time-window views
      */
     private final Map<String, CopyOnWriteArrayList<TimeWindowView>> measuresToViewsMap = new ConcurrentHashMap<>();
 
@@ -76,13 +76,13 @@ public class TimeWindowViewManager {
      * @param settings the (already validated) view settings
      */
     public synchronized void registerView(String metricName, String viewName, String unit, ViewDefinitionSettings settings) {
-        log.debug("Registering time-window metric: {}", metricName);
+        log.debug("Registering time-window view: {}", metricName);
 
         List<TimeWindowView> views = measuresToViewsMap.computeIfAbsent(metricName, (name) -> new CopyOnWriteArrayList<>());
 
         TimeWindowView view = switch (settings.getAggregation()) {
             case SMOOTHED_AVERAGE -> registerSmoothedAverageView(viewName, unit, settings);
-            case PERCENTILES -> registerPercentilesView(viewName, unit, settings);
+            case QUANTILES -> registerQuantilesView(viewName, unit, settings);
             default -> throw new IllegalArgumentException("Unknow time-window aggregation:" + settings.getAggregation());
         };
 
@@ -100,19 +100,19 @@ public class TimeWindowViewManager {
         return new SmoothedAverageView(viewName, description, unit, attributes, timeWindow, bufferLimit, dropUpper, dropLower);
     }
 
-    private TimeWindowView registerPercentilesView(String viewName, String unit, ViewDefinitionSettings settings) {
+    private TimeWindowView registerQuantilesView(String viewName, String unit, ViewDefinitionSettings settings) {
         String description = settings.getDescription();
         Set<String> attributes = getAttributeKeysForView(settings);
         Duration timeWindow = settings.getTimeWindow();
         int bufferLimit = settings.getMaxBufferedPoints();
-        Set<Double> percentiles = settings.getPercentiles();
-        boolean includeMin = percentiles.contains(0.0);
-        boolean includeMax = percentiles.contains(1.0);
-        Set<Double> percentilesFiltered = percentiles.stream()
+        Set<Double> quantiles = settings.getQuantiles();
+        boolean includeMin = quantiles.contains(0.0);
+        boolean includeMax = quantiles.contains(1.0);
+        Set<Double> quantilesFiltered = quantiles.stream()
                 .filter(p -> p > 0 && p < 1)
                 .collect(Collectors.toSet());
 
-        return new PercentilesView(viewName, description, unit, attributes, timeWindow, bufferLimit, percentilesFiltered, includeMin, includeMax);
+        return new QuantilesView(viewName, description, unit, attributes, timeWindow, bufferLimit, quantilesFiltered, includeMin, includeMax);
     }
 
     /**

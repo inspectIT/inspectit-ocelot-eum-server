@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static rocks.inspectit.ocelot.eum.server.metrics.timewindow.utils.TimeWindowTestUtils.assertContainsData;
 
-class PercentilesViewTest {
+class QuantilesViewTest {
 
     final String name = "name";
 
@@ -28,50 +28,50 @@ class PercentilesViewTest {
     class Constructor {
 
         @Test
-        void noPercentilesAndMinMaxSpecified() {
-            assertThatThrownBy(() -> new PercentilesView(name, desc, unit, Collections.emptySet(),
+        void noQuantilesAndMinMaxSpecified() {
+            assertThatThrownBy(() -> new QuantilesView(name, desc, unit, Collections.emptySet(),
                     Duration.ofSeconds(1), 1000, Collections.emptySet(), false, false))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
-        void invalidPercentile() {
-            assertThatThrownBy(() -> new PercentilesView(name, desc, unit, Collections.emptySet(),
+        void invalidQuantile() {
+            assertThatThrownBy(() -> new QuantilesView(name, desc, unit, Collections.emptySet(),
                     Duration.ofSeconds(1), 1000, Set.of(1.0), false, false))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         void blankName() {
-            assertThatThrownBy(() -> new PercentilesView(" ", desc, unit, Collections.emptySet(),
+            assertThatThrownBy(() -> new QuantilesView(" ", desc, unit, Collections.emptySet(),
                     Duration.ofSeconds(1), 1000, Collections.emptySet(), false, false))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         void blankDescription() {
-            assertThatThrownBy(() -> new PercentilesView(name, " ", unit, Collections.emptySet(),
+            assertThatThrownBy(() -> new QuantilesView(name, " ", unit, Collections.emptySet(),
                     Duration.ofSeconds(1), 1000, Collections.emptySet(), false, false))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         void blankUnit() {
-            assertThatThrownBy(() -> new PercentilesView(name, desc, " ", Collections.emptySet(),
+            assertThatThrownBy(() -> new QuantilesView(name, desc, " ", Collections.emptySet(),
                     Duration.ofSeconds(1), 1000, Collections.emptySet(), false, false))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         void invalidTimeWindow() {
-            assertThatThrownBy(() -> new PercentilesView(name, desc, unit, Collections.emptySet(),
+            assertThatThrownBy(() -> new QuantilesView(name, desc, unit, Collections.emptySet(),
                     Duration.ZERO, 1000, Collections.emptySet(), false, false))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         void invalidBufferSize() {
-            assertThatThrownBy(() -> new PercentilesView(name, desc, " ", Collections.emptySet(),
+            assertThatThrownBy(() -> new QuantilesView(name, desc, " ", Collections.emptySet(),
                     Duration.ofSeconds(1), 0, Collections.emptySet(), false, false))
                     .isInstanceOf(IllegalArgumentException.class);
         }
@@ -79,23 +79,23 @@ class PercentilesViewTest {
     }
 
     @Nested
-    class GetPercentileTag {
+    class GetQuantileAttribute {
 
         @Test
         void unnecessaryZeroesOmitted() {
-            String tag = PercentilesView.getPercentileTag(0.50);
+            String tag = QuantilesView.getQuantileAttribute(0.50);
             assertThat(tag).isEqualTo("0.5");
         }
 
         @Test
         void tooLongValueRoundedDown() {
-            String tag = PercentilesView.getPercentileTag(1.0 / 3);
+            String tag = QuantilesView.getQuantileAttribute(1.0 / 3);
             assertThat(tag).isEqualTo("0.33333");
         }
 
         @Test
         void tooLongValueRoundedUp() {
-            String tag = PercentilesView.getPercentileTag(1.0 / 3 * 2);
+            String tag = QuantilesView.getQuantileAttribute(1.0 / 3 * 2);
             assertThat(tag).isEqualTo("0.66667");
         }
     }
@@ -104,8 +104,8 @@ class PercentilesViewTest {
     class ComputeMetrics {
 
         @Test
-        void checkPercentileMetricData() {
-            TimeWindowView view = new PercentilesView(name, desc, unit, Set.of("my-tag"),
+        void checkQuantileMetricData() {
+            TimeWindowView view = new QuantilesView(name, desc, unit, Set.of("my-tag"),
                     Duration.ofMillis(10), 1, Set.of(0.5), false, false);
 
             Collection<MetricData> result = view.computeMetrics(Instant.now(), Resource.empty());
@@ -124,7 +124,7 @@ class PercentilesViewTest {
 
         @Test
         void checkMinMetricData() {
-            TimeWindowView view = new PercentilesView(name, desc, unit, Set.of("my-tag"),
+            TimeWindowView view = new QuantilesView(name, desc, unit, Set.of("my-tag"),
                     Duration.ofMillis(10), 1, Collections.emptySet(), false, true);
 
             Collection<MetricData> result = view.computeMetrics(Instant.now(), Resource.empty());
@@ -143,7 +143,7 @@ class PercentilesViewTest {
 
         @Test
         void checkMaxMetricData() {
-            TimeWindowView view = new PercentilesView(name, desc, unit, Set.of("my-tag"),
+            TimeWindowView view = new QuantilesView(name, desc, unit, Set.of("my-tag"),
                     Duration.ofMillis(10), 1, Collections.emptySet(), true, false);
 
             Collection<MetricData> result = view.computeMetrics(Instant.now(), Resource.empty());
@@ -162,7 +162,7 @@ class PercentilesViewTest {
 
         @Test
         void checkMinimumMetric() {
-            TimeWindowView view = new PercentilesView(name, desc, unit, Set.of("my-tag"),
+            TimeWindowView view = new QuantilesView(name, desc, unit, Set.of("my-tag"),
                     Duration.ofMillis(10), 4, Collections.emptySet(), false, true);
 
             insertValues(view);
@@ -175,7 +175,7 @@ class PercentilesViewTest {
 
         @Test
         void checkMaximumMetric() {
-            TimeWindowView view = new PercentilesView(name, desc, unit, Set.of("my-tag"),
+            TimeWindowView view = new QuantilesView(name, desc, unit, Set.of("my-tag"),
                     Duration.ofMillis(10), 4, Collections.emptySet(), true, false);
 
             insertValues(view);
@@ -187,8 +187,8 @@ class PercentilesViewTest {
         }
 
         @Test
-        void checkPercentileMetrics() {
-            TimeWindowView view = new PercentilesView(name, desc, unit, Set.of("my-tag"),
+        void checkQuantileMetrics() {
+            TimeWindowView view = new QuantilesView(name, desc, unit, Set.of("my-tag"),
                     Duration.ofMillis(10), 18, Set.of(0.5, 0.9), false, false);
 
             Baggage baggage1 = Baggage.builder().put("my-tag", "foo").build();
@@ -202,10 +202,10 @@ class PercentilesViewTest {
 
             Collection<MetricData> result = view.computeMetrics(Instant.now(), Resource.empty());
 
-            assertContainsData(result, name, 19, Map.of("my-tag", "foo", "percentile", "0.9"));
-            assertContainsData(result, name, 109, Map.of("my-tag", "bar", "percentile", "0.9"));
-            assertContainsData(result, name, 15, Map.of("my-tag", "foo", "percentile", "0.5"));
-            assertContainsData(result, name, 105, Map.of("my-tag", "bar", "percentile", "0.5"));
+            assertContainsData(result, name, 19, Map.of("my-tag", "foo", "quantile", "0.9"));
+            assertContainsData(result, name, 109, Map.of("my-tag", "bar", "quantile", "0.9"));
+            assertContainsData(result, name, 15, Map.of("my-tag", "foo", "quantile", "0.5"));
+            assertContainsData(result, name, 105, Map.of("my-tag", "bar", "quantile", "0.5"));
         }
     }
 

@@ -14,32 +14,32 @@ import java.util.*;
 /**
  * For the data within this window, percentiles and min / max values can be computed.
  */
-public class PercentilesView extends TimeWindowView {
+public class QuantilesView extends TimeWindowView {
 
     /**
-     * The tag to use for the percentile or "min","max" respectively.
+     * The attribute to use for the quantile or "min","max" respectively.
      */
-    private static final String PERCENTILE_TAG_KEY = "percentile";
+    private static final String QUANTILE_ATTRIBUTE_KEY = "quantile";
 
     /**
-     * The tag value to use for {@link #PERCENTILE_TAG_KEY} for the "minimum" series.
+     * The attribute value to use for {@link #QUANTILE_ATTRIBUTE_KEY} for the "minimum" series.
      */
     private static final String MIN_METRIC_SUFFIX = "_min";
 
     /**
-     * The tag value to use for {@link #PERCENTILE_TAG_KEY} for the "maximum" series.
+     * The attribute value to use for {@link #QUANTILE_ATTRIBUTE_KEY} for the "maximum" series.
      */
     private static final String MAX_METRIC_SUFFIX = "_max";
 
     /**
-     * The formatter used to print percentiles to tags.
+     * The formatter used to print quantiles to attributes.
      */
-    private static final DecimalFormat PERCENTILE_TAG_FORMATTER = new DecimalFormat("#.#####", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+    private static final DecimalFormat QUANTILE_TAG_FORMATTER = new DecimalFormat("#.#####", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
 
     /**
-     * The descriptor of the metric for this view, if percentile.
+     * The descriptor of the metric for this view, if quantile.
      */
-    private MetricInfo percentileMetricInfo;
+    private MetricInfo quantileMetricInfo;
 
     /**
      * If not null, the minimum value will be exposed as this gauge.
@@ -52,31 +52,31 @@ public class PercentilesView extends TimeWindowView {
     private MetricInfo maxMetricInfo;
 
     /**
-     * The percentiles to compute in the range (0,1)
+     * The quantiles to compute in the range (0,1)
      */
     @Getter
-    private final Set<Double> percentiles;
+    private final Set<Double> quantiles;
 
     /**
      * @param viewName    the prefix to use for the names of all exposed metrics
      * @param description the description of this view
      * @param unit        the unit of the measure
      * @param attributes  the attribute keys to use for this view
-     * @param timeWindow  the time range to use for computing minimum / maximum and percentile values
+     * @param timeWindow  the time range to use for computing minimum / maximum and quantile values
      * @param bufferLimit the maximum number of measurements to be buffered by this view
-     * @param percentiles the set of percentiles in the range (0,1) which shall be provided as metrics
+     * @param quantiles   the set of quantiles in the range (0,1) which shall be provided as metrics
      * @param includeMax  true, if the maximum value should be exposed as metric
      * @param includeMin  true, if the minimum value should be exposed as metric
      */
-    public PercentilesView(String viewName, String description, String unit, Set<String> attributes, Duration timeWindow, int bufferLimit,
-                           Set<Double> percentiles, boolean includeMax, boolean includeMin) {
+    public QuantilesView(String viewName, String description, String unit, Set<String> attributes, Duration timeWindow, int bufferLimit,
+                         Set<Double> quantiles, boolean includeMax, boolean includeMin) {
         super(viewName, description, unit, attributes, timeWindow, bufferLimit);
-        validateConfiguration(includeMin, includeMax, percentiles);
+        validateConfiguration(includeMin, includeMax, quantiles);
 
-        this.percentiles = new HashSet<>(percentiles);
+        this.quantiles = new HashSet<>(quantiles);
 
-        if (!percentiles.isEmpty()) {
-            this.percentileMetricInfo = new MetricInfo(viewName, description, unit);
+        if (!quantiles.isEmpty()) {
+            this.quantileMetricInfo = new MetricInfo(viewName, description, unit);
         }
         if (includeMin) {
             this.minMetricInfo = new MetricInfo(viewName + MIN_METRIC_SUFFIX, description, unit);
@@ -86,12 +86,12 @@ public class PercentilesView extends TimeWindowView {
         }
     }
 
-    private void validateConfiguration(boolean includeMin, boolean includeMax, Set<Double> percentiles) {
-        percentiles.stream().filter(p -> p <= 0.0 || p >= 1.0).forEach(p -> {
-            throw new IllegalArgumentException("Percentiles must be in range (0,1)");
+    private void validateConfiguration(boolean includeMin, boolean includeMax, Set<Double> quantiles) {
+        quantiles.stream().filter(q -> q <= 0.0 || q >= 1.0).forEach(q -> {
+            throw new IllegalArgumentException("Quantiles must be in range (0,1)");
         });
-        if (percentiles.isEmpty() && !includeMin && !includeMax) {
-            throw new IllegalArgumentException("You must specify at least one percentile or enable minimum or maximum computation!");
+        if (quantiles.isEmpty() && !includeMin && !includeMax) {
+            throw new IllegalArgumentException("You must specify at least one quantile or enable minimum or maximum computation!");
         }
     }
 
@@ -104,8 +104,8 @@ public class PercentilesView extends TimeWindowView {
     }
 
     @VisibleForTesting
-    static String getPercentileTag(double percentile) {
-        return PERCENTILE_TAG_FORMATTER.format(percentile);
+    static String getQuantileAttribute(double quantile) {
+        return QUANTILE_TAG_FORMATTER.format(quantile);
     }
 
     @Override
@@ -117,8 +117,8 @@ public class PercentilesView extends TimeWindowView {
         if (isMaxEnabled()) {
             metrics.add(maxMetricInfo);
         }
-        if (!percentiles.isEmpty()) {
-            metrics.add(percentileMetricInfo);
+        if (!quantiles.isEmpty()) {
+            metrics.add(quantileMetricInfo);
         }
         return metrics;
     }
@@ -139,15 +139,15 @@ public class PercentilesView extends TimeWindowView {
                 resultSeries.add(maxMetricInfo, time, attributes, maxValue);
             }
         }
-        if (!percentiles.isEmpty()) {
+        if (!quantiles.isEmpty()) {
             Percentile percentileComputer = new Percentile();
             percentileComputer.setData(data);
-            for (double percentile : percentiles) {
-                double percentileValue = percentileComputer.evaluate(percentile * 100);
-                Attributes attributesWithPercentile = attributes.toBuilder()
-                        .put(PERCENTILE_TAG_KEY, getPercentileTag(percentile))
+            for (double quantile : quantiles) {
+                double percentileValue = percentileComputer.evaluate(quantile * 100);
+                Attributes attributesWithQuantile = attributes.toBuilder()
+                        .put(QUANTILE_ATTRIBUTE_KEY, getQuantileAttribute(quantile))
                         .build();
-                resultSeries.add(percentileMetricInfo, time, attributesWithPercentile, percentileValue);
+                resultSeries.add(quantileMetricInfo, time, attributesWithQuantile, percentileValue);
             }
         }
     }

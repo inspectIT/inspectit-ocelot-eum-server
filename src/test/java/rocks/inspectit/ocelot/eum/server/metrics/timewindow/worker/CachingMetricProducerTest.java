@@ -10,7 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.TimeWindowViewManager;
-import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.PercentilesView;
+import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.QuantilesView;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.SmoothedAverageView;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.views.TimeWindowView;
 
@@ -37,15 +37,15 @@ class CachingMetricProducerTest {
 
     static final String metricName = "test";
 
-    static final String percentileViewName = "test/percentiles";
+    static final String quantileViewName = "test/quantiles";
 
     static final String smoothedAvgViewName = "test/smoothed/average";
 
     @BeforeEach
     void createViews() {
-        TimeWindowView percentilesView = createPercentilesView(1000);
+        TimeWindowView quantilesView = createQuantilesView(1000);
         TimeWindowView smoothedAvgView = createSmoothedAverageView(1000);
-        List<TimeWindowView> views = List.of(percentilesView, smoothedAvgView);
+        List<TimeWindowView> views = List.of(quantilesView, smoothedAvgView);
         lenient().when(viewManager.areAnyViewsRegistered(metricName)).thenReturn(true);
         lenient().when(viewManager.getAllViews()).thenReturn(views);
         lenient().when(viewManager.getViews(metricName)).thenReturn(views);
@@ -70,10 +70,10 @@ class CachingMetricProducerTest {
 
         assertThat(result).hasSize(4);
         assertTotalSeriesCount(result, 5);
-        assertContainsData(result, percentileViewName, 50, Map.of("percentile", "0.5"));
-        assertContainsData(result, percentileViewName, 95, Map.of("percentile", "0.95"));
-        assertContainsData(result, percentileViewName + "_max", 99, emptyMap());
-        assertContainsData(result, percentileViewName + "_min", 1, emptyMap());
+        assertContainsData(result, quantileViewName, 50, Map.of("quantile", "0.5"));
+        assertContainsData(result, quantileViewName, 95, Map.of("quantile", "0.95"));
+        assertContainsData(result, quantileViewName + "_max", 99, emptyMap());
+        assertContainsData(result, quantileViewName + "_min", 1, emptyMap());
         assertContainsData(result, smoothedAvgViewName, 50, emptyMap());
     }
 
@@ -95,14 +95,14 @@ class CachingMetricProducerTest {
         assertThat(result).hasSize(4);
         assertTotalSeriesCount(result, 10);
 
-        assertContainsData(result, percentileViewName, 50, Map.of("percentile", "0.5"));
-        assertContainsData(result, percentileViewName, 95, Map.of("percentile", "0.95"));
-        assertContainsData(result, percentileViewName, 1050, Map.of("key1", "foo", "key2", "bar", "percentile", "0.5"));
-        assertContainsData(result, percentileViewName, 1095, Map.of("key1", "foo", "key2", "bar", "percentile", "0.95"));
-        assertContainsData(result, percentileViewName + "_min", 1, emptyMap());
-        assertContainsData(result, percentileViewName + "_min", 1001, Map.of("key1", "foo", "key2", "bar"));
-        assertContainsData(result, percentileViewName + "_max", 99, emptyMap());
-        assertContainsData(result, percentileViewName + "_max", 1099, Map.of("key1", "foo", "key2", "bar"));
+        assertContainsData(result, quantileViewName, 50, Map.of("quantile", "0.5"));
+        assertContainsData(result, quantileViewName, 95, Map.of("quantile", "0.95"));
+        assertContainsData(result, quantileViewName, 1050, Map.of("key1", "foo", "key2", "bar", "quantile", "0.5"));
+        assertContainsData(result, quantileViewName, 1095, Map.of("key1", "foo", "key2", "bar", "quantile", "0.95"));
+        assertContainsData(result, quantileViewName + "_min", 1, emptyMap());
+        assertContainsData(result, quantileViewName + "_min", 1001, Map.of("key1", "foo", "key2", "bar"));
+        assertContainsData(result, quantileViewName + "_max", 99, emptyMap());
+        assertContainsData(result, quantileViewName + "_max", 1099, Map.of("key1", "foo", "key2", "bar"));
         assertContainsData(result, smoothedAvgViewName, 50, emptyMap());
         assertContainsData(result, smoothedAvgViewName, 1050, Map.of("key1", "foo", "key2", "bar"));
     }
@@ -124,9 +124,9 @@ class CachingMetricProducerTest {
 
     @Test
     void testDroppingBecauseBufferIsFull() {
-        TimeWindowView percentilesView = createPercentilesView(10);
+        TimeWindowView quantilesView = createQuantilesView(10);
         TimeWindowView smoothedAvgView = createSmoothedAverageView(10);
-        List<TimeWindowView> views = List.of(percentilesView, smoothedAvgView);
+        List<TimeWindowView> views = List.of(quantilesView, smoothedAvgView);
         when(viewManager.getAllViews()).thenReturn(views);
         when(viewManager.getViews(metricName)).thenReturn(views);
 
@@ -141,15 +141,15 @@ class CachingMetricProducerTest {
 
         assertThat(result).hasSize(4);
         assertTotalSeriesCount(result, 5);
-        assertContainsData(result, percentileViewName + "_min", 11.0, Map.of("key1", "foo"));
+        assertContainsData(result, quantileViewName + "_min", 11.0, Map.of("key1", "foo"));
         assertContainsData(result, smoothedAvgViewName, 15.5, Map.of("key1", "foo"));
     }
 
     @Test
     void testDroppingPreventedThroughCleanupTask() throws Exception {
-        TimeWindowView percentilesView = createPercentilesView(10);
+        TimeWindowView quantilesView = createQuantilesView(10);
         TimeWindowView smoothedAvgView = createSmoothedAverageView(10);
-        List<TimeWindowView> views = List.of(percentilesView, smoothedAvgView);
+        List<TimeWindowView> views = List.of(quantilesView, smoothedAvgView);
         when(viewManager.getAllViews()).thenReturn(views);
         when(viewManager.getViews(metricName)).thenReturn(views);
 
@@ -170,7 +170,7 @@ class CachingMetricProducerTest {
 
         assertThat(result).hasSize(4);
         assertTotalSeriesCount(result, 5);
-        assertContainsData(result, percentileViewName + "_min", 1000, Map.of("key1", "foo"));
+        assertContainsData(result, quantileViewName + "_min", 1000, Map.of("key1", "foo"));
         assertContainsData(result, smoothedAvgViewName, 1000, Map.of("key1", "foo"));
     }
 
@@ -194,8 +194,8 @@ class CachingMetricProducerTest {
         assertThat(result1).isNotSameAs(result2);
     }
 
-    static TimeWindowView createPercentilesView(int bufferLimit) {
-        return new PercentilesView(percentileViewName, "desc", "ms", Set.of("key1", "key2"),
+    static TimeWindowView createQuantilesView(int bufferLimit) {
+        return new QuantilesView(quantileViewName, "desc", "ms", Set.of("key1", "key2"),
                 Duration.ofMillis(200), bufferLimit, Set.of(0.5, 0.95), true, true);
     }
 

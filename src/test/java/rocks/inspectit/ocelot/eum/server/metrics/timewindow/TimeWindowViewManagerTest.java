@@ -49,7 +49,7 @@ class TimeWindowViewManagerTest {
         settings.setDescription(desc);
         settings.setTimeWindow(timeWindow);
         settings.setMaxBufferedPoints(bufferLimit);
-        settings.setAggregation(AggregationType.PERCENTILES);
+        settings.setAggregation(AggregationType.QUANTILES);
         settings.setAttributes(Collections.emptyMap());
 
         viewManager.registerView(metricName, viewName, unit, settings);

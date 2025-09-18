@@ -50,7 +50,7 @@ public abstract class TimeWindowView {
 
     /**
      * Defines the attributes which are used for the view.
-     * E.g. if the attribute "http_path" is used, percentiles will be computed for each http_path individually.
+     * E.g. if the attribute "http_path" is used, quantiles will be computed for each http_path individually.
      * <p>
      * The attribute values are stored in a fixed order in the keys of {@link #seriesValues} for each series.
      * The values here define at which position within these arrays the corresponding attribute value is found.
@@ -96,7 +96,7 @@ public abstract class TimeWindowView {
      * @param description      the description of this view
      * @param unit             the unit of the measure
      * @param attributes       the attribute keys to use for this view
-     * @param timeWindow       the time range to use for computing minimum / maximum and percentile values
+     * @param timeWindow       the time range to use for computing minimum / maximum and quantiles values
      * @param bufferLimit      the maximum number of measurements to be buffered by this view
      */
     TimeWindowView(String viewName, String description, String unit, Set<String> attributes, Duration timeWindow, int bufferLimit) {
@@ -158,7 +158,7 @@ public abstract class TimeWindowView {
             } else {
                 if (!overflowWarningPrinted) {
                     overflowWarningPrinted = true;
-                    log.warn("Dropping points for Percentiles-View '{}' because the buffer limit has been reached!" + " Percentiles/Min/Max will be meaningless." + " This warning will not be shown for future drops!", viewName);
+                    log.warn("Dropping points for Quantiles-View '{}' because the buffer limit has been reached!" + " Quantiles/Min/Max will be meaningless." + " This warning will not be shown for future drops!", viewName);
                 }
                 return false;
             }
@@ -217,11 +217,11 @@ public abstract class TimeWindowView {
     protected abstract Collection<MetricInfo> getMetrics();
 
     /**
-     * Computes the defined percentile and min / max metrics.
+     * Computes the defined quantiles and min / max metrics.
      *
      * @param time the current timestamp
      *
-     * @return the metrics containing the percentiles and min / max
+     * @return the metrics containing the quantiles and min / max
      */
     public Collection<MetricData> computeMetrics(Instant time, Resource resource) {
         removeStalePoints(time);
