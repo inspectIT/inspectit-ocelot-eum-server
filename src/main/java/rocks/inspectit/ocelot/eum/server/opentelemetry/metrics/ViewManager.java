@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.eum.server.opentelemetry.metrics;
 
 import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.sdk.metrics.*;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -31,9 +32,9 @@ public class ViewManager {
      * @param builder the sdk builder to register views with
      */
     public void registerViews(SdkMeterProviderBuilder builder) {
-        Map<String, Map<String, ViewDefinitionSettings>> metricViews = getAllViewsForMetrics();
+        val metricViews = getAllActiveViewsForMetrics();
 
-        for (Map.Entry<String, Map<String, ViewDefinitionSettings>> metricEntry : metricViews.entrySet()) {
+        for (val metricEntry : metricViews.entrySet()) {
             String metricName = metricEntry.getKey();
             Map<String, ViewDefinitionSettings> viewDefinitionSettings = metricEntry.getValue();
 
@@ -68,24 +69,46 @@ public class ViewManager {
     }
 
     /**
-     * @return the map of all metric names and their particular view settings
+     * @return the map of all metric names and their particular active views
      */
-    private Map<String, Map<String, ViewDefinitionSettings>> getAllViewsForMetrics() {
+    private Map<String, Map<String, ViewDefinitionSettings>> getAllActiveViewsForMetrics() {
         Map<String, Map<String, ViewDefinitionSettings>> metricViews = new HashMap<>();
+
+        // check self-monitoring definitions
+        configuration.getSelfMonitoring().getMetrics()
+                .entrySet().stream()
+                .filter(e -> e.getValue().isEnabled())
+                .forEach((e) -> {
+                    String metricName = e.getKey();
+                    MetricDefinitionSettings metricDefinition = e.getValue().getCopyWithDefaultsPopulated(metricName);
+
+                    Map<String, ViewDefinitionSettings> activeViews = getActiveViews(metricDefinition);
+                    metricViews.put(metricName, activeViews);
+                });
+
+        // check beacon metric definitions
         configuration.getDefinitions().entrySet().stream()
                 .filter(e -> e.getValue().isEnabled())
                 .forEach(e -> {
                     String metricName = e.getKey();
                     MetricDefinitionSettings metricDefinition = e.getValue().getCopyWithDefaultsPopulated(metricName);
-                    metricViews.put(metricName, metricDefinition.getViews());
+
+                    Map<String, ViewDefinitionSettings> activeViews = getActiveViews(metricDefinition);
+                    metricViews.put(metricName, activeViews);
                 });
 
-        configuration.getSelfMonitoring().getMetrics()
-                .entrySet().stream()
-                .filter(e -> e.getValue().isEnabled())
-                .forEach((e) -> metricViews.put(e.getKey(), e.getValue().getViews()));
-
         return metricViews;
+    }
+
+    /**
+     * @return the map of all active views for the provided metric definition
+     */
+    private Map<String, ViewDefinitionSettings> getActiveViews(MetricDefinitionSettings metricDefinition) {
+        Map<String, ViewDefinitionSettings> activeViews = new HashMap<>();
+        metricDefinition.getViews().entrySet().stream()
+                .filter(e -> e.getValue().isEnabled())
+                .forEach(e -> activeViews.put(e.getKey(), e.getValue()));
+        return activeViews;
     }
 
     /**
