@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricProducer;
 import io.opentelemetry.sdk.resources.Resource;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.TimeWindowViewManager;
@@ -23,7 +22,7 @@ import java.util.Collection;
  * Otherwise, e.g. spamming F5 on the prometheus endpoint could lead to an increased CPU usage.
  */
 @Component
-public class CachingMetricProducer implements MetricProducer {
+public class TimeWindowMetricProducer implements MetricProducer {
 
     @Autowired
     private TimeWindowViewManager viewManager;

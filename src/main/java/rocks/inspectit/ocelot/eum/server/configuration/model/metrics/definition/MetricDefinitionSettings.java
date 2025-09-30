@@ -8,9 +8,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.util.CollectionUtils;
+import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.AggregationType;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
 
-import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,7 +40,7 @@ public class MetricDefinitionSettings {
 
     @NotNull
     @Builder.Default
-    private InstrumentValueType valueType = InstrumentValueType.DOUBLE;
+    private InstrumentValueType valueType = InstrumentValueType.LONG;
 
     /**
      * The description of the metric.
@@ -49,7 +50,6 @@ public class MetricDefinitionSettings {
 
     /**
      * Maps view names to their definitions for the metric defined by this {@link MetricDefinitionSettings}.
-     * If this map is null, OpenTelemetry will create a default view automatically.
      */
     @Singular
     private Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views;
@@ -67,6 +67,32 @@ public class MetricDefinitionSettings {
 
         if(!CollectionUtils.isEmpty(views)) {
             views.forEach((name, def) -> result.view(name, def.getCopyWithDefaultsPopulated(resultDescription, unit)));
+        }
+        else {
+            /*
+                If there are no views specified, we will create a default view which only sets the default
+                OpenTelemetry aggregation for the particular instrument type.
+                Otherwise, we would not know about this view and could not set a proper AttributesProcessor
+                in the ViewManager to regulate, which attributes are allowed for the metric
+             */
+            Map<String, ViewDefinitionSettings> defaultView = new HashMap<>();
+            val builder =  ViewDefinitionSettings.builder();
+            switch (instrumentType) {
+                case GAUGE:
+                    ViewDefinitionSettings gaugeView = builder.aggregation(AggregationType.LAST_VALUE).build();
+                    defaultView.put(metricName, gaugeView);
+                    break;
+                case COUNTER:
+                case UP_DOWN_COUNTER:
+                    ViewDefinitionSettings counterView = builder.aggregation(AggregationType.SUM).build();
+                    defaultView.put(metricName, counterView);
+                    break;
+                case HISTOGRAM:
+                    ViewDefinitionSettings histogramView = builder.aggregation(AggregationType.HISTOGRAM).build();
+                    defaultView.put(metricName, histogramView);
+                    break;
+            }
+            result.views(defaultView);
         }
 
         return result.build();

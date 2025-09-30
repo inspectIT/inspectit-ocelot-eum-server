@@ -10,12 +10,18 @@ import rocks.inspectit.ocelot.eum.server.configuration.model.EumServerConfigurat
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.AggregationType;
 import rocks.inspectit.ocelot.eum.server.configuration.model.metrics.definition.view.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.eum.server.metrics.InstrumentManager;
 import rocks.inspectit.ocelot.eum.server.metrics.timewindow.TimeWindowViewManager;
 
 import java.util.*;
 
 /**
- * Registers all user-specified metric views.
+ * Stores all active OpenTelemetry metric views.
+ * <br>
+ * Note that if we do not register any view for an instrument (see {@link InstrumentManager}),
+ * OpenTelemetry would use a default view automatically to record data.
+ * However, this default view would not filter any attributes and thus would use every attribute,
+ * which was passed during recording. To prevent this, we should register at least one view for every metric by ourselves.
  */
 @Component
 public class ViewManager {
@@ -126,12 +132,16 @@ public class ViewManager {
                 .setDescription(settings.getDescription())
                 .setAggregation(aggregation)
                 .setCardinalityLimit(settings.getCardinalityLimit());
+        boolean withCommonAttributes = settings.isWithCommonAttributes();
 
         if (!CollectionUtils.isEmpty(settings.getAttributes())) {
             builder.setAttributeFilter((attribute) -> filterAttribute(settings, attribute));
         }
-        else {
+        else if (withCommonAttributes){
             builder.setAttributeFilter(this::isDefinedAsGlobal);
+        }
+        else {
+            builder.setAttributeFilter((attr) -> false); // reject all attributes
         }
 
         return builder.build();

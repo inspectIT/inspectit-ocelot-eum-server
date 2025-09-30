@@ -61,7 +61,7 @@ public class InstrumentManager {
             }
 
             val views = populatedMetricDefinition.getViews();
-            if(!CollectionUtils.isEmpty(views)) {
+            if (!CollectionUtils.isEmpty(views)) {
                 views.values().forEach(view -> attributesRegistry.processAttributeKeysForView(view));
             }
         }

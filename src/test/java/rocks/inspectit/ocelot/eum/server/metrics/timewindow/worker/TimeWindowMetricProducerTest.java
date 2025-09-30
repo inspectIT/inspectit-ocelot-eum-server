@@ -24,13 +24,13 @@ import static rocks.inspectit.ocelot.eum.server.metrics.timewindow.utils.TimeWin
 import static rocks.inspectit.ocelot.eum.server.metrics.timewindow.utils.TimeWindowTestUtils.assertTotalSeriesCount;
 
 @ExtendWith(MockitoExtension.class)
-class CachingMetricProducerTest {
+class TimeWindowMetricProducerTest {
 
     @Mock
     TimeWindowViewManager viewManager;
 
     @InjectMocks
-    CachingMetricProducer producer;
+    TimeWindowMetricProducer producer;
 
     @InjectMocks
     TimeWindowRecorder recorder;

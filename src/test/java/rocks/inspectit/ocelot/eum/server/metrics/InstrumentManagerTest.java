@@ -45,13 +45,13 @@ class InstrumentManagerTest {
     }
 
     @Test
-    void shouldCreateInstrumentAndNotProcessAttributesWhenNoViews() {
+    void shouldCreateInstrumentAndProcessAttributesWhenNoViews() {
         MetricDefinitionSettings metric = new MetricDefinitionSettings();
 
         manager.createInstrument(metricName, metric);
 
         verify(factory).createInstrument(anyString(), any(MetricDefinitionSettings.class));
-        verifyNoInteractions(registry);
+        verify(registry).processAttributeKeysForView(any(ViewDefinitionSettings.class));
     }
 
     @Test
