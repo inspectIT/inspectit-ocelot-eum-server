@@ -21,33 +21,30 @@ receivers:
           static_configs:
             - targets: [$PROMETHEUS_INTEGRATION_TEST_SCRAPE_TARGET]
 
-  # accept InfluxDB
-  influxdb:
-
   # accept Zipkin
   zipkin:
 
 exporters:
-  logging:
-    logLevel: $LOGGING_EXPORTER_LOG_lEVEL
   otlp:
     endpoint: $OTLP_EXPORTER_ENDPOINT
     tls:
       insecure: true
     compression: none
+  debug:
+#    verbosity: detailed
 
 service:
   extensions: [health_check]
   pipelines:
     metrics:
-      receivers: [otlp] #, prometheus, influxdb]
-      exporters: [logging, otlp]
+      receivers: [otlp] #, prometheus]
+      exporters: [debug, otlp]
     traces:
       receivers: [otlp, zipkin]
-      exporters: [logging, otlp]
+      exporters: [debug, otlp]
     logs:
       receivers: [otlp]
-      exporters: [logging, otlp]
+      exporters: [debug, otlp]
   telemetry:
     logs:
       level: "info"

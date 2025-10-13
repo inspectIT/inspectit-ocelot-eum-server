@@ -18,13 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class OcelotSpanUtilsTest {
+class OcelotSpanUtilsTest {
 
     @Nested
     class CreateSpanContext {
 
         @Test
-        public void validContext() {
+        void validContext() {
             SpanContext result = OcelotSpanUtils.createSpanContext("03c2a546267d1e90d70269bdc02babef", "c29e6dd2a1e1e7ae");
 
             assertThat(result.isValid()).isTrue();
@@ -33,7 +33,7 @@ public class OcelotSpanUtilsTest {
         }
 
         @Test
-        public void emptySpanId() {
+        void emptySpanId() {
             SpanContext result = OcelotSpanUtils.createSpanContext("03c2a546267d1e90d70269bdc02babef", "");
 
             assertThat(result.isValid()).isFalse();
@@ -44,7 +44,7 @@ public class OcelotSpanUtilsTest {
     class ToStatusCode {
 
         @Test
-        public void toStatusCode() {
+        void toStatusCode() {
             assertThat(OcelotSpanUtils.toStatusCode(Status.StatusCode.STATUS_CODE_OK)).isEqualTo(StatusCode.OK);
             assertThat(OcelotSpanUtils.toStatusCode(Status.StatusCode.STATUS_CODE_ERROR)).isEqualTo(StatusCode.ERROR);
             assertThat(OcelotSpanUtils.toStatusCode(Status.StatusCode.STATUS_CODE_UNSET)).isEqualTo(StatusCode.UNSET);
@@ -56,14 +56,14 @@ public class OcelotSpanUtilsTest {
     class ToAttributes {
 
         @Test
-        public void verifyEmptyArray() {
+        void verifyEmptyArray() {
             Attributes attributes = OcelotSpanUtils.toAttributes(Collections.emptyList());
 
             assertTrue(attributes.isEmpty());
         }
 
         @Test
-        public void verifyNullKeyValue() {
+        void verifyNullKeyValue() {
             List<KeyValue> keyValues = Collections.singletonList(null);
 
             Attributes attributes = OcelotSpanUtils.toAttributes(keyValues);
@@ -72,7 +72,7 @@ public class OcelotSpanUtilsTest {
         }
 
         @Test
-        public void verifyEmptyKeyValue() {
+        void verifyEmptyKeyValue() {
             KeyValue kv = KeyValue.newBuilder().build();
             List<KeyValue> keyValues = Collections.singletonList(kv);
 
@@ -82,7 +82,7 @@ public class OcelotSpanUtilsTest {
         }
 
         @Test
-        public void verifyNoValue() {
+        void verifyNoValue() {
             KeyValue kv = KeyValue.newBuilder()
                     .setKey("service.name")
                     .build();
@@ -94,7 +94,7 @@ public class OcelotSpanUtilsTest {
         }
 
         @Test
-        public void verifyNoKey() {
+        void verifyNoKey() {
             KeyValue kv = KeyValue.newBuilder()
                     .setValue(AnyValue.newBuilder().setStringValue("frontend").build())
                     .build();
@@ -106,7 +106,7 @@ public class OcelotSpanUtilsTest {
         }
 
         @Test
-        public void verifyValidAttributes() {
+        void verifyValidAttributes() {
             KeyValue kvString = KeyValue.newBuilder()
                     .setKey("service.name")
                     .setValue(AnyValue.newBuilder().setStringValue("frontend").build())
@@ -139,7 +139,7 @@ public class OcelotSpanUtilsTest {
         }
 
         @Test
-        public void verifyArrayValue() {
+        void verifyArrayValue() {
             KeyValue kvArray = KeyValue.newBuilder()
                     .setKey("browser.brands")
                     .setValue(AnyValue.newBuilder().setArrayValue(

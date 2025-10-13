@@ -2,8 +2,8 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 plugins {
     id "org.springframework.boot" version "${springBootVersion}"
-    id "org.cyclonedx.bom" version "${cyclonedxBomVersion}"
     id "io.spring.dependency-management" version "${springDependencyManangementVersion}"
+    id "org.cyclonedx.bom" version "${cyclonedxBomVersion}"
     id "org.owasp.dependencycheck" version "${owaspDependencyCheckVersion}"
     id "com.github.ben-manes.versions" version "${versionsPlugin}"
 }
@@ -13,7 +13,6 @@ repositories {
 }
 
 apply plugin: "java"
-apply plugin: "jacoco"
 
 group = "rocks.inspectit.ocelot"
 
@@ -55,7 +54,7 @@ tasks.register('generateVersionFile') {
     doLast {
         def currentDate = new Date().toString()
         ext.versionFile.withWriter("UTF-8") { writer ->
-            writer << "$version\n$currentDate\n$boomerangVersion"
+            writer << "$version\n$currentDate\n$boomerangVersion\n$openTelemetryVersion"
         }
     }
 }
@@ -82,7 +81,7 @@ bootJar {
     }
 
     manifest {
-        attributes "Start-Class": "rocks.inspectit.oce.eum.server.EUMServerApplication"
+        attributes "Start-Class": "rocks.inspectit.ocelot.eum.server.EUMServerApplication"
     }
 
     // include version file
@@ -120,46 +119,38 @@ test {
 
 dependencies {
     implementation(
+            // spring boot
             "org.springframework.boot:spring-boot-starter-web",
             "org.springframework.boot:spring-boot-starter-actuator",
             "org.springframework.boot:spring-boot-starter-validation",
             "org.springframework.boot:spring-boot-starter-security",
 
             "org.yaml:snakeyaml:${snakeYamlVersion}",
-            // Has to be included, but is transitive to spring
+            // has to be included, but is transitive to spring
             "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
 
-            // pin Prometheus client to 0.6.0 to prevent auto prefixing counter metrics with "_total"
-            // see: https://github.com/prometheus/client_java/issues/640, https://github.com/prometheus/client_java/pull/653
-            "io.prometheus:simpleclient:${prometheusClientVersion}",
-            "io.prometheus:simpleclient_common:${prometheusClientVersion}",
-            "io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
-
-            "io.opencensus:opencensus-api:${openCensusVersion}",
-            "io.opencensus:opencensus-impl:${openCensusVersion}",
-            "io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
-            "rocks.inspectit:opencensus-influxdb-exporter:${openCensusInfluxdbExporterVersion}",
-
-            "io.grpc:grpc-context:${grpcVersion}",
-
+            // opentelemetry
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-sdk-metrics:${openTelemetryVersion}",
             "io.opentelemetry:opentelemetry-exporter-otlp:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-exporter-prometheus:${openTelemetryAlphaVersion}",
             "io.opentelemetry.semconv:opentelemetry-semconv:${openTelemetrySemConvVersion}",
             "io.opentelemetry.proto:opentelemetry-proto:${openTelemetryProtoVersion}",
 
+            // also opentelemetry related
             "com.google.protobuf:protobuf-java:${protobufVersion}",
             "com.google.protobuf:protobuf-java-util:${protobufVersion}",
 
+            // utils
             "com.google.guava:guava:${guavaVersion}",
             "com.maxmind.geoip2:geoip2:${geoip2Version}",
             "commons-net:commons-net:${commonsNetVersion}",
             "org.apache.commons:commons-lang3:${commonsLang3Version}",
             "org.apache.commons:commons-math3:${commonsMath3Version}",
-            "commons-io:commons-io:${commonsIoVersion}",
-
-            "org.influxdb:influxdb-java:${influxdbJavaVersion}",
+            "commons-io:commons-io:${commonsIoVersion}"
     )
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
@@ -167,14 +158,13 @@ dependencies {
 
     testImplementation(
             "org.springframework.boot:spring-boot-starter-test",
-            "io.opencensus:opencensus-impl:${openCensusVersion}",
-            "org.apache.httpcomponents:httpclient:${httpClientVersion}",
+            "org.apache.httpcomponents.client5:httpclient5:${httpClientVersion}",
 
-            // ServerExtension
+            // server-extension
             "com.linecorp.armeria:armeria-junit5:${armeriaVersion}",
             "com.linecorp.armeria:armeria-grpc-protocol:${armeriaVersion}",
 
-            // for docker test containers
+            // docker test containers
             "org.testcontainers:testcontainers:${testContainersVersion}",
             "org.testcontainers:junit-jupiter:${testContainersVersion}"
     )

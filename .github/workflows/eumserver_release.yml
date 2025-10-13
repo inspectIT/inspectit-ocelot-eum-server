@@ -13,6 +13,7 @@ jobs:
   build_and_release:
     name: Build and release EUM Server
     runs-on: ubuntu-latest
+    environment: release
     container: openjdk:21-jdk-slim
     needs: [test_eum_server]
     steps:
@@ -24,7 +25,7 @@ jobs:
         run: ./gradlew assemble -PbuildVersion=${{ github.ref_name }}
         # copy jar into Docker folder
       - name: Prepare Docker artifact
-        run: ./gradlew copyServerJar
+        run: ./gradlew copyServerJar -PbuildVersion=${{ github.ref_name }}
       - name: Upload Docker artifact
         uses: actions/upload-artifact@v4
         with:

@@ -1,0 +1,107 @@
+package rocks.inspectit.ocelot.eum.server.utils;
+
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.web.servlet.MockMvc;
+import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
+import rocks.inspectit.ocelot.eum.server.beacon.processor.CountryCodeBeaconProcessor;
+import rocks.inspectit.ocelot.eum.server.metrics.BeaconMetricManager;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+/**
+ * Integration test of {@link GeolocationResolver}
+ */
+@SpringBootTest
+@AutoConfigureMockMvc
+@DirtiesContext
+class GeolocationResolverIntTest {
+
+    static final String URL_KEY = "u";
+    static final String SUT_URL = "http://test.com/login";
+    static final String BEACON_KEY_NAME = "t_page";
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @SpyBean
+    BeaconMetricManager beaconMetricManager;
+
+    @Captor
+    ArgumentCaptor<Beacon> beaconCaptor;
+
+    /**
+     * Sends beacon to mocked endpoint /beacon
+     */
+    private void sendBeacon(Map<String, String> beacon, String requesterIP) throws Exception {
+        List<NameValuePair> params = beacon.entrySet().stream().map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+        mockMvc.perform(post("/beacon").header("X-Forwarded-For", requesterIP).contentType(MediaType.APPLICATION_FORM_URLENCODED).content(EntityUtils.toString(new UrlEncodedFormEntity(params)))).andExpect(status().isOk());
+    }
+
+    private static Map<String, String> getBasicBeacon() {
+        Map<String, String> beacon = new HashMap<>();
+        beacon.put(URL_KEY, SUT_URL);
+        return beacon;
+    }
+
+    /**
+     * The application should process a beacon, where the tag COUNTRY_CODE is set to DE
+     */
+    @Test
+    void expectCountryCodeToBeSet() throws Exception {
+        Map<String, String> beacon = getBasicBeacon();
+        beacon.put(BEACON_KEY_NAME, "12");
+
+        sendBeacon(beacon, "94.186.169.18");
+
+        verify(beaconMetricManager).processBeacon(beaconCaptor.capture());
+        assertThat(beaconCaptor.getValue().get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEqualTo("DE");
+    }
+
+    /**
+     * The application should process a beacon, where the tag COUNTRY_CODE is not set
+     */
+    @Test
+    void expectCountryCodeToBeNotSetNotResolvableIP() throws Exception {
+        Map<String, String> beacon = getBasicBeacon();
+        beacon.put(BEACON_KEY_NAME, "12");
+
+        sendBeacon(beacon, "127.0.0.1");
+
+        verify(beaconMetricManager).processBeacon(beaconCaptor.capture());
+        assertThat(beaconCaptor.getValue().get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEmpty();
+    }
+
+    /**
+     * The application should process a beacon, where the tag COUNTRY_CODE is not set
+     */
+    @Test
+    void expectCountryCodeToBeNotSetWrongFormattedIP() throws Exception {
+        Map<String, String> beacon = getBasicBeacon();
+        beacon.put(BEACON_KEY_NAME, "12");
+
+        sendBeacon(beacon, "127.0.0.0.1");
+
+        verify(beaconMetricManager).processBeacon(beaconCaptor.capture());
+        assertThat(beaconCaptor.getValue().get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEmpty();
+    }
+}

@@ -1,0 +1,75 @@
+package rocks.inspectit.ocelot.eum.server.rest;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.*;
+import rocks.inspectit.ocelot.eum.server.beacon.Beacon;
+import rocks.inspectit.ocelot.eum.server.beacon.processor.CompositeBeaconProcessor;
+import rocks.inspectit.ocelot.eum.server.exporters.beacon.BeaconHttpExporter;
+import rocks.inspectit.ocelot.eum.server.metrics.BeaconMetricManager;
+import rocks.inspectit.ocelot.eum.server.metrics.SelfMonitoringMetricManager;
+
+import java.util.Collections;
+
+@RestController()
+@RequestMapping("/")
+@Slf4j
+public class BeaconController {
+
+    @Autowired
+    private BeaconMetricManager beaconMetricManager;
+
+    @Autowired
+    private CompositeBeaconProcessor beaconProcessor;
+
+    @Autowired
+    private SelfMonitoringMetricManager selfMonitoringService;
+
+    @Autowired(required = false)
+    private BeaconHttpExporter beaconHttpExporter;
+
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<String> handleException(Exception exception) {
+        selfMonitoringService.record("beacons_received", 1, Collections.singletonMap("is_error", "true"));
+        log.error("Error while receiving beacon", exception);
+        return new ResponseEntity<>("There was an error", HttpStatus.BAD_REQUEST);
+    }
+
+    @CrossOrigin
+    @PostMapping("beacon")
+    public ResponseEntity beaconPost(@RequestBody MultiValueMap<String, String> formData) {
+        return processBeacon(formData);
+    }
+
+    @CrossOrigin
+    @GetMapping("beacon")
+    public ResponseEntity beaconGet(@RequestParam MultiValueMap<String, String> requestParams) {
+        return processBeacon(requestParams);
+    }
+
+    /**
+     * Processes the incoming beacon data.
+     *
+     * @param beaconData the received EUM data
+     *
+     * @return the response used as result for the request
+     */
+    private ResponseEntity<Object> processBeacon(MultiValueMap<String, String> beaconData) {
+        Beacon beacon = beaconProcessor.process(Beacon.of(beaconData.toSingleValueMap()));
+
+        // export beacon
+        if (beaconHttpExporter != null) {
+            beaconHttpExporter.export(beacon);
+        }
+
+        // record metrics based on beacon data
+        boolean successful = beaconMetricManager.processBeacon(beacon);
+
+        selfMonitoringService.record("beacons_received", 1, Collections.singletonMap("is_error", String.valueOf(!successful)));
+
+        return ResponseEntity.ok().build();
+    }
+}

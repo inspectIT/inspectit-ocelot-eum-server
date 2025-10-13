@@ -1,0 +1,64 @@
+package rocks.inspectit.ocelot.eum.server.configuration.model.exporters.beacon;
+
+import lombok.Data;
+import org.springframework.validation.annotation.Validated;
+import rocks.inspectit.ocelot.eum.server.configuration.model.exporters.ExporterEnabledState;
+
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.time.Duration;
+
+/**
+ * Settings for exporting beacons via HTTP.
+ */
+@Data
+@Validated
+public class BeaconHttpExporterSettings {
+
+    /**
+     * Whether beacons should be exported via HTTP
+     */
+    @NotNull
+    private ExporterEnabledState enabled;
+
+    /**
+     * The endpoint to which the beacons are to be sent
+     */
+    @NotBlank
+    private String endpointUrl;
+
+    /**
+     * The max. amount of threads exporting beacons
+     */
+    @Min(1)
+    private int workerThreads;
+
+    /**
+     * The maximum number of beacons to be exported using a single HTTP request
+     */
+    @Min(1)
+    private int maxBatchSize;
+
+    /**
+     * The username used for Basic authentication
+     */
+    private String username;
+
+    /**
+     * The password used for Basic authentication
+     */
+    private String password;
+
+    /**
+     * The flush interval to export beacons in case the 'max-batch-size' has not been reached
+     */
+    @NotNull
+    private Duration flushInterval;
+
+    @AssertTrue(message = "Flush-Interval has to be greater or equal to 1 second.")
+    public boolean isFlushIntervalGreaterThanOne() {
+        return flushInterval.toMillis() >= 1000;
+    }
+}
