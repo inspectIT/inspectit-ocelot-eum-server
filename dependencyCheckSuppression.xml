@@ -12,4 +12,10 @@
         ]]></notes>
         <cve>CVE-2018-1258</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+        We do not use Spring Framework 5.0.5.RELEASE, but version 6+
+      ]]></notes>
+        <cve>CVE-2018-1258</cve>
+    </suppress>
 </suppressions>
